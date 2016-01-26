@@ -192,7 +192,10 @@ namespace StockSharp.Terminal
         /// <param name="isConnected"></param>
         private void ChangeConnectStatusEvent(bool isConnected)
         {
-            ConnectBtn.Content = isConnected ? LocalizedStrings.Disconnect : LocalizedStrings.Connect;
+            this.GuiAsync(() =>
+            {
+                ConnectBtn.Content = isConnected ? LocalizedStrings.Disconnect : LocalizedStrings.Connect;
+            });
         }
 
         /// <summary>
@@ -202,7 +205,10 @@ namespace StockSharp.Terminal
         /// <param name="caption"></param>
         private void ConnectorServiceErrorEvent(string message, string caption)
         {
-            MessageBox.Show(this, message, caption);
+            this.GuiAsync(() =>
+            {
+                MessageBox.Show(this, message, caption);
+            });
         }
 
         //-------------------------------------------------------------------

@@ -17,8 +17,8 @@ Copyright 2010 by StockSharp, LLC
 using Ecng.Configuration;
 using System.Windows;
 using System.Windows.Threading;
-using StockSharp.Studio.Services;
 using StockSharp.Studio.Core.Commands;
+using StockSharp.Studio.Core.Services;
 
 namespace StockSharp.Terminal
 {
@@ -32,11 +32,11 @@ namespace StockSharp.Terminal
 
 		protected override void OnStartup(StartupEventArgs e)
 		{
-			ConfigManager.RegisterService<IStudioCommandService>(new StudioCommandService());
-			//ConfigManager.RegisterService<ISecurityProvider>(new FakeSecurityProvider());
-			//ConfigManager.RegisterService<IMarketDataProvider>(new FakeMarketDataProvider());
+            ConfigManager.RegisterService<IStudioCommandService>(new StudioCommandService());
+            //ConfigManager.RegisterService<ISecurityProvider>(new FakeSecurityProvider());
+            //ConfigManager.RegisterService<IMarketDataProvider>(new FakeMarketDataProvider());
 
-			base.OnStartup(e);
+            base.OnStartup(e);
 		}
 	}
 }
