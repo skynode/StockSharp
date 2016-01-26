@@ -18,154 +18,215 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+using System.Collections.Generic;
 
 using StockSharp.Terminal.Layout;
 using StockSharp.Terminal.Controls;
 using StockSharp.Terminal.Logics;
+
 using Xceed.Wpf.AvalonDock.Layout;
 using Xceed.Wpf.AvalonDock;
-using System.Windows.Controls;
+
+using StockSharp.Algo;
+using StockSharp.Logging;
+using StockSharp.Algo.Storages;
+
+using Ecng.Configuration;
+using Ecng.Serialization;
+using Ecng.Common;
+using Ecng.Xaml;
+
+using StockSharp.BusinessEntities;
+using StockSharp.Localization;
+using StockSharp.Configuration;
+using StockSharp.Terminal.Services;
 
 namespace StockSharp.Terminal
 {
-	public partial class MainWindow
-	{
-		public LayoutManager LayoutManager { get; set; }
+    public partial class MainWindow
+    {
+        #region Fields
+        //-------------------------------------------------------------------
 
-		private int _countWorkArea = 2;
+        private int _countWorkArea = 2;
 
-		public MainWindow()
-		{
-			InitializeComponent();
+        private ConnectorService _connectorService;
 
-			LayoutManager = new LayoutManager(DockingManager);
+        //-------------------------------------------------------------------
+        #endregion Fields
 
-			//AddDocumentElement.IsSelectedChanged += AddDocumentElement_IsSelectedChanged;
-			DockingManager.DocumentClosed += DockingManager_DocumentClosed;
-		}
+        #region Properties
+        //-------------------------------------------------------------------
 
-		private void DockingManager_DocumentClosed(object sender, DocumentClosedEventArgs e)
-		{
-			var manager = (DockingManager)sender;
+        /// <summary>
+        /// 
+        /// </summary>
+        public LayoutManager LayoutManager { get; set; }
 
-			if (LayoutDocuments.Children.Count == 0 &&
-				manager.FloatingWindows.ToList().Count == 0)
-				_countWorkArea = 0;
-		}
+        /// <summary>
+        /// 
+        /// </summary>
+        public static MainWindow Instance { get; private set; }
 
-		//private void DockingManager_DocumentClosing(object sender, Xceed.Wpf.AvalonDock.DocumentClosingEventArgs e)
-		//{
-		//	var element = e.Document;
-		//	var manager = (Xceed.Wpf.AvalonDock.DockingManager)sender;
+        //-------------------------------------------------------------------
+        #endregion Properties
 
-		//	var item = manager.FloatingWindows.FirstOrDefault(x =>
-		//	{
-		//		var doc = (LayoutDocumentFloatingWindow)x.Model;
-		//		return doc.Children.Contains(element);
-		//	});
+        public MainWindow()
+        {
+            InitializeComponent();
+            Instance = this;
 
-		//	if (item != null)
-		//	{
-		//		manager.FloatingWindows.ToList().Remove(item);
-		//	}
-		//	else
-		//		LayoutDocuments.RemoveChild(element);
+            LayoutManager = new LayoutManager(DockingManager);
+            DockingManager.DocumentClosed += DockingManager_DocumentClosed;
 
-		//	if (LayoutDocuments.Children.Count == 0)
-		//		_countWorkArea = 0;
+            Title = Title.Put("Multi connection");
 
-		//	//if (LayoutDocuments.Children.Count == 2)
-		//	//{
-		//	//	var item = LayoutDocuments.Children.FirstOrDefault(x => x.Title != "+");
-		//	//	item.CanClose = false;
-		//	//	LayoutDocuments.SelectedContentIndex = LayoutDocuments.IndexOfChild(item);
-		//	//}
-		//}
+            var logManager = new LogManager();
 
-		private void AddDocument(object sender, RoutedEventArgs e)
-		{
-			var newWorkArea = new LayoutDocument()
-			{
-				Title = "Work area #" + ++_countWorkArea,
-				Content = new WorkAreaControl()
-			};
+            _connectorService = new ConnectorService();
+            _connectorService.ChangeConnectStatusEvent += ChangeConnectStatusEvent;
+            _connectorService.ErrorEvent += ConnectorServiceErrorEvent;
 
-			newWorkArea.Closing += NewWorkArea_Closing;
+            logManager.Sources.Add(_connectorService.GetConnector());
+            logManager.Listeners.Add(new FileLogListener("sample.log"));
 
-			LayoutDocuments.Children.Add(newWorkArea);
-			
-			var offset = LayoutDocuments.Children.Count - 1;
-			offset = (offset < 0) ? 0 : offset;
+            _connectorService.InitConnector();
+        }
 
-			LayoutDocuments.SelectedContentIndex = offset;
-		}
+        #region Events
+        //-------------------------------------------------------------------
 
-		private void NewWorkArea_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			
-		}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnAddDocument_Click(object sender, RoutedEventArgs e)
+        {
+            var newWorkArea = new LayoutDocument()
+            {
+                Title = "Work area #" + ++_countWorkArea,
+                Content = new WorkAreaControl()
+            };
 
-		//private void AddDocumentElement_IsSelectedChanged(object sender, EventArgs e)
-		//{
-		//	var element = (LayoutDocument)sender;
+            LayoutDocuments.Children.Add(newWorkArea);
 
-		//	if (!element.IsSelected || LayoutDocuments.Children.Count == 1)
-		//		return;
+            var offset = LayoutDocuments.Children.Count - 1;
+            LayoutDocuments.SelectedContentIndex = (offset < 0) ? 0 : offset;
+        }
 
-		//	LayoutDocument newWorkArea = new LayoutDocument()
-		//	{
-		//		Title = "Рабочая область " + ++_countWorkArea,
-		//		Content = new WorkAreaControl()
-		//	};
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DockingManager_DocumentClosed(object sender, DocumentClosedEventArgs e)
+        {
+            var manager = (DockingManager)sender;
 
-		//	var offset = LayoutDocuments.Children.Count - 1;
+            if (LayoutDocuments.Children.Count == 0 && manager.FloatingWindows.ToList().Count == 0)
+                _countWorkArea = 0;
+        }
 
-		//	//if (offset != LayoutDocuments.IndexOfChild(element))
-		//	//	return;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (NewControlComboBox.SelectedIndex != -1)
+            {
+                var workArea = (WorkAreaControl)DockingManager.ActiveContent;
+                workArea.AddControl(((ComboBoxItem)NewControlComboBox.SelectedItem).Content.ToString());
+                NewControlComboBox.SelectedIndex = -1;
+            }
+        }
 
-		//	LayoutDocuments.Children.RemoveAt(offset);
-
-		//	LayoutDocuments.Children.Add(newWorkArea);
-		//	LayoutDocuments.Children.Add(element);
-		//	LayoutDocuments.SelectedContentIndex = offset;
-
-		//	//var offset = LayoutDocuments.IndexOfChild(element);
-		//	//LayoutDocuments.InsertChildAt(offset, newWorkArea);
-		//	//LayoutDocuments.SelectedContentIndex = offset;
-		//}
-
-		private void DockingManager_OnActiveContentChanged(object sender, EventArgs e)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DockingManager_OnActiveContentChanged(object sender, EventArgs e)
         {
             DockingManager.ActiveContent.DoIfElse<WorkAreaControl>(editor =>
-			{
-				var element = (Xceed.Wpf.AvalonDock.DockingManager)sender;
+            {
+                var element = (DockingManager)sender;
 
-			}, () =>
-			{
-				var element = (Xceed.Wpf.AvalonDock.DockingManager)sender;
-
-			});
+            }, () =>
+            {
+                var element = (DockingManager)sender;
+                new Connector().Configure(this);
+            });
         }
-		
-		protected override void OnClosed(EventArgs e)
-		{
-			base.OnClosed(e);
 
-		}
-		
-		private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
-		{
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SettingsClick(object sender, RoutedEventArgs e)
+        {
+            _connectorService.Configure(this);
+            new XmlSerializer<SettingsStorage>().Serialize(_connectorService.Save(), ConnectorService.SETTINGS_FILE);
+        }
 
-		}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ConnectClick(object sender, RoutedEventArgs e)
+        {
+            if (!_connectorService.IsConnected)
+                _connectorService.Connect();
+            else
+                _connectorService.Disconnect();
+        }
 
-		private void ComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-		{
-			if (NewControlComboBox.SelectedIndex != -1)
-			{
-				var workArea = (WorkAreaControl)DockingManager.ActiveContent;
-				workArea.AddControl(((ComboBoxItem)NewControlComboBox.SelectedItem).Content.ToString());
-				NewControlComboBox.SelectedIndex = -1;
-			}
-		}
-	}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="isConnected"></param>
+        private void ChangeConnectStatusEvent(bool isConnected)
+        {
+            ConnectBtn.Content = isConnected ? LocalizedStrings.Disconnect : LocalizedStrings.Connect;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="caption"></param>
+        private void ConnectorServiceErrorEvent(string message, string caption)
+        {
+            MessageBox.Show(this, message, caption);
+        }
+
+        //-------------------------------------------------------------------
+        #endregion Events
+
+        #region Приватные методы
+        //-------------------------------------------------------------------
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="window"></param>
+        private static void ShowOrHide(Window window)
+        {
+            if (window == null)
+                throw new ArgumentNullException("window");
+
+            if (window.Visibility == Visibility.Visible)
+                window.Hide();
+            else
+                window.Show();
+        }
+
+        //-------------------------------------------------------------------
+        #endregion Приватные методы
+    }
 }
