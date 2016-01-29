@@ -193,7 +193,9 @@ namespace StockSharp.Terminal.Services
 
             _connector.StorageAdapter.DaysLoad = TimeSpan.FromDays(3);
 			_connector.StorageAdapter.Load();
-		}
+
+            ConfigManager.RegisterService<Connector>(_connector);
+        }
 
 		/// <summary>
 		/// 
