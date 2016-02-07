@@ -33,6 +33,7 @@ namespace StockSharp.Sterling
 		private void ProcessOrderRegisterMessage(OrderRegisterMessage regMsg)
 		{
 			var condition = (SterlingOrderCondition)regMsg.Condition;
+			var orderType = regMsg.OrderType.Value;
 
 			var order = new STIOrder
 			{
@@ -44,7 +45,7 @@ namespace StockSharp.Sterling
 				Symbol = regMsg.SecurityId.SecurityCode, 
 				Destination = regMsg.SecurityId.BoardCode, 
 				Tif = regMsg.TimeInForce.ToSterlingTif(regMsg.TillDate), 
-				PriceType = regMsg.OrderType.ToSterlingPriceType(condition), 
+				PriceType = orderType.ToSterlingPriceType(condition), 
 				User = regMsg.Comment, 
 				Side = regMsg.Side.ToSterlingSide()
 			};
@@ -55,7 +56,7 @@ namespace StockSharp.Sterling
 			if (regMsg.Currency != null)
 				order.Currency = regMsg.Currency.ToString();
 
-			if (regMsg.OrderType == OrderTypes.Conditional)
+			if (orderType == OrderTypes.Conditional)
 			{
 				order.Discretion = condition.Discretion.ToDouble();
 				order.ExecInst = condition.ExecutionInstruction.ToSterling();
@@ -105,7 +106,7 @@ namespace StockSharp.Sterling
 				Symbol = replaceMsg.SecurityId.SecurityCode, 
 				Destination = replaceMsg.SecurityId.BoardCode, 
 				Tif = replaceMsg.TimeInForce.ToSterlingTif(replaceMsg.TillDate), 
-				PriceType = replaceMsg.OrderType.ToSterlingPriceType(condition), 
+				PriceType = replaceMsg.OrderType.Value.ToSterlingPriceType(condition), 
 				User = replaceMsg.Comment
 			};
 
@@ -139,7 +140,8 @@ namespace StockSharp.Sterling
 					Comment = order.bstrUser,
 					OrderState = ((STIOrderStatus)order.nOrderStatus).ToOrderStates(),
 					OrderId = order.nOrderRecordId,
-					ServerTime = order.bstrOrderTime.StrToDateTime()
+					ServerTime = order.bstrOrderTime.StrToDateTime(),
+					HasOrderInfo = true,
 				});
 			}
 
@@ -161,6 +163,7 @@ namespace StockSharp.Sterling
 					TradeVolume = trade.nQuantity,
 					Commission = trade.bEcnFee,
 					ServerTime = trade.bstrTradeTime.StrToDateTime(),
+					HasTradeInfo = true,
 				});
 			}
 		}
@@ -180,7 +183,8 @@ namespace StockSharp.Sterling
 				OrderId = msg.OrderRecordID,
 				TradeId = msg.TradeRecordID,
 				ServerTime = msg.TradeTime.StrToDateTime(),
-				LocalTime = msg.UpdateTime.StrToDateTime()
+				LocalTime = msg.UpdateTime.StrToDateTime(),
+				HasTradeInfo = true,
 			});
 		}
 
@@ -199,7 +203,8 @@ namespace StockSharp.Sterling
 				OrderId = msg.OrderRecordID,
 				VisibleVolume = msg.Display,
 				ServerTime = msg.OrderTime.StrToDateTime(),
-				LocalTime = msg.UpdateTime.StrToDateTime()
+				LocalTime = msg.UpdateTime.StrToDateTime(),
+				HasOrderInfo = true,
 			});
 		}
 
@@ -211,6 +216,7 @@ namespace StockSharp.Sterling
 				OrderState = OrderStates.Failed,
 				Error = new InvalidOperationException(),
 				ExecutionType = ExecutionTypes.Transaction,
+				HasOrderInfo = true,
 			});
 		}
 
@@ -221,6 +227,7 @@ namespace StockSharp.Sterling
 				OriginalTransactionId = msg.ClOrderID.To<long>(),
 				OrderState = OrderStates.Active,
 				ExecutionType = ExecutionTypes.Transaction,
+				HasOrderInfo = true,
 			});
 		}
 

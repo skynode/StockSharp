@@ -233,6 +233,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="StockSharp.db" />
     <None Include="Strategies\d2d7aeb2_ca92_4a88_9f2b_dccb72949af1.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -284,6 +285,13 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\storage_32x32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Help_16x16.png" />
+    <Resource Include="Images\Settings_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Security_32x32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

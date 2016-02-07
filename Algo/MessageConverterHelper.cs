@@ -255,9 +255,15 @@ namespace StockSharp.Algo
 				SecurityId = order.Security.ToSecurityId(),
 				PortfolioName = order.Portfolio.Name,
 				ExecutionType = ExecutionTypes.Transaction,
+				HasOrderInfo = true,
+				HasTradeInfo = true,
 				ServerTime = tick.Time,
 				OriginSide = tick.OrderDirection,
 				Currency = tick.Currency,
+				Position = trade.Position,
+				PnL = trade.PnL,
+				Slippage = trade.Slippage,
+				Commission = trade.Commission,
 			};
 		}
 
@@ -280,6 +286,7 @@ namespace StockSharp.Algo
 				SecurityId = order.Security.ToSecurityId(),
 				PortfolioName = order.Portfolio.Name,
 				ExecutionType = ExecutionTypes.Transaction,
+				HasOrderInfo = true,
 				OrderPrice = order.Price,
 				OrderType = order.Type,
 				OrderVolume = order.Volume,
@@ -322,6 +329,7 @@ namespace StockSharp.Algo
 				PortfolioName = fail.Order.Portfolio.Name,
 				Error = fail.Error,
 				ExecutionType = ExecutionTypes.Transaction,
+				HasOrderInfo = true,
 				OrderState = OrderStates.Failed,
 				ServerTime = fail.ServerTime,
 				LocalTime = fail.LocalTime,

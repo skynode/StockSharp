@@ -92,6 +92,16 @@ namespace StockSharp.Messages
 		public string ClientCode { get; set; }
 
 		/// <summary>
+		/// Broker firm code.
+		/// </summary>
+		[DataMember]
+		[MainCategory]
+		[CategoryLoc(LocalizedStrings.Str2593Key)]
+		[DisplayNameLoc(LocalizedStrings.BrokerKey)]
+		[DescriptionLoc(LocalizedStrings.Str2619Key)]
+		public string BrokerCode { get; set; }
+
+		/// <summary>
 		/// The depositary where the physical security.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.DepoKey)]
@@ -193,6 +203,16 @@ namespace StockSharp.Messages
 		public string DerivedOrderStringId { get; set; }
 
 		/// <summary>
+		/// Is the message contains order info.
+		/// </summary>
+		public bool HasOrderInfo { get; set; }
+
+		/// <summary>
+		/// Is the message contains trade info.
+		/// </summary>
+		public bool HasTradeInfo { get; set; }
+
+		/// <summary>
 		/// Order price.
 		/// </summary>
 		[DataMember]
@@ -205,7 +225,7 @@ namespace StockSharp.Messages
 		/// Number of contracts in an order.
 		/// </summary>
 		[DataMember]
-		[DisplayNameLoc(LocalizedStrings.VolumeKey)]
+		[DisplayNameLoc(LocalizedStrings.VolumeOrderKey)]
 		[DescriptionLoc(LocalizedStrings.OrderVolumeKey)]
 		[MainCategory]
 		[Nullable]
@@ -215,7 +235,7 @@ namespace StockSharp.Messages
 		/// Number of contracts in an trade.
 		/// </summary>
 		[DataMember]
-		[DisplayNameLoc(LocalizedStrings.VolumeKey)]
+		[DisplayNameLoc(LocalizedStrings.VolumeTradeKey)]
 		[DescriptionLoc(LocalizedStrings.TradeVolumeKey)]
 		[MainCategory]
 		[Nullable]
@@ -257,7 +277,7 @@ namespace StockSharp.Messages
 		[DisplayNameLoc(LocalizedStrings.Str132Key)]
 		[DescriptionLoc(LocalizedStrings.Str133Key)]
 		[MainCategory]
-		public OrderTypes OrderType { get; set; }
+		public OrderTypes? OrderType { get; set; }
 
 		/// <summary>
 		/// System order status.
@@ -517,6 +537,7 @@ namespace StockSharp.Messages
 				Comment = Comment,
 				Condition = Condition.CloneNullable(),
 				ClientCode = ClientCode,
+				BrokerCode = BrokerCode,
 				Currency = Currency,
 				ServerTime = ServerTime,
 				DepoName = DepoName,
@@ -562,6 +583,9 @@ namespace StockSharp.Messages
 
 				PnL = PnL,
 				Position = Position,
+
+				HasTradeInfo = HasTradeInfo,
+				HasOrderInfo = HasOrderInfo
 			};
 
 			this.CopyExtensionInfo(clone);

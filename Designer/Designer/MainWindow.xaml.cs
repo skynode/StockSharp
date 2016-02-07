@@ -16,20 +16,19 @@ Copyright 2010 by StockSharp, LLC
 namespace StockSharp.Designer
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Data.Common;
+	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
 	using System.Linq;
 	using System.Windows;
+	using System.Windows.Controls;
 	using System.Windows.Input;
 	using System.Windows.Media.Imaging;
 
 	using Ecng.Collections;
 	using Ecng.Common;
 	using Ecng.Configuration;
-	using Ecng.Data;
 	using Ecng.Interop;
 	using Ecng.Serialization;
 	using Ecng.Xaml;
@@ -80,6 +79,11 @@ namespace StockSharp.Designer
 		public static RoutedCommand ConnectDisconnectCommand = new RoutedCommand();
 		public static RoutedCommand RefreshCompositionCommand = new RoutedCommand();
 		public static RoutedCommand OpenMarketDataSettingsCommand = new RoutedCommand();
+		public static RoutedCommand HelpCommand = new RoutedCommand();
+		public static RoutedCommand AboutCommand = new RoutedCommand();
+		public static RoutedCommand TargetPlatformCommand = new RoutedCommand();
+		public static RoutedCommand ResetSettingsCommand = new RoutedCommand();
+		public static RoutedCommand AddNewSecurityCommand = new RoutedCommand();
 
 		private readonly string _settingsFile;
 		private readonly StrategiesRegistry _strategiesRegistry;
@@ -87,6 +91,7 @@ namespace StockSharp.Designer
 		private readonly LayoutManager _layoutManager;
 
 		private MarketDataSettingsCache _marketDataSettingsCache;
+		private bool _isReseting;
 
 		public MainWindow()
 		{
@@ -119,14 +124,7 @@ namespace StockSharp.Designer
 				SeparateByDates = SeparateByDateModes.SubDirectories,
 			});
 			logManager.Listeners.Add(new GuiLogListener(Monitor));
-
-			_strategiesRegistry = new StrategiesRegistry(compositionsPath, strategiesPath);
-			logManager.Sources.Add(_strategiesRegistry);
-			_strategiesRegistry.Init();
-
-			_layoutManager = new LayoutManager(DockingManager);
-			_layoutManager.Changed += SaveSettings;
-			logManager.Sources.Add(_layoutManager);
+			ConfigManager.RegisterService(logManager);
 
 			var entityRegistry = ConfigManager.GetService<IEntityRegistry>();
 			var storageRegistry = ConfigManager.GetService<IStorageRegistry>();
@@ -142,46 +140,28 @@ namespace StockSharp.Designer
 			_connector.Disconnected += ConnectorOnConnectionStateChanged;
 			_connector.ConnectionError += ConnectorOnConnectionError;
 			logManager.Sources.Add(_connector);
-
-			ConfigManager.RegisterService(logManager);
-			ConfigManager.RegisterService(_strategiesRegistry);
-			ConfigManager.RegisterService(_layoutManager);
 			ConfigManager.RegisterService<IConnector>(_connector);
 			ConfigManager.RegisterService<ISecurityProvider>(_connector);
+
+			_strategiesRegistry = new StrategiesRegistry(compositionsPath, strategiesPath);
+			logManager.Sources.Add(_strategiesRegistry);
+			_strategiesRegistry.Init();
+			ConfigManager.RegisterService(_strategiesRegistry);
+
+			_layoutManager = new LayoutManager(DockingManager);
+			_layoutManager.Changed += SaveSettings;
+			logManager.Sources.Add(_layoutManager);
+			ConfigManager.RegisterService(_layoutManager);
+
 			ConfigManager.RegisterService(_marketDataSettingsCache);
 
 			SolutionExplorer.Compositions = _strategiesRegistry.Compositions;
 			SolutionExplorer.Strategies = _strategiesRegistry.Strategies;
 		}
 
-		private void InitializeDataSource()
+		private static void InitializeDataSource()
 		{
-			var entityRegistry = ConfigManager.GetService<IEntityRegistry>();
-
-			var database = (Database)((EntityRegistry)entityRegistry).Storage;
-
-			if (database == null)
-				return;
-
-			var conStr = new DbConnectionStringBuilder
-			{
-				ConnectionString = database.ConnectionString
-			};
-
-			var dbFile = (string)conStr.Cast<KeyValuePair<string, object>>().ToDictionary(StringComparer.InvariantCultureIgnoreCase).TryGetValue("Data Source");
-
-			if (dbFile == null)
-				return;
-
-			dbFile = dbFile.Replace("%Documents%", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-
-			conStr["Data Source"] = dbFile;
-			database.ConnectionString = conStr.ToString();
-
-			dbFile.CreateDirIfNotExists();
-
-			if (!File.Exists(dbFile))
-				Properties.Resources.StockSharp.Save(dbFile);
+			((EntityRegistry)ConfigManager.GetService<IEntityRegistry>()).FirstTimeInit(Properties.Resources.StockSharp);
 		}
 
 		private void InitializeCommands()
@@ -259,6 +239,33 @@ namespace StockSharp.Designer
 					}
 				})
 				.Launch());
+
+			cmdSvc.Register<CreateSecurityCommand>(this, true, cmd =>
+			{
+				var entityRegistry = ConfigManager.GetService<IEntityRegistry>();
+
+				ISecurityWindow wnd;
+
+				if (cmd.SecurityType == typeof(Security))
+					wnd = new SecurityCreateWindow();
+				else
+					throw new InvalidOperationException(LocalizedStrings.Str2140Params.Put(cmd.SecurityType));
+
+				wnd.ValidateId = id =>
+				{
+					if (entityRegistry.Securities.ReadById(id) != null)
+						return LocalizedStrings.Str3275Params.Put(id);
+
+					return null;
+				};
+
+				if (!((Window)wnd).ShowModal(Application.Current.GetActiveOrMainWindow()))
+					return;
+
+				entityRegistry.Securities.Save(wnd.Security);
+				_connector.SendOutMessage(wnd.Security.ToMessage());
+				cmd.Security = wnd.Security;
+			});
 		}
 
 		private void InitializeMarketDataSettingsCache()
@@ -365,7 +372,15 @@ namespace StockSharp.Designer
 
 		private void AddCommand_OnCanExecute(object sender, CanExecuteRoutedEventArgs e)
 		{
-			e.CanExecute = true;
+			var item = e.OriginalSource as TreeViewItem;
+
+			if (item != null)
+			{
+				var solutionExplorerItem = item.Header as SolutionExplorerItem;
+				e.CanExecute = solutionExplorerItem?.Parent == null;
+			}
+			else
+				e.CanExecute = true;
 		}
 
 		private void AddCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
@@ -562,6 +577,70 @@ namespace StockSharp.Designer
 			OpenMarketDataPanel(_marketDataSettingsCache.Settings.FirstOrDefault(s => s.Id != Guid.Empty));
 		}
 
+		private void HelpCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+		{
+			"http://stocksharp.com/forum/yaf_postst5874_S--Designer---coming-soon.aspx".To<Uri>().OpenLinkInBrowser();
+		}
+
+		private void AboutCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+		{
+			var wnd = new AboutWindow(this);
+			wnd.ShowModal(this);
+		}
+
+		private void TargetPlatformCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+		{
+			var language = LocalizedStrings.ActiveLanguage;
+			var platform = Environment.Is64BitProcess ? Platforms.x64 : Platforms.x86;
+
+			var window = new TargetPlatformWindow();
+
+			if (!window.ShowModal(this))
+				return;
+
+			if (window.SelectedLanguage == language && window.SelectedPlatform == platform)
+				return;
+
+			// temporarily set prev lang for display the followed message
+			// and leave all text as is if user will not restart the app
+			LocalizedStrings.ActiveLanguage = language;
+
+			var result = new MessageBoxBuilder()
+				.Text(LocalizedStrings.Str2952Params.Put(TypeHelper.ApplicationName))
+				.Owner(this)
+				.Info()
+				.YesNo()
+				.Show();
+
+			if (result == MessageBoxResult.Yes)
+				Application.Current.Restart();
+		}
+
+		private void ResetSettingsCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+		{
+			var res = new MessageBoxBuilder()
+						.Text(LocalizedStrings.Str2954Params.Put(TypeHelper.ApplicationName))
+						.Warning()
+						.Owner(this)
+						.YesNo()
+						.Show();
+
+			if (res != MessageBoxResult.Yes)
+				return;
+
+			_isReseting = true;
+
+			ConfigManager.GetService<LogManager>().Dispose();
+			Directory.Delete(BaseApplication.AppDataPath, true);
+
+			Application.Current.Restart();
+		}
+
+		private void AddNewSecurityCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+		{
+			new CreateSecurityCommand((Type)e.Parameter).Process(this, true);
+		}
+
 		#endregion
 
 		private void OpenComposition(CompositionItem item)
@@ -628,14 +707,17 @@ namespace StockSharp.Designer
 				{
 					var settings = new XmlSerializer<SettingsStorage>().Deserialize(_settingsFile);
 
+					settings.TryLoadSettings<SettingsStorage>("MarketDataSettingsCache", s => _marketDataSettingsCache.Load(s));
 					settings.TryLoadSettings<SettingsStorage>("Layout", s => _layoutManager.Load(s));
 					settings.TryLoadSettings<SettingsStorage>("Connector", s => _connector.Load(s));
-					settings.TryLoadSettings<SettingsStorage>("MarketDataSettingsCache", s => _marketDataSettingsCache.Load(s));
 				});
 		}
 
 		private void SaveSettings()
 		{
+			if (_isReseting)
+				return;
+
 			CultureInfo
 				.InvariantCulture
 				.DoInCulture(() =>

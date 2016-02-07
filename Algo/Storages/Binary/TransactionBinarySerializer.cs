@@ -38,8 +38,12 @@ namespace StockSharp.Algo.Storages.Binary
 			FirstTradeId = -1;
 
 			Portfolios = new List<string>();
-			StrategyIds = new List<string>();
+			ClientCodes = new List<string>();
+			BrokerCodes = new List<string>();
+			DepoNames = new List<string>();
+			UserOrderIds = new List<string>();
 			Comments = new List<string>();
+			SystemComments = new List<string>();
 			Errors = new List<string>();
 		}
 
@@ -60,11 +64,24 @@ namespace StockSharp.Algo.Storages.Binary
 		public decimal FirstCommission { get; set; }
 		public decimal LastCommission { get; set; }
 
-		public IList<string> Portfolios { get; }
+		public decimal FirstPnL { get; set; }
+		public decimal LastPnL { get; set; }
 
-		public IList<string> StrategyIds { get; }
+		public decimal FirstPosition { get; set; }
+		public decimal LastPosition { get; set; }
+
+		public decimal FirstSlippage { get; set; }
+		public decimal LastSlippage { get; set; }
+
+		public IList<string> Portfolios { get; }
+		public IList<string> ClientCodes { get; }
+		public IList<string> BrokerCodes { get; }
+		public IList<string> DepoNames { get; }
+
+		public IList<string> UserOrderIds { get; }
 
 		public IList<string> Comments { get; }
+		public IList<string> SystemComments { get; }
 
 		public IList<string> Errors { get; }
 
@@ -84,10 +101,20 @@ namespace StockSharp.Algo.Storages.Binary
 			stream.Write(LastPrice);
 			stream.Write(FirstCommission);
 			stream.Write(LastCommission);
+			stream.Write(FirstPnL);
+			stream.Write(LastPnL);
+			stream.Write(FirstPosition);
+			stream.Write(LastPosition);
+			stream.Write(FirstSlippage);
+			stream.Write(LastSlippage);
 
 			WriteList(stream, Portfolios);
-			WriteList(stream, StrategyIds);
+			WriteList(stream, ClientCodes);
+			WriteList(stream, BrokerCodes);
+			WriteList(stream, DepoNames);
+			WriteList(stream, UserOrderIds);
 			WriteList(stream, Comments);
+			WriteList(stream, SystemComments);
 			WriteList(stream, Errors);
 
 			WriteNonSystemPrice(stream);
@@ -138,10 +165,20 @@ namespace StockSharp.Algo.Storages.Binary
 			LastPrice = stream.Read<decimal>();
 			FirstCommission = stream.Read<decimal>();
 			LastCommission = stream.Read<decimal>();
+			FirstPnL = stream.Read<decimal>();
+			LastPnL = stream.Read<decimal>();
+			FirstPosition = stream.Read<decimal>();
+			LastPosition = stream.Read<decimal>();
+			FirstSlippage = stream.Read<decimal>();
+			LastSlippage = stream.Read<decimal>();
 
 			ReadList(stream, Portfolios);
-			ReadList(stream, StrategyIds);
+			ReadList(stream, ClientCodes);
+			ReadList(stream, BrokerCodes);
+			ReadList(stream, DepoNames);
+			ReadList(stream, UserOrderIds);
 			ReadList(stream, Comments);
+			ReadList(stream, SystemComments);
 			ReadList(stream, Errors);
 
 			ReadNonSystemPrice(stream);
@@ -176,15 +213,33 @@ namespace StockSharp.Algo.Storages.Binary
 			LastPrice = src.LastPrice;
 			FirstCommission = src.FirstCommission;
 			LastCommission = src.LastCommission;
+			FirstPnL = src.FirstPnL;
+			LastPnL = src.LastPnL;
+			FirstPosition = src.FirstPosition;
+			LastPosition = src.LastPosition;
+			FirstSlippage = src.FirstSlippage;
+			LastSlippage = src.LastSlippage;
 
 			Portfolios.Clear();
 			Portfolios.AddRange(src.Portfolios);
 
-			StrategyIds.Clear();
-			StrategyIds.AddRange(src.StrategyIds);
+			ClientCodes.Clear();
+			ClientCodes.AddRange(src.ClientCodes);
+
+			BrokerCodes.Clear();
+			BrokerCodes.AddRange(src.BrokerCodes);
+
+			DepoNames.Clear();
+			DepoNames.AddRange(src.DepoNames);
+
+			UserOrderIds.Clear();
+			UserOrderIds.AddRange(src.UserOrderIds);
 
 			Comments.Clear();
 			Comments.AddRange(src.Comments);
+
+			SystemComments.Clear();
+			SystemComments.AddRange(src.Comments);
 
 			Errors.Clear();
 			Errors.AddRange(src.Errors);
@@ -209,6 +264,9 @@ namespace StockSharp.Algo.Storages.Binary
 				metaInfo.FirstTransactionId = metaInfo.LastTransactionId = msg.TransactionId;
 				metaInfo.FirstOriginalTransactionId = metaInfo.LastOriginalTransactionId = msg.OriginalTransactionId;
 				metaInfo.FirstCommission = metaInfo.LastCommission = msg.Commission ?? 0;
+				metaInfo.FirstPnL = metaInfo.LastPnL = msg.PnL ?? 0;
+				metaInfo.FirstPosition = metaInfo.LastPosition = msg.Position ?? 0;
+				metaInfo.FirstSlippage = metaInfo.LastSlippage = msg.Slippage ?? 0;
 				metaInfo.ServerOffset = msg.ServerTime.Offset;
 			}
 
@@ -247,68 +305,69 @@ namespace StockSharp.Algo.Storages.Binary
 						throw new ArgumentOutOfRangeException(nameof(messages), msg.TradePrice, LocalizedStrings.Str929Params.Put(msg.TradeId, msg.OrderId));
 				}
 
-				writer.WriteInt((int)msg.ExecutionType);
+				//writer.WriteInt((int)msg.ExecutionType);
 
 				metaInfo.LastTransactionId = writer.SerializeId(msg.TransactionId, metaInfo.LastTransactionId);
 				metaInfo.LastOriginalTransactionId = writer.SerializeId(msg.OriginalTransactionId, metaInfo.LastOriginalTransactionId);
 
-				if (msg.HasOrderInfo())
-				{
-					writer.Write(true);
+				writer.Write(msg.HasOrderInfo);
+				writer.Write(msg.HasTradeInfo);
 
-					if (metaInfo.Version < MarketDataVersions.Version50)
-						metaInfo.LastOrderId = writer.SerializeId(msg.OrderId ?? 0, metaInfo.LastOrderId);
+				if (metaInfo.Version < MarketDataVersions.Version50)
+					metaInfo.LastOrderId = writer.SerializeId(msg.OrderId ?? 0, metaInfo.LastOrderId);
+				else
+				{
+					writer.Write(msg.OrderId != null);
+
+					if (msg.OrderId != null)
+					{
+						metaInfo.LastOrderId = writer.SerializeId(msg.OrderId.Value, metaInfo.LastOrderId);
+					}
 					else
 					{
-						writer.Write(msg.OrderId != null);
+						writer.Write(!msg.OrderStringId.IsEmpty());
 
-						if (msg.OrderId != null)
-						{
-							metaInfo.LastOrderId = writer.SerializeId(msg.OrderId.Value, metaInfo.LastOrderId);
-						}
-						else
-						{
-							writer.Write(!msg.OrderStringId.IsEmpty());
-
-							if (!msg.OrderStringId.IsEmpty())
-								writer.WriteString(msg.OrderStringId);
-						}
-
-						writer.Write(!msg.OrderBoardId.IsEmpty());
-
-						if (!msg.OrderBoardId.IsEmpty())
-							writer.WriteString(msg.OrderBoardId);
+						if (!msg.OrderStringId.IsEmpty())
+							writer.WriteString(msg.OrderStringId);
 					}
 
+					writer.Write(!msg.OrderBoardId.IsEmpty());
+
+					if (!msg.OrderBoardId.IsEmpty())
+						writer.WriteString(msg.OrderBoardId);
+				}
+
+				if (metaInfo.Version < MarketDataVersions.Version50)
+					metaInfo.LastTradeId = writer.SerializeId(msg.TradeId ?? 0, metaInfo.LastTradeId);
+				else
+				{
+					writer.Write(msg.TradeId != null);
+
+					if (msg.TradeId != null)
+					{
+						metaInfo.LastTradeId = writer.SerializeId(msg.TradeId.Value, metaInfo.LastTradeId);
+					}
+					else
+					{
+						writer.Write(!msg.TradeStringId.IsEmpty());
+
+						if (!msg.TradeStringId.IsEmpty())
+							writer.WriteString(msg.TradeStringId);
+					}
+				}
+
+				if (msg.OrderPrice != 0)
+				{
+					writer.Write(true);
 					writer.WritePriceEx(msg.OrderPrice, metaInfo, SecurityId);
 				}
 				else
 					writer.Write(false);
 
-				if (msg.HasTradeInfo())
+				if (msg.TradePrice != null)
 				{
 					writer.Write(true);
-
-					if (metaInfo.Version < MarketDataVersions.Version50)
-						metaInfo.LastTradeId = writer.SerializeId(msg.TradeId ?? 0, metaInfo.LastTradeId);
-					else
-					{
-						writer.Write(msg.TradeId != null);
-
-						if (msg.TradeId != null)
-						{
-							metaInfo.LastTradeId = writer.SerializeId(msg.TradeId.Value, metaInfo.LastTradeId);
-						}
-						else
-						{
-							writer.Write(!msg.TradeStringId.IsEmpty());
-
-							if (!msg.TradeStringId.IsEmpty())
-								writer.WriteString(msg.TradeStringId);
-						}
-					}
-
-					writer.WritePriceEx(msg.GetTradePrice(), metaInfo, SecurityId);
+					writer.WritePriceEx(msg.TradePrice.Value, metaInfo, SecurityId);
 				}
 				else
 					writer.Write(false);
@@ -354,7 +413,10 @@ namespace StockSharp.Algo.Storages.Binary
 				metaInfo.LastTime = writer.WriteTime(msg.ServerTime, metaInfo.LastTime, LocalizedStrings.Str930, allowNonOrdered, isUtc, metaInfo.ServerOffset, allowDiffOffsets, ref lastOffset);
 				metaInfo.LastServerOffset = lastOffset;
 
-				writer.WriteInt((int)msg.OrderType);
+				writer.Write(msg.OrderType != null);
+
+				if (msg.OrderType != null)
+					writer.WriteInt((int)msg.OrderType.Value);
 
 				writer.WriteNullableInt(msg.OrderState);
 				writer.WriteNullableInt(msg.OrderStatus);
@@ -384,13 +446,28 @@ namespace StockSharp.Algo.Storages.Binary
 						writer.Write(msg.IsSystem.Value);
 				}
 
-				writer.WriteLong(msg.ExpiryDate?.Ticks ?? 0L);
+				if (msg.ExpiryDate != null)
+				{
+					writer.Write(true);
+					writer.WriteLong(msg.ExpiryDate.Value.Ticks);
+					writer.WriteInt(msg.ExpiryDate.Value.Offset.Hours);
+					writer.WriteInt(msg.ExpiryDate.Value.Offset.Minutes);
+				}
+				else
+					writer.Write(false);
 
-				WriteCommission(writer, metaInfo, msg.Commission);
+				metaInfo.LastCommission = Write(writer, msg.Commission, metaInfo.LastCommission);
+				metaInfo.LastPnL = Write(writer, msg.PnL, metaInfo.LastPnL);
+				metaInfo.LastPosition = Write(writer, msg.Position, metaInfo.LastPosition);
+				metaInfo.LastSlippage = Write(writer, msg.Slippage, metaInfo.LastSlippage);
 
 				WriteString(writer, metaInfo.Portfolios, msg.PortfolioName);
-				WriteString(writer, metaInfo.StrategyIds, msg.UserOrderId);
+				WriteString(writer, metaInfo.ClientCodes, msg.ClientCode);
+				WriteString(writer, metaInfo.BrokerCodes, msg.BrokerCode);
+				WriteString(writer, metaInfo.DepoNames, msg.DepoName);
+				WriteString(writer, metaInfo.UserOrderIds, msg.UserOrderId);
 				WriteString(writer, metaInfo.Comments, msg.Comment);
+				WriteString(writer, metaInfo.SystemComments, msg.SystemComment);
 				WriteString(writer, metaInfo.Errors, msg.Error?.Message);
 
 				if (metaInfo.Version < MarketDataVersions.Version55)
@@ -400,6 +477,16 @@ namespace StockSharp.Algo.Storages.Binary
 
 				if (msg.Currency != null)
 					writer.WriteInt((int)msg.Currency.Value);
+
+				writer.Write(msg.Latency != null);
+
+				if (msg.Latency != null)
+					writer.WriteLong(msg.Latency.Value.Ticks);
+
+				writer.Write(msg.OriginSide != null);
+
+				if (msg.OriginSide != null)
+					writer.Write(msg.OriginSide.Value == Sides.Buy);
 			}
 		}
 
@@ -408,56 +495,65 @@ namespace StockSharp.Algo.Storages.Binary
 			var reader = enumerator.Reader;
 			var metaInfo = enumerator.MetaInfo;
 
-			var execType = (ExecutionTypes)reader.ReadInt();
+			//var execType = (ExecutionTypes)reader.ReadInt();
 			//var isTrade = execType == ExecutionTypes.Trade;
 
 			metaInfo.FirstTransactionId += reader.ReadLong();
 			metaInfo.FirstOriginalTransactionId += reader.ReadLong();
 
+			var hasOrderInfo = reader.Read();
+			var hasTradeInfo = reader.Read();
+
+			long? orderId = null;
+			long? tradeId = null;
+
 			string orderBoardId = null;
 			string orderStringId = null;
 			string tradeStringId = null;
 
-			decimal? orderPrice = null;
-			decimal? tradePrice = null;
-
-			if (reader.Read())
+			if (metaInfo.Version < MarketDataVersions.Version50)
 			{
-				if (metaInfo.Version < MarketDataVersions.Version50)
-					metaInfo.FirstOrderId += reader.ReadLong();
-				else
-				{
-					if (reader.Read())
-						metaInfo.FirstOrderId += reader.ReadLong();
-					else
-					{
-						if (reader.Read())
-							orderStringId = reader.ReadString();
-					}
-
-					if (reader.Read())
-						orderBoardId = reader.ReadString();
-				}
-
-				orderPrice = reader.ReadPriceEx(metaInfo);
+				orderId = reader.ReadLong();
+				metaInfo.FirstOrderId += orderId.Value;
 			}
 			else
 			{
-				if (metaInfo.Version < MarketDataVersions.Version50)
-					metaInfo.FirstTradeId += reader.ReadLong();
+				if (reader.Read())
+				{
+					orderId = reader.ReadLong();
+					metaInfo.FirstOrderId += orderId.Value;
+				}
 				else
 				{
 					if (reader.Read())
-						metaInfo.FirstTradeId += reader.ReadLong();
-					else
-					{
-						if (reader.Read())
-							tradeStringId = reader.ReadString();
-					}
+						orderStringId = reader.ReadString();
 				}
 
-				tradePrice = reader.ReadPriceEx(metaInfo);
+				if (reader.Read())
+					orderBoardId = reader.ReadString();
 			}
+
+			if (metaInfo.Version < MarketDataVersions.Version50)
+			{
+				tradeId = reader.ReadLong();
+				metaInfo.FirstTradeId += tradeId.Value;
+			}
+			else
+			{
+				if (reader.Read())
+				{
+					tradeId = reader.ReadLong();
+					metaInfo.FirstTradeId += tradeId.Value;
+				}
+				else
+				{
+					if (reader.Read())
+						tradeStringId = reader.ReadString();
+				}
+			}
+
+			var orderPrice = reader.Read() ? reader.ReadPriceEx(metaInfo) : (decimal?)null;
+			var tradePrice = reader.Read() ? reader.ReadPriceEx(metaInfo) : (decimal?)null;
 
 			var side = reader.Read() ? Sides.Buy : Sides.Sell;
 
@@ -480,7 +576,7 @@ namespace StockSharp.Algo.Storages.Binary
 			metaInfo.FirstTime = prevTime;
 			metaInfo.FirstServerOffset = lastOffset;
 
-			var type = reader.ReadInt().To<OrderTypes>();
+			var type = reader.Read() ? reader.ReadInt().To<OrderTypes>() : (OrderTypes?)null;
 
 			var state = reader.ReadNullableInt<OrderStates>();
 			var status = reader.ReadNullableInt<OrderStatus>();
@@ -497,18 +593,24 @@ namespace StockSharp.Algo.Storages.Binary
 						? reader.Read()
 						: (reader.Read() ? reader.Read() : (bool?)null);
 
-			var expDate = reader.ReadLong();
+			var expDate = reader.Read() ? reader.ReadLong().To<DateTime>().ApplyTimeZone(new TimeSpan(reader.ReadInt(), reader.ReadInt(), 0)) : (DateTimeOffset?)null;
 
-			var commission = ReadCommission(reader, metaInfo);
+			var commission = reader.Read() ? metaInfo.FirstCommission = reader.ReadDecimal(metaInfo.FirstCommission) : (decimal?)null;
+			var pnl = reader.Read() ? metaInfo.FirstPnL = reader.ReadDecimal(metaInfo.FirstPnL) : (decimal?)null;
+			var position = reader.Read() ? metaInfo.FirstPosition = reader.ReadDecimal(metaInfo.FirstPosition) : (decimal?)null;
+			var slippage = reader.Read() ? metaInfo.FirstSlippage = reader.ReadDecimal(metaInfo.FirstSlippage) : (decimal?)null;
 
 			var portfolio = ReadString(reader, metaInfo.Portfolios);
-			var userOrderId = ReadString(reader, metaInfo.StrategyIds);
+			var clientCode = ReadString(reader, metaInfo.ClientCodes);
+			var brokerCode = ReadString(reader, metaInfo.BrokerCodes);
+			var depoName = ReadString(reader, metaInfo.DepoNames);
+			var userOrderId = ReadString(reader, metaInfo.UserOrderIds);
 			var comment = ReadString(reader, metaInfo.Comments);
-			var error = ReadString(reader, metaInfo.Errors);
+			var sysComment = ReadString(reader, metaInfo.SystemComments);
 
 			var msg = new ExecutionMessage
 			{
-				ExecutionType = execType,
+				ExecutionType = ExecutionTypes.Transaction,
 				SecurityId = SecurityId,
 
 				ServerTime = serverTime,
@@ -527,35 +629,36 @@ namespace StockSharp.Algo.Storages.Binary
 				OrderStatus = status,
 				TimeInForce = timeInForce,
 				IsSystem = isSystem,
-				ExpiryDate = expDate == 0 ? (DateTimeOffset?)null : expDate.To<DateTimeOffset>(),
+				ExpiryDate = expDate,
 				Commission = commission,
+				PnL = pnl,
+				Position = position,
+				Slippage = slippage,
 				PortfolioName = portfolio,
+				ClientCode = clientCode,
+				BrokerCode = brokerCode,
+				DepoName = depoName,
 				UserOrderId = userOrderId,
 				Comment = comment,
+				SystemComment = sysComment,
 
 				TradeStatus = tradeStatus,
+
+				HasOrderInfo = hasOrderInfo,
+				HasTradeInfo = hasTradeInfo,
+
+				OrderPrice = orderPrice ?? 0,
+				TradePrice = tradePrice,
+
+				OrderId = orderId,
+				TradeId = tradeId,
+
+				OrderBoardId = orderBoardId,
+				OrderStringId = orderStringId,
+				TradeStringId = tradeStringId,
 			};
 
-			if (orderPrice != null)
-			{
-				if (orderStringId == null)
-					msg.OrderId = metaInfo.FirstOrderId;
-				else
-					msg.OrderStringId = orderStringId;
-
-				msg.OrderBoardId = orderBoardId;
-				msg.OrderPrice = orderPrice.Value;
-			}
-			
-			if (tradePrice != null)
-			{
-				if (tradeStringId == null)
-					msg.TradeId = metaInfo.FirstTradeId;
-				else
-					msg.TradeStringId = tradeStringId;
-
-				msg.TradePrice = tradePrice.Value;
-			}
+			var error = ReadString(reader, metaInfo.Errors);
 
 			if (!error.IsEmpty())
 				msg.Error = new InvalidOperationException(error);
@@ -564,21 +667,30 @@ namespace StockSharp.Algo.Storages.Binary
 			{
 				if (reader.Read())
 					msg.Currency = (CurrencyTypes)reader.ReadInt();
+
+				if (reader.Read())
+					msg.Latency = reader.ReadLong().To<TimeSpan>();
+
+				if (reader.Read())
+					msg.OriginSide = reader.Read() ? Sides.Buy : Sides.Sell;
 			}
 
 			return msg;
 		}
 
-		private static void WriteCommission(BitArrayWriter writer, TransactionSerializerMetaInfo metaInfo, decimal? value)
+		private static decimal Write(BitArrayWriter writer, decimal? value, decimal last)
 		{
 			if (value == null)
+			{
 				writer.Write(false);
+				return last;
+			}
 			else
 			{
 				writer.Write(true);
-				writer.WriteDecimal((decimal)value, metaInfo.LastCommission);
+				writer.WriteDecimal((decimal)value, last);
 
-				metaInfo.LastCommission = (decimal)value;
+				return value.Value;
 			}
 		}
 
@@ -593,14 +705,6 @@ namespace StockSharp.Algo.Storages.Binary
 				items.TryAdd(value);
 				writer.WriteInt(items.IndexOf(value));
 			}
-		}
-
-		private static decimal? ReadCommission(BitArrayReader reader, TransactionSerializerMetaInfo metaInfo)
-		{
-			if (!reader.Read())
-				return null;
-
-			return metaInfo.FirstCommission = reader.ReadDecimal(metaInfo.FirstCommission);
 		}
 
 		private static string ReadString(BitArrayReader reader, IList<string> items)

@@ -54,7 +54,7 @@ namespace StockSharp.Algo
 		private class SecurityData
 		{
 			public readonly CachedSynchronizedDictionary<Tuple<long, long>, MyTrade> MyTrades = new CachedSynchronizedDictionary<Tuple<long, long>, MyTrade>();
-			public readonly CachedSynchronizedDictionary<Tuple<long, bool, bool>, OrderInfo> Orders = new CachedSynchronizedDictionary<Tuple<long, bool, bool>, OrderInfo>();
+			public readonly CachedSynchronizedDictionary<Tuple<long, OrderTypes, bool>, OrderInfo> Orders = new CachedSynchronizedDictionary<Tuple<long, OrderTypes, bool>, OrderInfo>();
 
 			public readonly SynchronizedDictionary<long, Trade> TradesById = new SynchronizedDictionary<long, Trade>();
 			public readonly SynchronizedDictionary<string, Trade> TradesByStringId = new SynchronizedDictionary<string, Trade>(StringComparer.InvariantCultureIgnoreCase);
@@ -264,7 +264,7 @@ namespace StockSharp.Algo
 			if (order == null)
 				return;
 
-			var key = CreateOrderKey(order.Type == OrderTypes.Conditional ? OrderTypes.Conditional : OrderTypes.Limit, transactionId, true);
+			var key = CreateOrderKey(order.Type, transactionId, true);
 			GetData(order.Security).Orders.Add(key, new OrderInfo(order, false));
 			_allOrdersByTransactionId.Add(Tuple.Create(transactionId, true), order);
 		}
@@ -318,6 +318,7 @@ namespace StockSharp.Algo
 					? _portfolios.FirstOrDefault().Value
 					: ProcessPortfolio(message.PortfolioName).Item1;
 				o.ClientCode = message.ClientCode;
+				o.BrokerCode = message.BrokerCode;
 
 				return o;
 			}, out isNew, true);
@@ -548,6 +549,12 @@ namespace StockSharp.Algo
 				if (message.Slippage != null)
 					t.Slippage = message.Slippage;
 
+				if (message.PnL != null)
+					t.PnL = message.PnL;
+
+				if (message.Position != null)
+					t.Position = message.Position;
+
 				message.CopyExtensionInfo(t);
 
 				//trades.Add(t);
@@ -659,12 +666,12 @@ namespace StockSharp.Algo
 			return Tuple.Create(news, isNew);
 		}
 
-		private static Tuple<long, bool, bool> CreateOrderKey(OrderTypes type, long transactionId, bool isCancel)
+		private static Tuple<long, OrderTypes, bool> CreateOrderKey(OrderTypes? type, long transactionId, bool isCancel)
 		{
 			if (transactionId <= 0)
 				throw new ArgumentOutOfRangeException(nameof(transactionId), transactionId, LocalizedStrings.Str718);
 
-			return Tuple.Create(transactionId, type == OrderTypes.Conditional, isCancel);
+			return Tuple.Create(transactionId, type ?? OrderTypes.Limit, isCancel);
 		}
 
 		public Order GetOrder(Security security, long transactionId, long? orderId, string orderStringId, OrderTypes orderType = OrderTypes.Limit, bool isCancel = false)
@@ -694,7 +701,7 @@ namespace StockSharp.Algo
 			return orderStringId == null ? null : data.OrdersByStringId.TryGetValue(orderStringId);
 		}
 
-		private Tuple<Order, bool, bool> GetOrderInfo(SecurityData securityData, OrderTypes type, long transactionId, long? orderId, string orderStringId, Func<long, Order> createOrder, out bool isNew, bool newOrderRaised = false)
+		private Tuple<Order, bool, bool> GetOrderInfo(SecurityData securityData, OrderTypes? type, long transactionId, long? orderId, string orderStringId, Func<long, Order> createOrder, out bool isNew, bool newOrderRaised = false)
 		{
 			if (createOrder == null)
 				throw new ArgumentNullException(nameof(createOrder));

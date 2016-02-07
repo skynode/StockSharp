@@ -228,11 +228,8 @@ namespace StockSharp.Xaml
 
 				((OptionDeskRow[])ItemsSource).ForEach(r =>
 				{
-					if (r.Call != null)
-						r.Call.ApplyModel();
-
-					if (r.Put != null)
-						r.Put.ApplyModel();
+					r.Call?.ApplyModel();
+					r.Put?.ApplyModel();
 				});
 			}
 		}
@@ -437,7 +434,7 @@ namespace StockSharp.Xaml
 		{
 			base.Save(storage);
 
-			storage.SetValue("UseBlackModel", UseBlackModel);
+			storage.SetValue(nameof(UseBlackModel), UseBlackModel);
 		}
 
 		/// <summary>
@@ -448,7 +445,7 @@ namespace StockSharp.Xaml
 		{
 			base.Load(storage);
 
-			UseBlackModel = storage.GetValue<bool>("UseBlackModel");
+			UseBlackModel = storage.GetValue<bool>(nameof(UseBlackModel));
 		}
 	}
 

@@ -8,6 +8,7 @@
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:localization="clr-namespace:StockSharp.Localization;assembly=StockSharp.Localization"
 		xmlns:local="clr-namespace:StockSharp.Designer"
+		xmlns:businessEntities="clr-namespace:StockSharp.BusinessEntities;assembly=StockSharp.BusinessEntities"
 		mc:Ignorable="d"
 		Height="768" Width="1024" WindowState="Maximized"
         DontUseDwm="False" WindowStartupLocation="CenterScreen"
@@ -57,6 +58,21 @@
         <CommandBinding Command="{x:Static local:MainWindow.OpenMarketDataSettingsCommand}"
 						CanExecute="OpenMarketDataSettingsCommand_OnCanExecute"
 						Executed="OpenMarketDataSettingsCommand_OnExecuted"/>
+
+        <CommandBinding Command="{x:Static local:MainWindow.HelpCommand}"
+						Executed="HelpCommand_OnExecuted"/>
+
+        <CommandBinding Command="{x:Static local:MainWindow.AboutCommand}"
+						Executed="AboutCommand_OnExecuted"/>
+
+        <CommandBinding Command="{x:Static local:MainWindow.TargetPlatformCommand}"
+						Executed="TargetPlatformCommand_OnExecuted"/>
+
+        <CommandBinding Command="{x:Static local:MainWindow.ResetSettingsCommand}"
+						Executed="ResetSettingsCommand_OnExecuted"/>
+
+        <CommandBinding Command="{x:Static local:MainWindow.AddNewSecurityCommand}"
+						Executed="AddNewSecurityCommand_OnExecuted"/>
     </Window.CommandBindings>
 	
 	<Window.Resources>
@@ -64,6 +80,11 @@
 		
         <ContextMenu x:Key="TreeContextMenu"
 					 DataContext="{Binding Path=PlacementTarget.Header, RelativeSource={RelativeSource Self}}">
+            <MenuItem Header="{x:Static localization:LocalizedStrings.Str3229}"
+					  Icon="pack://application:,,,/Designer;component/Images/Add_32x32.png"
+					  Command="{x:Static local:MainWindow.AddCommand}"
+					  CommandParameter="{Binding Type}"/>
+			
             <MenuItem Header="{x:Static localization:LocalizedStrings.Str1509}"
 					  Icon="pack://application:,,,/Designer;component/Images/Open_32x32.png"
 					  Command="{x:Static local:MainWindow.OpenCommand}"
@@ -111,7 +132,34 @@
 								   Icon="pack://application:,,,/Designer;component/Images/Connect_24x24.png" 
 								   Command="{x:Static local:MainWindow.ConnectDisconnectCommand}"/>
                 </fluent:QuickAccessMenuItem>
+                <fluent:QuickAccessMenuItem IsChecked="true">
+                    <fluent:DropDownButton Size="Small" 
+										   Header="{x:Static localization:LocalizedStrings.Settings}"
+										   ToolTip="{x:Static localization:LocalizedStrings.Settings}"
+										   Icon="pack://application:,,,/Designer;component/Images/Settings_24x24.png" >
+                        <fluent:MenuItem Header="{x:Static localization:LocalizedStrings.XamlStr610}"
+										 Command="{x:Static local:MainWindow.TargetPlatformCommand}" />
+                        <fluent:MenuItem Header="{x:Static localization:LocalizedStrings.Str1520}"
+										 Command="{x:Static local:MainWindow.ResetSettingsCommand}" />
+                    </fluent:DropDownButton>
+                </fluent:QuickAccessMenuItem>
             </fluent:Ribbon.QuickAccessItems>
+			
+			<fluent:Ribbon.ToolBarItems>
+                <fluent:DropDownButton Size="Small" 
+									   ToolTip="{x:Static localization:LocalizedStrings.Help}"
+									   Icon="pack://application:,,,/StockSharp.Xaml;component/Images/help_16x16.png">
+                    <fluent:MenuItem Header="{x:Static localization:LocalizedStrings.Help}"
+									 Command="{x:Static local:MainWindow.HelpCommand}" />
+                    <fluent:MenuItem Command="{x:Static local:MainWindow.AboutCommand}" >
+                        <fluent:MenuItem.Header>
+                            <TextBlock>
+								<Run Text="{x:Static localization:LocalizedStrings.About}" />...
+                            </TextBlock>
+                        </fluent:MenuItem.Header>
+                    </fluent:MenuItem>
+                </fluent:DropDownButton>
+            </fluent:Ribbon.ToolBarItems>
 			
             <!--<fluent:Ribbon.ContextualGroups>
                 <fluent:RibbonContextualTabGroup x:Name="DesignerRibbonGroup"
@@ -132,17 +180,17 @@
             <fluent:RibbonTabItem Header="{x:Static localization:LocalizedStrings.Schemas}"
 								  x:Name="RibbonCommonTab">
                 <fluent:RibbonGroupBox Header="{x:Static localization:LocalizedStrings.CompositionElementsStrategies}">
-                    <fluent:SplitButton Header="{x:Static localization:LocalizedStrings.Str3229}" 
-										SizeDefinition="Middle"
-                                        Icon="pack://application:,,,/Designer;component/Images/Add_32x32.png"
-                                        LargeIcon="pack://application:,,,/Designer;component/Images/Add_32x32.png">
+                    <fluent:DropDownButton Header="{x:Static localization:LocalizedStrings.Str3229}" 
+										   SizeDefinition="Middle"
+										   Icon="pack://application:,,,/Designer;component/Images/Add_32x32.png"
+										   LargeIcon="pack://application:,,,/Designer;component/Images/Add_32x32.png">
                         <fluent:MenuItem Header="{x:Static localization:LocalizedStrings.CompositeElement}"
 										 Command="{x:Static local:MainWindow.AddCommand}"
 										 CommandParameter="{x:Static local:CompositionType.Composition}" />
                         <fluent:MenuItem Header="{x:Static localization:LocalizedStrings.Strategy}"
 										 Command="{x:Static local:MainWindow.AddCommand}"
 										 CommandParameter="{x:Static local:CompositionType.Strategy}" />
-                    </fluent:SplitButton>
+                    </fluent:DropDownButton>
                     <fluent:Button Header="{x:Static localization:LocalizedStrings.Str1509}"
 								   SizeDefinition="Middle"
 								   Icon="pack://application:,,,/Designer;component/Images/Open_32x32.png"
@@ -185,6 +233,11 @@
 								   SizeDefinition="Large"
 								   LargeIcon="pack://application:,,,/Designer;component/Images/storage_32x32.png" 
 								   Command="{x:Static local:MainWindow.OpenMarketDataSettingsCommand}" />
+                    <fluent:Button Header="{x:Static localization:LocalizedStrings.XamlStr137}"
+								   SizeDefinition="Large"
+								   LargeIcon="pack://application:,,,/Designer;component/Images/Security_32x32.png" 
+								   Command="{x:Static local:MainWindow.AddNewSecurityCommand}"
+								   CommandParameter="{x:Type businessEntities:Security}" />
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
 

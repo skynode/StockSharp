@@ -128,7 +128,7 @@ namespace StockSharp.OpenECry
 			}
 			else
 			{
-				draft.Type = message.OrderType.ToOec();
+				draft.Type = message.OrderType.Value.ToOec();
 			}
 
 			draft.Flags = OrderFlags.None;
@@ -307,7 +307,7 @@ namespace StockSharp.OpenECry
 			var execMsg = new ExecutionMessage
 			{
 				OriginalTransactionId = trasactionId,
-				OrderId = order.ID,
+				OrderId = order.ID > 0 ? order.ID : (long?)null,
 				Side = order.Side.ToStockSharp(),
 				ExecutionType = ExecutionTypes.Transaction,
 				ServerTime = order.States.Current.Timestamp.ApplyTimeZone(TimeHelper.Est),
@@ -321,6 +321,7 @@ namespace StockSharp.OpenECry
 				},
 				Comment = order.Comments,
 				OrderPrice = order.Contract.Cast(order.Price) ?? 0,
+				HasOrderInfo = true,
 			};
 
 			var currVersion = order.Versions.Current;
@@ -479,6 +480,11 @@ namespace StockSharp.OpenECry
 
 			SendOutMessage(new ExecutionMessage
 			{
+				SecurityId = new SecurityId
+				{
+					SecurityCode = order.Contract.Symbol,
+					BoardCode = order.Route == null ? order.Contract.Exchange.Name : order.Route.Name,
+				},
 				ExecutionType = ExecutionTypes.Transaction,
 				OriginalTransactionId = _orderTransactions.TryGetValue2(order) ?? 0,
 				OrderId = order.ID,
@@ -488,6 +494,7 @@ namespace StockSharp.OpenECry
 				TradeVolume = fill.Quantity,
 				SystemComment = fill.Comments,
 				Commission = fill.Commission.ToDecimal(),
+				HasTradeInfo = true,
 			});
 		}
 

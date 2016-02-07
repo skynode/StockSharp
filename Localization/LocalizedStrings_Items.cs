@@ -1038,6 +1038,26 @@ namespace StockSharp.Localization
 		public static string Volume => GetString(VolumeKey);
 
 		/// <summary>
+		/// Volume (order)
+		/// </summary>
+		public const string VolumeOrderKey = "VolumeOrder";
+
+		/// <summary>
+		/// Volume (order)
+		/// </summary>
+		public static string VolumeOrder => GetString(VolumeOrderKey);
+
+		/// <summary>
+		/// Volume (trade)
+		/// </summary>
+		public const string VolumeTradeKey = "VolumeTrade";
+
+		/// <summary>
+		/// Volume (trade)
+		/// </summary>
+		public static string VolumeTrade => GetString(VolumeTradeKey);
+
+		/// <summary>
 		/// Total candle volume.
 		/// </summary>
 		public const string TotalCandleVolumeKey = "TotalCandleVolume";
@@ -4110,7 +4130,7 @@ namespace StockSharp.Localization
 		/// <summary>
 		/// Fill Or Kill
 		/// </summary>
-		public const string FOKKey = "Foc";
+		public const string FOKKey = "FOK";
 
 		/// <summary>
 		/// Fill Or Kill
@@ -4618,12 +4638,12 @@ namespace StockSharp.Localization
 		public static string Str497 => GetString(Str497Key);
 
 		/// <summary>
-		/// Volume spread.
+		/// Volume spread
 		/// </summary>
 		public const string Str498Key = "Str498";
 
 		/// <summary>
-		/// Volume spread.
+		/// Volume spread
 		/// </summary>
 		public static string Str498 => GetString(Str498Key);
 
@@ -27488,14 +27508,14 @@ namespace StockSharp.Localization
 		public static string Str2952Params => GetString(Str2952ParamsKey);
 
 		/// <summary>
-		/// S#.Data settings will be reset. This operation is irreversible. Are you sure you want to continue?
+		/// App settings will be reset. This operation is irreversible. Are you sure you want to continue?
 		/// </summary>
-		public const string Str2954Key = "Str2954";
+		public const string Str2954ParamsKey = "Str2954Params";
 
 		/// <summary>
-		/// S#.Data settings will be reset. This operation is irreversible. Are you sure you want to continue?
+		/// App settings will be reset. This operation is irreversible. Are you sure you want to continue?
 		/// </summary>
-		public static string Str2954 => GetString(Str2954Key);
+		public static string Str2954Params => GetString(Str2954ParamsKey);
 
 		/// <summary>
 		/// Data processing error
@@ -37368,12 +37388,12 @@ namespace StockSharp.Localization
 		public static string XamlStr324 => GetString(XamlStr324Key);
 
 		/// <summary>
-		/// Fin securities:
+		/// Find securities:
 		/// </summary>
 		public const string XamlStr325Key = "XamlStr325";
 
 		/// <summary>
-		/// Fin securities:
+		/// Find securities:
 		/// </summary>
 		public static string XamlStr325 => GetString(XamlStr325Key);
 
@@ -41756,5 +41776,15 @@ namespace StockSharp.Localization
 		/// Atomic reregister
 		/// </summary>
 		public static string IsSupportAtomicReRegister => GetString(IsSupportAtomicReRegisterKey);
+
+		/// <summary>
+		/// Best pair quotes
+		/// </summary>
+		public const string BestPairKey = "BestPair";
+
+		/// <summary>
+		/// Best pair quotes
+		/// </summary>
+		public static string BestPair => GetString(BestPairKey);
 	}
 }

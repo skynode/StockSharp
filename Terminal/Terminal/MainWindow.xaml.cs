@@ -23,8 +23,6 @@ using System.Collections.Generic;
 
 using StockSharp.Terminal.Layout;
 using StockSharp.Terminal.Controls;
-using StockSharp.Terminal.Logics;
-
 using Xceed.Wpf.AvalonDock.Layout;
 using Xceed.Wpf.AvalonDock;
 
