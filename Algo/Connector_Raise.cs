@@ -488,14 +488,8 @@ namespace StockSharp.Algo
 
 		private void RaiseMarketDepthChanged(MarketDepth marketDepth)
 		{
-			MarketDepthChanged.SafeInvoke(marketDepth);
-
-			var multiEvt = MarketDepthsChanged;
-
-			if (multiEvt == null)
-				return;
-
-			multiEvt.SafeInvoke(new[] { marketDepth });
+			MarketDepthChanged?.Invoke(marketDepth);
+			MarketDepthsChanged?.Invoke(new[] { marketDepth });
 		}
 
 		/// <summary>

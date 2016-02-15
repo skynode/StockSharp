@@ -16,221 +16,115 @@ Copyright 2010 by StockSharp, LLC
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using System.Collections.Generic;
-
-using StockSharp.Terminal.Layout;
-using StockSharp.Terminal.Controls;
-using Xceed.Wpf.AvalonDock.Layout;
-using Xceed.Wpf.AvalonDock;
-
-using StockSharp.Algo;
+using System.Windows.Input;
 using StockSharp.Logging;
-using StockSharp.Algo.Storages;
-
 using Ecng.Configuration;
 using Ecng.Serialization;
 using Ecng.Common;
+using Ecng.Localization;
 using Ecng.Xaml;
-
 using StockSharp.BusinessEntities;
 using StockSharp.Localization;
-using StockSharp.Configuration;
+using StockSharp.Studio.Core.Commands;
 using StockSharp.Terminal.Services;
 
 namespace StockSharp.Terminal
 {
-    public partial class MainWindow
-    {
-        #region Fields
-        //-------------------------------------------------------------------
+	public partial class MainWindow
+	{
+		public const string LayoutFile = "layout.xml";
+		private readonly ConnectorService _connectorService;
 
-        private int _countWorkArea = 2;
+		public static MainWindow Instance { get; private set; }
 
-        private ConnectorService _connectorService;
+		public MainWindow()
+		{
+			LocalizedStrings.ActiveLanguage = Languages.English;
+			ConfigManager.RegisterService<IStudioCommandService>(new TerminalCommandService());
 
-        //-------------------------------------------------------------------
-        #endregion Fields
+			InitializeComponent();
+			Instance = this;
 
-        #region Properties
-        //-------------------------------------------------------------------
+			Title = Title.Put("S# Terminal");
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public LayoutManager LayoutManager { get; set; }
+			_connectorService = new ConnectorService();
+			_connectorService.ChangeConnectStatusEvent += ChangeConnectStatusEvent;
+			_connectorService.ErrorEvent += OnError;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public static MainWindow Instance { get; private set; }
+			var logManager = ConfigManager.GetService<LogManager>();
+			logManager.Application.LogLevel = LogLevels.Debug;
 
-        //-------------------------------------------------------------------
-        #endregion Properties
+			logManager.Listeners.Add(new FileLogListener("Terminal.log"));
 
-        public MainWindow()
-        {
-            InitializeComponent();
-            Instance = this;
+			var cmdSvc = ConfigManager.GetService<IStudioCommandService>();
 
-            LayoutManager = new LayoutManager(DockingManager);
-            DockingManager.DocumentClosed += DockingManager_DocumentClosed;
+			Loaded += (sender, args) =>
+			{
+				cmdSvc.Register<RequestBindSource>(this, true, cmd => new BindConnectorCommand(ConfigManager.GetService<IConnector>(), cmd.Control).SyncProcess(this));
+				_connectorService.InitConnector();
+			};
 
-            Title = Title.Put("Multi connection");
+			Closing += (sender, args) =>
+			{
+				new XmlSerializer<SettingsStorage>().Serialize(_workAreaControl.Save(), LayoutFile);
+			};
 
-            var logManager = new LogManager();
+			WindowState = WindowState.Maximized;
 
-            _connectorService = new ConnectorService();
-            _connectorService.ChangeConnectStatusEvent += ChangeConnectStatusEvent;
-            _connectorService.ErrorEvent += ConnectorServiceErrorEvent;
+			try
+			{
+				if (File.Exists(LayoutFile))
+					_workAreaControl.Load(new XmlSerializer<SettingsStorage>().Deserialize(LayoutFile));
+			}
+			catch (Exception ex)
+			{
+				OnError(ex.ToString(), $"Ошибка при чтении файла {LayoutFile}");
+			}
+		}
 
-            logManager.Sources.Add(_connectorService.GetConnector());
-            logManager.Listeners.Add(new FileLogListener("sample.log"));
+		private void SettingsClick(object sender, RoutedEventArgs e)
+		{
+			_connectorService.Configure(this);
+			new XmlSerializer<SettingsStorage>().Serialize(_connectorService.Save(), ConnectorService.SETTINGS_FILE);
+		}
 
-            _connectorService.InitConnector();
-        }
+		private void ConnectClick(object sender, RoutedEventArgs e)
+		{
+			if (!_connectorService.IsConnected)
+				_connectorService.Connect();
+			else
+				_connectorService.Disconnect();
+		}
 
-        #region Events
-        //-------------------------------------------------------------------
+		private void ChangeConnectStatusEvent(bool isConnected)
+		{
+			this.GuiAsync(() => ConnectBtn.Content = isConnected ? LocalizedStrings.Disconnect : LocalizedStrings.Connect);
+		}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BtnAddDocument_Click(object sender, RoutedEventArgs e)
-        {
-            var newWorkArea = new LayoutDocument()
-            {
-                Title = "Work area #" + ++_countWorkArea,
-                Content = new WorkAreaControl()
-            };
+		private void OnError(string message, string caption)
+		{
+			this.GuiAsync(() => MessageBox.Show(this, message, caption));
+		}
 
-            LayoutDocuments.Children.Add(newWorkArea);
+		private void LookupCode_OnKeyDown(object sender, KeyEventArgs e)
+		{
+			if(e.Key == Key.Enter)
+				LookupSecurities();
+		}
 
-            var offset = LayoutDocuments.Children.Count - 1;
-            LayoutDocuments.SelectedContentIndex = (offset < 0) ? 0 : offset;
-        }
+		private void LookupButton_OnClick(object sender, RoutedEventArgs e)
+		{
+			LookupSecurities();
+		}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DockingManager_DocumentClosed(object sender, DocumentClosedEventArgs e)
-        {
-            var manager = (DockingManager)sender;
-
-            if (LayoutDocuments.Children.Count == 0 && manager.FloatingWindows.ToList().Count == 0)
-                _countWorkArea = 0;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (NewControlComboBox.SelectedIndex != -1)
-            {
-                var workArea = (WorkAreaControl)DockingManager.ActiveContent;
-                workArea.AddControl(((ComboBoxItem)NewControlComboBox.SelectedItem).Content.ToString());
-                NewControlComboBox.SelectedIndex = -1;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DockingManager_OnActiveContentChanged(object sender, EventArgs e)
-        {
-            DockingManager.ActiveContent.DoIfElse<WorkAreaControl>(editor =>
-            {
-                var element = (DockingManager)sender;
-
-            }, () =>
-            {
-                var element = (DockingManager)sender;
-                new Connector().Configure(this);
-            });
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SettingsClick(object sender, RoutedEventArgs e)
-        {
-            _connectorService.Configure(this);
-            new XmlSerializer<SettingsStorage>().Serialize(_connectorService.Save(), ConnectorService.SETTINGS_FILE);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ConnectClick(object sender, RoutedEventArgs e)
-        {
-            if (!_connectorService.IsConnected)
-                _connectorService.Connect();
-            else
-                _connectorService.Disconnect();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="isConnected"></param>
-        private void ChangeConnectStatusEvent(bool isConnected)
-        {
-            this.GuiAsync(() =>
-            {
-                ConnectBtn.Content = isConnected ? LocalizedStrings.Disconnect : LocalizedStrings.Connect;
-            });
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="caption"></param>
-        private void ConnectorServiceErrorEvent(string message, string caption)
-        {
-            this.GuiAsync(() =>
-            {
-                MessageBox.Show(this, message, caption);
-            });
-        }
-
-        //-------------------------------------------------------------------
-        #endregion Events
-
-        #region Приватные методы
-        //-------------------------------------------------------------------
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="window"></param>
-        private static void ShowOrHide(Window window)
-        {
-            if (window == null)
-                throw new ArgumentNullException("window");
-
-            if (window.Visibility == Visibility.Visible)
-                window.Hide();
-            else
-                window.Show();
-        }
-
-        //-------------------------------------------------------------------
-        #endregion Приватные методы
-    }
+		private void LookupSecurities()
+		{
+			new LookupSecuritiesCommand(new Security
+			{
+				Code = LookupCode.Text.Trim(),
+				Type = LookupType.SelectedType,
+			}).Process(this);
+		}
+	}
 }

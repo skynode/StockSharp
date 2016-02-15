@@ -129,6 +129,9 @@ namespace StockSharp.Algo
 						break;
 				}
 
+				if(dataType == MarketDataTypes.CandleTimeFrame)
+					return; // todo fix
+
 				message.FillSecurityInfo(_connector, subscriber);
 
 				if (security == null)

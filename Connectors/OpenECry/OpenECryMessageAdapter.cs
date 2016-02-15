@@ -13,9 +13,11 @@ Created: 2015, 11, 11, 2:32 PM
 Copyright 2010 by StockSharp, LLC
 *******************************************************************************************/
 #endregion S# License
+
 namespace StockSharp.OpenECry
 {
 	using System;
+	using System.Timers;
 	using System.Security;
 
 	using Ecng.Common;
@@ -38,11 +40,21 @@ namespace StockSharp.OpenECry
 
 			object ThreadingPolicy.SetTimer(int timeout, EventHandler action)
 			{
-				return new object();
+				var timer = new Timer
+				{
+					Interval = 100,
+					AutoReset = true,
+				};
+
+				timer.Elapsed += action.Invoke;
+				timer.Start();
+
+				return timer;
 			}
 
 			void ThreadingPolicy.KillTimer(object timerObject)
 			{
+				(timerObject as Timer)?.Dispose();
 			}
 
 			void ThreadingPolicy.Send(APIAction action)
@@ -150,6 +162,7 @@ namespace StockSharp.OpenECry
 				Error = unexpected ? new InvalidOperationException(LocalizedStrings.Str2551) : null
 			});
 
+			DisposeClient();
 			_client = null;
 		}
 
@@ -188,8 +201,74 @@ namespace StockSharp.OpenECry
 		/// </summary>
 		protected override bool IsSupportNativeSecurityLookup => true;
 
-		private void DisposeClient()
+		private bool _isClientSubscribed;
+
+		private void SubscribeClient()
 		{
+			if(_isClientSubscribed)
+				return;
+
+			_isClientSubscribed = true;
+
+			_client.OnLoginComplete += SessionOnLoginComplete;
+			_client.OnLoginFailed += SessionOnLoginFailed;
+			_client.OnDisconnected += SessionOnDisconnected;
+			_client.OnBeginEvents += SessionOnBeginEvents;
+			_client.OnEndEvents += SessionOnEndEvents;
+			_client.OnError += SessionOnError;
+
+			_client.OnAccountRiskLimitChanged += SessionOnAccountRiskLimitChanged;
+			_client.OnAccountSummaryChanged += SessionOnAccountSummaryChanged;
+			_client.OnAllocationBlocksChanged += SessionOnAllocationBlocksChanged;
+			_client.OnAvgPositionChanged += SessionOnAvgPositionChanged;
+			_client.OnBalanceChanged += SessionOnBalanceChanged;
+			_client.OnCommandUpdated += SessionOnCommandUpdated;
+			_client.OnCompoundPositionGroupChanged += SessionOnCompoundPositionGroupChanged;
+			_client.OnOrderConfirmed += SessionOnOrderConfirmed;
+			_client.OnOrderFilled += SessionOnOrderFilled;
+			_client.OnOrderStateChanged += SessionOnOrderStateChanged;
+			_client.OnDetailedPositionChanged += SessionOnDetailedPositionChanged;
+			_client.OnMarginCalculationCompleted += SessionOnMarginCalculationCompleted;
+			_client.OnPortfolioMarginChanged += SessionOnPortfolioMarginChanged;
+			_client.OnPostAllocation += SessionOnPostAllocation;
+			_client.OnRiskLimitDetailsReceived += SessionOnRiskLimitDetailsReceived;
+
+			_client.OnBarsReceived += SessionOnBarsReceived;
+			_client.OnContinuousContractRuleChanged += SessionOnContinuousContractRuleChanged;
+			_client.OnContractChanged += SessionOnContractChanged;
+			_client.OnContractCreated += SessionOnContractCreated;
+			_client.OnContractRiskLimitChanged += SessionOnContractRiskLimitChanged;
+			_client.OnContractsChanged += SessionOnContractsChanged;
+			_client.OnCurrencyPriceChanged += SessionOnCurrencyPriceChanged;
+			_client.OnDOMChanged += SessionOnDomChanged;
+			_client.OnDealQuoteUpdated += SessionOnDealQuoteUpdated;
+			_client.OnHistogramReceived += SessionOnHistogramReceived;
+			_client.OnHistoryReceived += SessionOnHistoryReceived;
+			_client.OnIndexComponentsReceived += SessionOnIndexComponentsReceived;
+			_client.OnLoggedUserClientsChanged += SessionOnLoggedUserClientsChanged;
+			_client.OnNewsMessage += SessionOnNewsMessage;
+			_client.OnOsmAlgoListLoaded += SessionOnOsmAlgoListLoaded;
+			_client.OnOsmAlgoListUpdated += SessionOnOsmAlgoListUpdated;
+			_client.OnPitGroupsChanged += SessionOnPitGroupsChanged;
+			_client.OnPriceChanged += SessionOnPriceChanged;
+			_client.OnPriceTick += SessionOnPriceTick;
+			_client.OnProductCalendarUpdated += SessionOnProductCalendarUpdated;
+			_client.OnQuoteDetailsChanged += SessionOnQuoteDetailsChanged;
+			_client.OnRelationsChanged += SessionOnRelationsChanged;
+			_client.OnSymbolLookupReceived += SessionOnSymbolLookupReceived;
+			_client.OnTicksReceived += SessionOnTicksReceived;
+			_client.OnTradersChanged += SessionOnTradersChanged;
+			_client.OnUserMessage += SessionOnUserMessage;
+			_client.OnUserStatusChanged += SessionOnUserStatusChanged;
+		}
+
+		private void UnsubscribeClient()
+		{
+			if(!_isClientSubscribed)
+				return;
+
+			_isClientSubscribed = false;
+
 			_client.OnLoginComplete -= SessionOnLoginComplete;
 			_client.OnLoginFailed -= SessionOnLoginFailed;
 			_client.OnDisconnected -= SessionOnDisconnected;
@@ -240,7 +319,11 @@ namespace StockSharp.OpenECry
 			_client.OnTradersChanged -= SessionOnTradersChanged;
 			_client.OnUserMessage -= SessionOnUserMessage;
 			_client.OnUserStatusChanged -= SessionOnUserStatusChanged;
+		}
 
+		private void DisposeClient()
+		{
+			UnsubscribeClient();
 			_client.Dispose();
 		}
 
@@ -317,56 +400,7 @@ namespace StockSharp.OpenECry
 						}
 					}
 
-					_client.OnLoginComplete += SessionOnLoginComplete;
-					_client.OnLoginFailed += SessionOnLoginFailed;
-					_client.OnDisconnected += SessionOnDisconnected;
-					_client.OnBeginEvents += SessionOnBeginEvents;
-					_client.OnEndEvents += SessionOnEndEvents;
-					_client.OnError += SessionOnError;
-
-					_client.OnAccountRiskLimitChanged += SessionOnAccountRiskLimitChanged;
-					_client.OnAccountSummaryChanged += SessionOnAccountSummaryChanged;
-					_client.OnAllocationBlocksChanged += SessionOnAllocationBlocksChanged;
-					_client.OnAvgPositionChanged += SessionOnAvgPositionChanged;
-					_client.OnBalanceChanged += SessionOnBalanceChanged;
-					_client.OnCommandUpdated += SessionOnCommandUpdated;
-					_client.OnCompoundPositionGroupChanged += SessionOnCompoundPositionGroupChanged;
-					_client.OnOrderConfirmed += SessionOnOrderConfirmed;
-					_client.OnOrderFilled += SessionOnOrderFilled;
-					_client.OnOrderStateChanged += SessionOnOrderStateChanged;
-					_client.OnDetailedPositionChanged += SessionOnDetailedPositionChanged;
-					_client.OnMarginCalculationCompleted += SessionOnMarginCalculationCompleted;
-					_client.OnPortfolioMarginChanged += SessionOnPortfolioMarginChanged;
-					_client.OnPostAllocation += SessionOnPostAllocation;
-					_client.OnRiskLimitDetailsReceived += SessionOnRiskLimitDetailsReceived;
-
-					_client.OnBarsReceived += SessionOnBarsReceived;
-					_client.OnContinuousContractRuleChanged += SessionOnContinuousContractRuleChanged;
-					_client.OnContractChanged += SessionOnContractChanged;
-					_client.OnContractCreated += SessionOnContractCreated;
-					_client.OnContractRiskLimitChanged += SessionOnContractRiskLimitChanged;
-					_client.OnContractsChanged += SessionOnContractsChanged;
-					_client.OnCurrencyPriceChanged += SessionOnCurrencyPriceChanged;
-					_client.OnDOMChanged += SessionOnDomChanged;
-					_client.OnDealQuoteUpdated += SessionOnDealQuoteUpdated;
-					_client.OnHistogramReceived += SessionOnHistogramReceived;
-					_client.OnHistoryReceived += SessionOnHistoryReceived;
-					_client.OnIndexComponentsReceived += SessionOnIndexComponentsReceived;
-					_client.OnLoggedUserClientsChanged += SessionOnLoggedUserClientsChanged;
-					_client.OnNewsMessage += SessionOnNewsMessage;
-					_client.OnOsmAlgoListLoaded += SessionOnOsmAlgoListLoaded;
-					_client.OnOsmAlgoListUpdated += SessionOnOsmAlgoListUpdated;
-					_client.OnPitGroupsChanged += SessionOnPitGroupsChanged;
-					_client.OnPriceChanged += SessionOnPriceChanged;
-					_client.OnPriceTick += SessionOnPriceTick;
-					_client.OnProductCalendarUpdated += SessionOnProductCalendarUpdated;
-					_client.OnQuoteDetailsChanged += SessionOnQuoteDetailsChanged;
-					_client.OnRelationsChanged += SessionOnRelationsChanged;
-					_client.OnSymbolLookupReceived += SessionOnSymbolLookupReceived;
-					_client.OnTicksReceived += SessionOnTicksReceived;
-					_client.OnTradersChanged += SessionOnTradersChanged;
-					_client.OnUserMessage += SessionOnUserMessage;
-					_client.OnUserStatusChanged += SessionOnUserStatusChanged;
+					SubscribeClient();
 
 					_client.Connect(Address.GetHost(), Address.GetPort(), Login, Password.To<string>(), UseNativeReconnect);
 
@@ -378,7 +412,6 @@ namespace StockSharp.OpenECry
 					if (_client == null)
 						throw new InvalidOperationException(LocalizedStrings.Str1856);
 
-					DisposeClient();
 					_client.Disconnect();
 					break;
 				}

@@ -210,6 +210,8 @@ namespace StockSharp.Algo.Storages
 				GetStorage<ExecutionMessage>(secId, ExecutionTypes.OrderLog)
 					.Load(from, to)
 					.ForEach(RaiseStorageMessage);
+
+				//GetStorage<TimeFrameCandleMessage>(secId, )
 			}
 
 			//_storageRegistry.DefaultDrive.GetCandleTypes();

@@ -1,70 +1,33 @@
 ﻿<Window x:Class="StockSharp.Terminal.MainWindow"
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-		xmlns:xaml="http://schemas.stocksharp.com/xaml"
-		xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
-        xmlns:local="clr-namespace:StockSharp.Terminal.Controls"
-		xmlns:fluent="clr-namespace:Fluent;assembly=Fluent"
+		xmlns:local="clr-namespace:StockSharp.Terminal.Controls"
 		xmlns:loc="clr-namespace:StockSharp.Localization;assembly=StockSharp.Localization"
+		xmlns:xaml="http://schemas.stocksharp.com/xaml"
 		DataContext="{Binding RelativeSource={RelativeSource Self}}"
 		Height="600" Width="800" Title="Trade Terminal (UI test)">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
 
-        <ToolBar Visibility="Collapsed">
-            <Button x:Name="ConnectButton" 
-					Content="{x:Static loc:LocalizedStrings.Connect}"
-					Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.ConnectCommand}" />
-            <Button Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.SettingsCommand}" 
-                    Content="{x:Static loc:LocalizedStrings.Settings}">
-            </Button>
-        </ToolBar>
-        <fluent:Ribbon Grid.Row="0" x:Name="Ribbon" AutomaticStateManagement="True">
-            
-        </fluent:Ribbon>
-        <StackPanel Orientation="Horizontal">
-            <Button Click="BtnAddDocument_Click" Width="90" Height="25" Content="Add work area" HorizontalAlignment="Left" Margin="10, 5" />
-            <ComboBox x:Name="NewControlComboBox" Width="100" Height="25" Text="123" SelectionChanged="ComboBox_SelectionChanged">
-                <ComboBoxItem Content="TradesPanel"/>
-                <ComboBoxItem Content="OrdersPanel"/>
-                <ComboBoxItem Content="SecuritiesPanel"/>
-                <ComboBoxItem Content="Level2Panel"/>
-                <ComboBoxItem Content="NewsPanel"/>
-                <ComboBoxItem Content="PortfoliosPanel"/>
-                <ComboBoxItem Content="CandleChartPanel"/>
-            </ComboBox>
+		<StackPanel Orientation="Horizontal">
+<!--			<Button Click="BtnAddDocument_Click" Width="90" Height="25" Content="Add work area" HorizontalAlignment="Left" Margin="10, 5" />-->
 
-            <Button x:Name="SettingsBtn" Width="80" Height="25" Margin="10,0" Content="{x:Static loc:LocalizedStrings.Settings}" Click="SettingsClick" />
-            <Button x:Name="ConnectBtn" Background="LightPink" Width="100" Height="25" Content="{x:Static loc:LocalizedStrings.Connect}" Click="ConnectClick" />
+			<Button x:Name="SettingsBtn" Width="80" Height="25" Margin="10,0" Content="{x:Static loc:LocalizedStrings.Settings}" Click="SettingsClick" />
+			<Button x:Name="ConnectBtn" Background="LightPink" Width="100" Height="25" Content="{x:Static loc:LocalizedStrings.Connect}" Click="ConnectClick" />
 
-        </StackPanel>
-        <xcad:DockingManager Grid.Row="1" x:Name="DockingManager" ActiveContentChanged="DockingManager_OnActiveContentChanged">
-            <xcad:LayoutRoot>
-                <xcad:LayoutPanel>                    
-                    <xcad:LayoutAnchorablePaneGroup>
-                        <xcad:LayoutAnchorablePane>
-                            
-                        </xcad:LayoutAnchorablePane>
-                    </xcad:LayoutAnchorablePaneGroup>
-                    <xcad:LayoutDocumentPaneGroup>
-                        <xcad:LayoutDocumentPane x:Name="LayoutDocuments">
-                            <xcad:LayoutDocument Title="Work area #1">
-                                <local:WorkAreaControl />
-                            </xcad:LayoutDocument>
-                            <xcad:LayoutDocument Title="Work area #2">
-                                <local:WorkAreaControl />
-                            </xcad:LayoutDocument>
-                            <!--<xcad:LayoutDocument Title="+" x:Name="AddDocumentElement" CanFloat="False" CanClose="False">
-                                <Grid Background="Gray" />
-                            </xcad:LayoutDocument>-->
-                        </xcad:LayoutDocumentPane>
-                    </xcad:LayoutDocumentPaneGroup>
-                </xcad:LayoutPanel>
-            </xcad:LayoutRoot>
-        </xcad:DockingManager>
-    </Grid>
+			<GroupBox Header="Lookup securities" Margin="30,0,0,0">
+				<StackPanel Orientation="Horizontal">
+					<TextBox x:Name="LookupCode" KeyDown="LookupCode_OnKeyDown" Width="150"/>
+					<xaml:SecurityTypeComboBox x:Name="LookupType" Width="70"/>
+					<Button Content="Lookup" Click="LookupButton_OnClick" Margin="10,0"/>
+				</StackPanel>
+			</GroupBox>
+		</StackPanel>
+		
+		<local:WorkAreaControl Grid.Row="1" x:Name="_workAreaControl"/>
+	</Grid>
 </Window>

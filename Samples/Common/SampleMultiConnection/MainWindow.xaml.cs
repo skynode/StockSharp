@@ -64,6 +64,7 @@ namespace SampleMultiConnection
 			_portfoliosWindow.MakeHideable();
 
 			var logManager = new LogManager();
+			logManager.Application.LogLevel = LogLevels.Debug;
 			logManager.Listeners.Add(new FileLogListener("sample.log"));
 
 			var entityRegistry = ConfigManager.GetService<IEntityRegistry>();

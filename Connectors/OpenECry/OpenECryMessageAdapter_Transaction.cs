@@ -61,6 +61,22 @@ namespace StockSharp.OpenECry
 			draft.Comments = message.Comment;
 			draft.Account = _client.Accounts[message.PortfolioName];
 			draft.Contract = _client.Contracts[message.SecurityId.SecurityCode];
+
+			if (draft.Contract == null)
+			{
+				ContractAction(message.SecurityId, 
+					() => { ProcessOrderRegister(message); },
+					() =>
+					{
+						var execMsg = message.ToExecutionMessage();
+						execMsg.Error = new InvalidOperationException($"Contract '{message.SecurityId.SecurityCode}' not found.");
+						execMsg.OrderState = OrderStates.Failed;
+						SendOutMessage(execMsg);
+					});
+
+				return;
+			}
+
 			draft.Route = _client.Routes[message.SecurityId.BoardCode];
 			draft.Side = message.Side.ToOec();
 			draft.Quantity = (int)message.Volume;

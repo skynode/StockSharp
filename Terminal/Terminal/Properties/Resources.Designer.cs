@@ -59,9 +59,9 @@ namespace StockSharp.Terminal.Properties {
                 resourceCulture = value;
             }
         }
-
+        
         /// <summary>
-        ///   Поиск локализованного ресурса типа System.Byte[].
+        ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] StockSharp {
             get {
