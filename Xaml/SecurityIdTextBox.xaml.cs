@@ -92,10 +92,10 @@ namespace StockSharp.Xaml
 				return LocalizedStrings.Str1550;
 
 			if (id.IndexOf('@') == 0)
-				return LocalizedStrings.Str1551;
+				return LocalizedStrings.Str2923;
 
 			if (id.IndexOf('@') == (id.Length - 1))
-				return LocalizedStrings.Str1552;
+				return LocalizedStrings.Str2926;
 
 			return null;
 		}
@@ -108,7 +108,7 @@ namespace StockSharp.Xaml
 
 		private void RefreshId()
 		{
-			Text = Security.Code + "@" + Security.Board;
+			Text = Security.Code + "@" + Security.Board.Code;
 		}
 
 		/// <summary>

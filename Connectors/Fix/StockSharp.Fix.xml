@@ -55,6 +55,21 @@
             FIX protocol format.
             </summary>
     </member>
+    <member name="P:StockSharp.Fix.Dialects.BaseDialect.SecurityLookup">
+      <summary>
+            Supports <see cref="T:StockSharp.Messages.SecurityLookupMessage" />.
+            </summary>
+    </member>
+    <member name="P:StockSharp.Fix.Dialects.BaseDialect.PortfolioLookup">
+      <summary>
+            Supports <see cref="T:StockSharp.Messages.PortfolioLookupMessage" />.
+            </summary>
+    </member>
+    <member name="P:StockSharp.Fix.Dialects.BaseDialect.OrderLookup">
+      <summary>
+            Supports <see cref="T:StockSharp.Messages.OrderStatusMessage" /> for mass orders.
+            </summary>
+    </member>
     <member name="M:StockSharp.Fix.Dialects.BaseDialect.OnRead(StockSharp.Fix.Native.IFixReader,System.String,Ecng.Common.AllocationArray{StockSharp.Messages.Message})">
       <summary>
             Read next message from FIX protocol.
@@ -146,7 +161,7 @@
       <summary>
             Process <see cref="T:StockSharp.Fix.Native.ExecutionReport" /> instance.
             </summary>
-      <param name="execRpt">
+      <param name="report">
         <see cref="T:StockSharp.Fix.Native.ExecutionReport" /> instance.</param>
       <param name="messages">The allocation array.</param>
       <param name="processExecMsg">Post handle an <see cref="T:StockSharp.Messages.ExecutionMessage" /> instance.</param>
@@ -158,14 +173,13 @@
             The default implementation of <see cref="T:StockSharp.Fix.Dialects.IFixDialect" />.
             </summary>
     </member>
-    <member name="M:StockSharp.Fix.Dialects.DefaultDialect.#ctor(System.String,System.String,System.IO.Stream,System.Text.Encoding,Ecng.Common.IncrementalIdGenerator,System.TimeSpan,System.Boolean,System.String,System.Security.SecureString,System.TimeZoneInfo,System.Func{StockSharp.Messages.OrderCondition})">
+    <member name="M:StockSharp.Fix.Dialects.DefaultDialect.#ctor(System.String,System.String,System.IO.Stream,Ecng.Common.IncrementalIdGenerator,System.TimeSpan,System.Boolean,System.String,System.Security.SecureString,System.TimeZoneInfo,System.Func{StockSharp.Messages.OrderCondition})">
       <summary>
             Initializes a new instance of the <see cref="T:StockSharp.Fix.Dialects.DefaultDialect" />.
             </summary>
       <param name="senderCompId">Sender ID.</param>
       <param name="targetCompId">Target ID.</param>
       <param name="stream">Stream.</param>
-      <param name="encoding">Encoding.</param>
       <param name="idGenerator">Sequence id generator.</param>
       <param name="heartbeatInterval">Heartbeat interval.</param>
       <param name="isResetCounter">Should the number counter be cleared.</param>
@@ -222,6 +236,21 @@
     <member name="P:StockSharp.Fix.Dialects.IFixDialect.Reader">
       <summary>
             The reader of data recorded in the FIX protocol format.
+            </summary>
+    </member>
+    <member name="P:StockSharp.Fix.Dialects.IFixDialect.SecurityLookup">
+      <summary>
+            Supports <see cref="T:StockSharp.Messages.SecurityLookupMessage" />.
+            </summary>
+    </member>
+    <member name="P:StockSharp.Fix.Dialects.IFixDialect.PortfolioLookup">
+      <summary>
+            Supports <see cref="T:StockSharp.Messages.PortfolioLookupMessage" />.
+            </summary>
+    </member>
+    <member name="P:StockSharp.Fix.Dialects.IFixDialect.OrderLookup">
+      <summary>
+            Supports <see cref="T:StockSharp.Messages.OrderStatusMessage" /> for mass orders.
             </summary>
     </member>
     <member name="M:StockSharp.Fix.Dialects.IFixDialect.Write(StockSharp.Messages.Message)">
@@ -2410,6 +2439,54 @@
       <summary>
       </summary>
     </member>
+    <member name="T:StockSharp.Fix.Native.MassCancelResponse">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelRequestRejected">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelOrdersForASecurity">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelOrdersForAnUnderlyingSecurity">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelOrdersForAProduct">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelOrdersForACficode">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelOrdersForASecuritytype">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelOrdersForATradingSession">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelAllOrders">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelOrdersForAMarket">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelOrdersForAMarketSegment">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.MassCancelResponse.CancelOrdersForASecurityGroup">
+      <summary>
+      </summary>
+    </member>
     <member name="T:StockSharp.Fix.Native.PosReqType">
       <summary>
       </summary>
@@ -3326,6 +3403,34 @@
       <summary>
       </summary>
     </member>
+    <member name="T:StockSharp.Fix.Native.TrdRegTimestampType">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.TrdRegTimestampType.ExecutionTime">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.TrdRegTimestampType.TimeIn">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.TrdRegTimestampType.TimeOut">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.TrdRegTimestampType.BrokerReceipt">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.TrdRegTimestampType.BrokerExecution">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.TrdRegTimestampType.DeskReceipt">
+      <summary>
+      </summary>
+    </member>
     <member name="T:StockSharp.Fix.Native.ExecutionReport">
       <summary>
             Execution report.
@@ -3353,11 +3458,28 @@
     </member>
     <member name="F:StockSharp.Fix.Native.ExecutionReport.OrderQty">
       <summary>
-      </summary>
+            Quantity ordered. This represents the number of shares for equities or par, face or nominal value for FI instruments.
+            </summary>
     </member>
     <member name="F:StockSharp.Fix.Native.ExecutionReport.LeavesQty">
       <summary>
-      </summary>
+            Quantity open for further execution.
+            </summary>
+    </member>
+    <member name="P:StockSharp.Fix.Native.ExecutionReport.CumQty">
+      <summary>
+            Total quantity (e.g. number of shares) filled.
+            </summary>
+    </member>
+    <member name="P:StockSharp.Fix.Native.ExecutionReport.TrdRegTimestamp">
+      <summary>
+            Traded / Regulatory timestamp value.
+            </summary>
+    </member>
+    <member name="P:StockSharp.Fix.Native.ExecutionReport.TrdRegTimestampType">
+      <summary>
+            Traded / Regulatory timestamp type.
+            </summary>
     </member>
     <member name="F:StockSharp.Fix.Native.ExecutionReport.Price">
       <summary>
@@ -3434,6 +3556,10 @@
       <summary>
             Date of order expiration (last day the order can trade), always expressed in terms of the local market date.
             </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.ExecutionReport.ExpireTime">
+      <summary>
+      </summary>
     </member>
     <member name="F:StockSharp.Fix.Native.ExecutionReport.LastPx">
       <summary>
@@ -4193,6 +4319,18 @@
       <summary>
       </summary>
     </member>
+    <member name="F:StockSharp.Fix.Native.FixTags.NoTrdRegTimestamps">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.FixTags.TrdRegTimestamp">
+      <summary>
+      </summary>
+    </member>
+    <member name="F:StockSharp.Fix.Native.FixTags.TrdRegTimestampType">
+      <summary>
+      </summary>
+    </member>
     <member name="F:StockSharp.Fix.Native.FixTags.NextExpectedMsgSeqNum">
       <summary>
       </summary>
@@ -4765,6 +4903,11 @@
             </summary>
       <returns>Order condition. If the connection does not support the order type <see cref="F:StockSharp.Messages.OrderTypes.Conditional" />, it will be returned <see langword="null" />.</returns>
     </member>
+    <member name="P:StockSharp.Fix.FixMessageAdapter.OrderStatusRequired">
+      <summary>
+        <see cref="T:StockSharp.Messages.OrderStatusMessage" /> required to get orders and ow trades.
+            </summary>
+    </member>
     <member name="P:StockSharp.Fix.FixMessageAdapter.SecurityLookupRequired">
       <summary>
         <see cref="T:StockSharp.Messages.SecurityLookupMessage" /> required to get securities.
@@ -4827,11 +4970,6 @@
     <member name="P:StockSharp.Fix.FixMessageAdapter.RequestAllSecurities">
       <summary>
             Request all securities on connection.
-            </summary>
-    </member>
-    <member name="P:StockSharp.Fix.FixMessageAdapter.Encoding">
-      <summary>
-            The encoding used for data transmission. The default value is <see cref="P:System.Text.Encoding.UTF8" />.
             </summary>
     </member>
     <member name="P:StockSharp.Fix.FixMessageAdapter.IsResetCounter">
