@@ -38,6 +38,8 @@ namespace StockSharp.Terminal.Services {
 			msg.From = series.From;
 			msg.Arg = (TimeSpan)series.Arg;
 
+			_lastCandles.Remove(Tuple.Create(msg.SecurityId, msg.Arg));
+
 			SendInMessage(msg);
 
 			SubscribeMarketData(series.Security, MarketDataTypes.CandleTimeFrame);
@@ -56,7 +58,7 @@ namespace StockSharp.Terminal.Services {
 			msg.DataType = MarketDataTypes.CandleTimeFrame;
 			msg.IsSubscribe = false;
 			msg.From = tuple.Item1;
-			msg.Arg = TimeSpan.FromMinutes(5);
+			msg.Arg = msg.Arg;
 
 			SendInMessage(msg);
 

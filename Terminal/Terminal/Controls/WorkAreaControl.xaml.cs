@@ -157,8 +157,14 @@ namespace StockSharp.Terminal.Controls
 
 		void ResetChart()
 		{
-			if (_candleElement != null)
-				new ChartRemoveElementCommand(_chartArea, _candleElement).Process(this);
+			if (_chartArea != null)
+			{
+				if (_candleElement != null)
+					new ChartRemoveElementCommand(_chartArea, _candleElement).Process(this);
+
+				new ChartRemoveAreaCommand(_chartArea).Process(this);
+				_chartArea = null;
+			}
 		}
 
 		void ResetMarketDepth()
