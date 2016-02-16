@@ -15,6 +15,7 @@ Copyright 2010 by StockSharp, LLC
 #endregion S# License
 
 using System.Threading;
+using StockSharp.Logging;
 
 namespace StockSharp.OpenECry
 {
@@ -35,7 +36,9 @@ namespace StockSharp.OpenECry
 
 	partial class OpenECryMessageAdapter
 	{
-		private readonly SynchronizedPairSet<Tuple<SecurityId, MarketDataTypes, long>, Subscription> _subscriptions = new SynchronizedPairSet<Tuple<SecurityId, MarketDataTypes, long>, Subscription>();
+		private readonly SynchronizedDictionary<int, Tuple<SecurityId, MarketDataTypes, long>> _subscriptionDataBySid = new SynchronizedDictionary<int, Tuple<SecurityId, MarketDataTypes, long>>();
+		private readonly SynchronizedDictionary<Tuple<SecurityId, MarketDataTypes, object>, Subscription> _subscriptionsByKey = new SynchronizedDictionary<Tuple<SecurityId, MarketDataTypes, object>, Subscription>();
+
 		private readonly SynchronizedPairSet<int, Action<ContractList>> _lookups = new SynchronizedPairSet<int, Action<ContractList>>();
 
 		private void ContractAction(SecurityId id, Action onSuccess, Action onError)
@@ -65,9 +68,7 @@ namespace StockSharp.OpenECry
 
 		private void ProcessMarketDataMessage(MarketDataMessage message)
 		{
-			var key = message.IsSubscribe ? 
-				Tuple.Create(message.SecurityId, message.DataType, message.TransactionId) : 
-				Tuple.Create(message.SecurityId, message.DataType, message.OriginalTransactionId);
+			var key = Tuple.Create(message.SecurityId, message.DataType, message.Arg);
 			var contract = _client.Contracts[message.SecurityId.SecurityCode];
 
 			if (contract == null)
@@ -104,10 +105,11 @@ namespace StockSharp.OpenECry
 					if (message.IsSubscribe)
 					{
 						var subscription = _client.SubscribeTicks(contract, (message.From ?? DateTimeOffset.MinValue).UtcDateTime);
-						_subscriptions.Add(key, subscription);
+						_subscriptionDataBySid.Add(subscription.ID, Tuple.Create(message.SecurityId, message.DataType, message.TransactionId));
+						_subscriptionsByKey.Add(key, subscription);
 					}
 					else
-						_client.CancelSubscription(_subscriptions[key]);
+						CancelSubscription(key);
 
 					break;
 				}
@@ -185,10 +187,11 @@ namespace StockSharp.OpenECry
 							? _client.SubscribeBars(contract, (message.From ?? DateTimeOffset.MinValue).UtcDateTime, subscriptionType, interval, false)
 							: _client.SubscribeBars(contract, (int)message.Count.Value, subscriptionType, interval, false);
 
-						_subscriptions.Add(key, subscription);
+						_subscriptionDataBySid.Add(subscription.ID, Tuple.Create(message.SecurityId, message.DataType, message.TransactionId));
+						_subscriptionsByKey.Add(key, subscription);
 					}
 					else
-						_client.CancelSubscription(_subscriptions[key]);
+						CancelSubscription(key);
 
 					break;
 				}
@@ -197,6 +200,19 @@ namespace StockSharp.OpenECry
 			}
 
 			SendOutMessage(new MarketDataMessage { OriginalTransactionId = message.TransactionId });
+		}
+
+		private void CancelSubscription(Tuple<SecurityId, MarketDataTypes, object> key)
+		{
+			var s = _subscriptionsByKey.TryGetValue(key);
+
+			if (s != null)
+			{
+				_client.CancelSubscription(s);
+				_subscriptionsByKey.Remove(key);
+			}
+			else
+				this.AddErrorLog($"Subscription not found: {key}");
 		}
 
 		private void ProcessSecurityLookup(SecurityLookupMessage message)
@@ -582,10 +598,10 @@ namespace StockSharp.OpenECry
 
 		private void ProcessBars(Subscription subscription, OEC.API.Bar[] bars, bool setFinished)
 		{
-			var key = _subscriptions.TryGetKey(subscription);
+			var tuple = _subscriptionDataBySid.TryGetValue(subscription.ID);
 
-			var candleType = key?.Item2.ToCandleMessage() ?? typeof(TimeFrameCandleMessage);
-			var transId = key?.Item3 ?? 0;
+			var candleType = tuple?.Item2.ToCandleMessage() ?? typeof(TimeFrameCandleMessage);
+			var transId = tuple?.Item3 ?? 0;
 
 			var contract = subscription.Contract;
 

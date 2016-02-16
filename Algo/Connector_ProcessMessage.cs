@@ -165,47 +165,15 @@ namespace StockSharp.Algo
 		/// </summary>
 		protected virtual bool RaiseConnectedOnFirstAdapter => true;
 
-		private IMessageChannel _outMessageChannel;
-
 		/// <summary>
 		/// Outgoing message channel.
 		/// </summary>
-		public IMessageChannel OutMessageChannel
-		{
-			get { return _outMessageChannel; }
-			protected set
-			{
-				if (value == null)
-					throw new ArgumentNullException();
-
-				if (value == _outMessageChannel)
-					return;
-
-				if (_outMessageChannel != null)
-					_outMessageChannel.NewOutMessage -= OutMessageChannelOnNewOutMessage;
-
-				_outMessageChannel = value;
-
-				_outMessageChannel.NewOutMessage += OutMessageChannelOnNewOutMessage;
-			}
-		}
-
-		private IMessageChannel _inMessageChannel;
+		public IMessageChannel OutMessageChannel {get;}
 
 		/// <summary>
 		/// Input message channel.
 		/// </summary>
-		public IMessageChannel InMessageChannel
-		{
-			get { return _inMessageChannel; }
-			protected set
-			{
-				if (value == null)
-					throw new ArgumentNullException();
-
-				_inMessageChannel = value;
-			}
-		}
+		public IMessageChannel InMessageChannel {get;}
 
 		private void OutMessageChannelOnNewOutMessage(Message message)
 		{
@@ -235,7 +203,7 @@ namespace StockSharp.Algo
 					_adapter.InnerAdapters.Removed -= InnerAdaptersOnRemoved;
 					_adapter.InnerAdapters.Cleared -= InnerAdaptersOnCleared;
 
-					_inAdapter.NewOutMessage -= AdapterOnNewOutMessage;
+					_inAdapter.NewOutMessage -= OutMessageChannelOnNewOutMessage;
 
 					SendInMessage(new ResetMessage());
 
@@ -250,6 +218,11 @@ namespace StockSharp.Algo
 
 				if (_adapter != null)
 				{
+					_inAdapter = new ChannelMessageAdapter(_inAdapter, new PassThroughMessageChannel(), OutMessageChannel)
+					{
+						OwnOutputChannel = true
+					};
+
 					if (LatencyManager != null)
 						_inAdapter = new LatencyMessageAdapter(_inAdapter) { LatencyManager = LatencyManager };
 
@@ -273,11 +246,11 @@ namespace StockSharp.Algo
 						OwnInputChannel = true
 					};
 
+					_inAdapter.NewOutMessage += OutMessageChannelOnNewOutMessage;
+
 					_adapter.InnerAdapters.Added += InnerAdaptersOnAdded;
 					_adapter.InnerAdapters.Removed += InnerAdaptersOnRemoved;
 					_adapter.InnerAdapters.Cleared += InnerAdaptersOnCleared;
-
-					_inAdapter.NewOutMessage += AdapterOnNewOutMessage;
 
 					_adapter.Parent = this;
 				}

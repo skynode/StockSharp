@@ -227,11 +227,6 @@ namespace StockSharp.Terminal.Services
 			if (listener == null)
 				throw new ArgumentNullException(nameof(listener));
 
-			var sc = listener as StrategyContainer;
-
-			if (sc != null)
-				listener = sc.Strategy;
-
 			return _scopes.SafeAdd(listener, InternalGetScope);
 		}
 
@@ -249,6 +244,8 @@ namespace StockSharp.Terminal.Services
 
 			if (scope != null)
 				return scope;
+
+			return _globalScope; // todo fix problem with undefined scope
 
 			var ctrl = listener as DependencyObject;
 

@@ -17,15 +17,19 @@ Copyright 2010 by StockSharp, LLC
 using System;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using StockSharp.Logging;
 using Ecng.Configuration;
 using Ecng.Serialization;
 using Ecng.Common;
+using Ecng.ComponentModel;
 using Ecng.Localization;
 using Ecng.Xaml;
+using MoreLinq;
 using StockSharp.BusinessEntities;
 using StockSharp.Localization;
+using StockSharp.Studio.Controls;
 using StockSharp.Studio.Core.Commands;
 using StockSharp.Terminal.Services;
 
@@ -37,6 +41,25 @@ namespace StockSharp.Terminal
 		private readonly ConnectorService _connectorService;
 
 		public static MainWindow Instance { get; private set; }
+
+		public static readonly DependencyProperty IsConnectedProperty = DependencyProperty.Register("IsConnected", typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
+
+		public bool IsConnected
+		{
+			get { return (bool)GetValue(IsConnectedProperty); }
+			set { SetValue(IsConnectedProperty, value); }
+		}
+
+		public static readonly Type[] ControlTypes = {
+			typeof(TradesPanel),
+			typeof(MyTradesTable),
+			typeof(OrdersPanel),
+			typeof(SecuritiesPanel),
+			typeof(ScalpingMarketDepthControl),
+			typeof(NewsPanel),
+			typeof(PortfoliosPanel),
+			typeof(CandleChartPanel),
+		};
 
 		public MainWindow()
 		{
@@ -70,6 +93,12 @@ namespace StockSharp.Terminal
 				new XmlSerializer<SettingsStorage>().Serialize(_workAreaControl.Save(), LayoutFile);
 			};
 
+			ControlTypes.ForEach(t => NewControlComboBox.Items.Add(new ComboBoxItem
+			{
+				Content = t.GetDisplayName(),
+				Tag = t
+			}));
+
 			WindowState = WindowState.Maximized;
 
 			try
@@ -99,7 +128,7 @@ namespace StockSharp.Terminal
 
 		private void ChangeConnectStatusEvent(bool isConnected)
 		{
-			this.GuiAsync(() => ConnectBtn.Content = isConnected ? LocalizedStrings.Disconnect : LocalizedStrings.Connect);
+			this.GuiAsync(() => IsConnected = isConnected);
 		}
 
 		private void OnError(string message, string caption)
@@ -125,6 +154,20 @@ namespace StockSharp.Terminal
 				Code = LookupCode.Text.Trim(),
 				Type = LookupType.SelectedType,
 			}).Process(this);
+		}
+
+		private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if(NewControlComboBox.SelectedIndex == -1)
+				return;
+
+			var controlType = ((ComboBoxItem) NewControlComboBox.SelectedItem).Tag as Type;
+			if(controlType == null)
+				return;
+
+			_workAreaControl.HandleNewPanelSelection(controlType);
+
+			NewControlComboBox.SelectedIndex = -1;
 		}
 	}
 }

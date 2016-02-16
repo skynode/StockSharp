@@ -326,6 +326,8 @@ namespace StockSharp.Messages
 					case MessageTypes.OrderRegister:
 					{
 						var execMsg = ((OrderRegisterMessage)message).ToExecutionMessage();
+						if(execMsg.ServerTime.IsDefault())
+								execMsg.ServerTime = CurrentTime;
 						execMsg.Error = ex;
 						execMsg.OrderState = OrderStates.Failed;
 						SendOutMessage(execMsg);
@@ -336,6 +338,8 @@ namespace StockSharp.Messages
 					case MessageTypes.OrderReplace:
 					{
 						var execMsg = ((OrderReplaceMessage)message).ToExecutionMessage();
+						if(execMsg.ServerTime.IsDefault())
+								execMsg.ServerTime = CurrentTime;
 						execMsg.Error = ex;
 						execMsg.OrderState = OrderStates.Failed;
 						SendOutMessage(execMsg);
@@ -346,6 +350,8 @@ namespace StockSharp.Messages
 					case MessageTypes.OrderPairReplace:
 					{
 						var execMsg = ((OrderPairReplaceMessage)message).ToExecutionMessage();
+						if(execMsg.ServerTime.IsDefault())
+								execMsg.ServerTime = CurrentTime;
 						execMsg.Error = ex;
 						execMsg.OrderState = OrderStates.Failed;
 						SendOutMessage(execMsg);
@@ -356,6 +362,8 @@ namespace StockSharp.Messages
 					case MessageTypes.OrderCancel:
 					{
 						var execMsg = ((OrderCancelMessage)message).ToExecutionMessage();
+						if(execMsg.ServerTime.IsDefault())
+								execMsg.ServerTime = CurrentTime;
 						execMsg.Error = ex;
 						execMsg.OrderState = OrderStates.Failed;
 						SendOutMessage(execMsg);
@@ -366,6 +374,8 @@ namespace StockSharp.Messages
 					case MessageTypes.OrderGroupCancel:
 					{
 						var execMsg = ((OrderGroupCancelMessage)message).ToExecutionMessage();
+						if(execMsg.ServerTime.IsDefault())
+								execMsg.ServerTime = CurrentTime;
 						execMsg.Error = ex;
 						execMsg.OrderState = OrderStates.Failed;
 						SendOutMessage(execMsg);

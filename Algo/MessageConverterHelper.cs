@@ -306,6 +306,9 @@ namespace StockSharp.Algo
 				Currency = order.Currency,
 			};
 
+			if(message.ServerTime.IsDefault())
+				message.ServerTime = DateTimeOffset.Now;
+
 			return message;
 		}
 

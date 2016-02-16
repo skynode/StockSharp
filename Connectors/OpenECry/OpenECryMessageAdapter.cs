@@ -337,7 +337,8 @@ namespace StockSharp.OpenECry
 			{
 				case MessageTypes.Reset:
 				{
-					_subscriptions.Clear();
+					_subscriptionDataBySid.Clear();
+					_subscriptionsByKey.Clear();
 
 					if (_client != null)
 					{
@@ -363,7 +364,8 @@ namespace StockSharp.OpenECry
 					if (_client != null)
 						throw new InvalidOperationException(LocalizedStrings.Str1619);
 
-					_subscriptions.Clear();
+					_subscriptionDataBySid.Clear();
+					_subscriptionsByKey.Clear();
 
 					switch (Remoting)
 					{

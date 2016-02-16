@@ -58,7 +58,7 @@ namespace StockSharp.Terminal.Services {
 			msg.DataType = MarketDataTypes.CandleTimeFrame;
 			msg.IsSubscribe = false;
 			msg.From = tuple.Item1;
-			msg.Arg = msg.Arg;
+			msg.Arg = series.Arg;
 
 			SendInMessage(msg);
 

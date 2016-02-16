@@ -6,6 +6,7 @@
 			 xmlns:controls="clr-namespace:StockSharp.Studio.Controls;assembly=StockSharp.Studio.Controls"
 			 xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
 			 xmlns:loc="clr-namespace:StockSharp.Localization;assembly=StockSharp.Localization"
+			DataContext="{Binding RelativeSource={RelativeSource Self}}"
 			 mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="600">
 
 	<Grid>
@@ -13,11 +14,6 @@
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
-
-		<StackPanel Orientation="Horizontal" Margin="10,3">
-			<TextBlock VerticalAlignment="Center"><Run Text="{x:Static loc:LocalizedStrings.Str3229}"/><Run Text=": "/></TextBlock>
-			<ComboBox x:Name="NewControlComboBox" Width="120" SelectionChanged="ComboBox_SelectionChanged"/>
-		</StackPanel>
 
 		<xcad:DockingManager Grid.Row="1" x:Name="DockingManager">
 			<xcad:LayoutRoot>

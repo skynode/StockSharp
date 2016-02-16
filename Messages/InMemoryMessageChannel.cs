@@ -61,6 +61,7 @@ namespace StockSharp.Messages
 		}
 
 		private readonly Action<Exception> _errorHandler;
+		private readonly Action<Message> _initMessage;
 		private readonly BlockingPriorityQueue _messageQueue = new BlockingPriorityQueue();
 
 		/// <summary>
@@ -68,7 +69,7 @@ namespace StockSharp.Messages
 		/// </summary>
 		/// <param name="name">Channel name.</param>
 		/// <param name="errorHandler">Error handler.</param>
-		public InMemoryMessageChannel(string name, Action<Exception> errorHandler)
+		public InMemoryMessageChannel(string name, Action<Exception> errorHandler, Action<Message> initMessage = null)
 		{
 			if (name.IsEmpty())
 				throw new ArgumentNullException(nameof(name));
@@ -79,6 +80,7 @@ namespace StockSharp.Messages
 			Name = name;
 
 			_errorHandler = errorHandler;
+			_initMessage = initMessage;
 			_messageQueue.Close();
 		}
 
@@ -173,6 +175,8 @@ namespace StockSharp.Messages
 
 			//if (!(message is TimeMessage) && message.GetType().Name != "BasketMessage")
 			//	Console.WriteLine(">> ({0}) {1}", System.Threading.Thread.CurrentThread.Name, message);
+
+			_initMessage?.Invoke(message);
 
 			_msgStat.Add(message);
 			_messageQueue.Enqueue(new KeyValuePair<DateTimeOffset, Message>(message.LocalTime, message));

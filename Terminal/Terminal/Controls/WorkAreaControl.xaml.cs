@@ -17,7 +17,6 @@ Copyright 2010 by StockSharp, LLC
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Controls;
 using Ecng.Common;
 using Ecng.ComponentModel;
 using Ecng.Configuration;
@@ -47,24 +46,6 @@ namespace StockSharp.Terminal.Controls
 			InitializeComponent();
 
 			_layoutManager = new LayoutManager(DockingManager);
-
-			var types = new[]
-			{
-				typeof(TradesPanel),
-				typeof(MyTradesTable),
-				typeof(OrdersPanel),
-				typeof(SecuritiesPanel),
-				typeof(ScalpingMarketDepthControl),
-				typeof(NewsPanel),
-				typeof(PortfoliosPanel),
-				typeof(CandleChartPanel),
-			};
-
-			types.ForEach(t => NewControlComboBox.Items.Add(new ComboBoxItem
-			{
-				Content = t.GetDisplayName(),
-				Tag = t
-			}));
 		}
 
 		private void InitializeCommands()
@@ -106,14 +87,8 @@ namespace StockSharp.Terminal.Controls
 			});
 		}
 
-		private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		public void HandleNewPanelSelection(Type controlType)
 		{
-			if(NewControlComboBox.SelectedIndex == -1)
-				return;
-
-			var controlType = ((ComboBoxItem) NewControlComboBox.SelectedItem).Tag as Type;
-			NewControlComboBox.SelectedIndex = -1;
-
 			if(controlType == null || !typeof(BaseStudioControl).IsAssignableFrom(controlType))
 				return;
 

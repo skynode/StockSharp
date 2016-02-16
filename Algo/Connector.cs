@@ -237,7 +237,11 @@ namespace StockSharp.Algo
 			_connectorStat.Add(this);
 
 			InMessageChannel = new InMemoryMessageChannel("Connector In", RaiseError);
-			OutMessageChannel = new InMemoryMessageChannel("Connector Out", RaiseError);
+			OutMessageChannel = new InMemoryMessageChannel("Connector Out", RaiseError, message =>
+			{
+				if (message.LocalTime.IsDefault())
+					message.LocalTime = CurrentTime;
+			});
 
 			Adapter = new BasketMessageAdapter(new MillisecondIncrementalIdGenerator());
 		}
