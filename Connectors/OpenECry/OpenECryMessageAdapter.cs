@@ -339,6 +339,7 @@ namespace StockSharp.OpenECry
 				{
 					_subscriptionDataBySid.Clear();
 					_subscriptionsByKey.Clear();
+					_processedSecurities.Clear();
 
 					if (_client != null)
 					{

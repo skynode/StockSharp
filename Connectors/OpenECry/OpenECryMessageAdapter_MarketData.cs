@@ -38,6 +38,7 @@ namespace StockSharp.OpenECry
 	{
 		private readonly SynchronizedDictionary<int, Tuple<SecurityId, MarketDataTypes, long>> _subscriptionDataBySid = new SynchronizedDictionary<int, Tuple<SecurityId, MarketDataTypes, long>>();
 		private readonly SynchronizedDictionary<Tuple<SecurityId, MarketDataTypes, object>, Subscription> _subscriptionsByKey = new SynchronizedDictionary<Tuple<SecurityId, MarketDataTypes, object>, Subscription>();
+		private readonly SynchronizedSet<SecurityId> _processedSecurities = new SynchronizedSet<SecurityId>();
 
 		private readonly SynchronizedPairSet<int, Action<ContractList>> _lookups = new SynchronizedPairSet<int, Action<ContractList>>();
 
@@ -332,9 +333,14 @@ namespace StockSharp.OpenECry
 
 		private void ProcessContract(OEC.API.Contract contract, long originalTransactionId)
 		{
+			var id = contract.ToSecurityId();
+
+			if (!_processedSecurities.TryAdd(id))
+				return;
+
 			SendOutMessage(new SecurityMessage
 			{
-				SecurityId = contract.ToSecurityId(),
+				SecurityId = id,
 				Name = contract.Name,
 				UnderlyingSecurityCode = contract.BaseSymbol,
 				Currency = contract.Currency.Name.ToCurrency(),
