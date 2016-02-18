@@ -238,7 +238,7 @@ namespace StockSharp.Algo.Candles
 			if (Security != null)
 				storage.SetValue("SecurityId", Security.Id);
 
-			storage.SetValue("CandleType", CandleType.GetTypeName(false));
+			storage.SetValue("CandleType", CandleType?.GetTypeName(false));
 			storage.SetValue("Arg", Arg);
 
 			storage.SetValue("From", From);

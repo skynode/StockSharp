@@ -308,6 +308,14 @@ namespace StockSharp.Studio.Controls
 			});
 			cmdSvc.Register<ResetedCommand>(this, false, cmd => new RequestMarketDataCommand(Settings.Security, MarketDataTypes.MarketDepth).Process(this));
 
+			cmdSvc.Register<SelectCommand>(this, true, cmd =>
+			{
+				if(Settings.Security != null)
+					return;
+
+				Settings.Security = cmd.Instance as Security;
+			});
+
 			WhenLoaded(() =>
 			{
 				_isLoaded = true;
@@ -401,6 +409,7 @@ namespace StockSharp.Studio.Controls
 			cmdSvc.UnRegister<ClearMarketDepthCommand>(this);
 			cmdSvc.UnRegister<OrderCommand>(this);
 			cmdSvc.UnRegister<ResetedCommand>(this);
+			cmdSvc.UnRegister<SelectCommand>(this);
 		}
 
 		public override void Save(SettingsStorage settings)

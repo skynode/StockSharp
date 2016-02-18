@@ -129,6 +129,7 @@
       <DependentUpon>WorkAreaControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Layout\LayoutKeys.cs" />
+    <Compile Include="Services\TerminalCandleBuilder.cs" />
     <Compile Include="Services\TerminalCommandService.cs" />
     <Compile Include="Services\TerminalConnector.cs" />
     <Page Include="Controls\WorkAreaControl.xaml">
