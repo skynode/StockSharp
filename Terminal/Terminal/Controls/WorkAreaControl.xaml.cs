@@ -35,7 +35,7 @@ namespace StockSharp.Terminal.Controls
 			InitializeCommands();
 			InitializeComponent();
 
-			_layoutManager = new LayoutManager(DockingManager);
+			_layoutManager = new LayoutManager(DockManager);
 		}
 
 		private void InitializeCommands()

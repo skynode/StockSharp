@@ -131,7 +131,8 @@ namespace StockSharp.Studio.Controls
 		{
 			base.Save(storage);
 
-			storage.SetValue(nameof(Series), Series.Save());
+			if(Series != null)
+				storage.SetValue(nameof(Series), Series.Save());
 			storage.SetValue(nameof(ChartPanel), ChartPanel.Save());
 		}
 
