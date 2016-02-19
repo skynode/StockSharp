@@ -35,6 +35,7 @@ using StockSharp.BusinessEntities;
 using StockSharp.Localization;
 using StockSharp.Studio.Controls;
 using StockSharp.Studio.Core.Commands;
+using StockSharp.Terminal.Controls;
 using StockSharp.Terminal.Services;
 
 namespace StockSharp.Terminal
@@ -147,24 +148,12 @@ namespace StockSharp.Terminal
 			this.GuiAsync(() => MessageBox.Show(this, message, caption));
 		}
 
-		private void LookupCode_OnKeyDown(object sender, KeyEventArgs e)
-		{
-			if(e.Key == Key.Enter)
-				LookupSecurities();
-		}
-
 		private void LookupButton_OnClick(object sender, RoutedEventArgs e)
 		{
-			LookupSecurities();
-		}
+			var w = new FindSecurityWindow();
 
-		private void LookupSecurities()
-		{
-//			new LookupSecuritiesCommand(new Security
-//			{
-//				Code = LookupCode.Text.Trim(),
-//				Type = LookupType.SelectedType,
-//			}).Process(this);
+			if(w.ShowModal())
+				new LookupSecuritiesCommand(w.Criteria).Process(this);
 		}
 
 		private void OnCreateWindowClick(Type ctlType)

@@ -19,13 +19,10 @@
 		xmlns:ribbon="http://schemas.devexpress.com/winfx/2008/xaml/ribbon">
 
 	<DockPanel>
-		<dxr:RibbonControl DockPanel.Dock="Top" RibbonStyle="OfficeSlim" ToolbarShowMode="ShowAbove" ShowApplicationButton="False">
+		<dxr:RibbonControl DockPanel.Dock="Top" RibbonStyle="OfficeSlim" ToolbarShowMode="Hide" ShowApplicationButton="False">
 			<ribbon:RibbonControl.ApplicationMenu>
 				<ribbon:ApplicationMenu/>
 			</ribbon:RibbonControl.ApplicationMenu>
-			<dxr:RibbonControl.ToolbarItems>
-				<dxb:BarButtonItemLink BarItemName="biConnect"/>
-			</dxr:RibbonControl.ToolbarItems>
 			<dxr:RibbonDefaultPageCategory>
 				<dxr:RibbonPage Caption="Main">
 					<dxr:RibbonPageGroup>
@@ -46,8 +43,7 @@
 						<dxb:BarButtonItem ItemClick="SettingsClick" Glyph="img/Settings_24x24.png" Content="{x:Static loc:LocalizedStrings.Settings}"/>
 						<dxb:BarButtonItem Content="{x:Static loc:LocalizedStrings.Str3657}" Glyph="{dx:DXImage Image=Find_16x16.png}" LargeGlyph="{dx:DXImage Image=Find_32x32.png}" ItemClick="LookupButton_OnClick"/>
 					</dxr:RibbonPageGroup>
-					<dxr:RibbonPageGroup x:Name="_ribbonGroupWindows">
-					</dxr:RibbonPageGroup>
+					<dxr:RibbonPageGroup x:Name="_ribbonGroupWindows"/>
 				</dxr:RibbonPage>
 			</dxr:RibbonDefaultPageCategory>
 		</dxr:RibbonControl>

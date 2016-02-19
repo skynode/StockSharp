@@ -138,6 +138,9 @@
     <Compile Include="..\..\StockSharpAssemblyInfo.cs">
       <Link>Properties\StockSharpAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Controls\FindSecurityWindow.xaml.cs">
+      <DependentUpon>FindSecurityWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Interfaces\ITerminalCommandService.cs" />
     <Compile Include="Services\ConnectorService.cs" />
     <Compile Include="Layout\LayoutManager.cs" />
@@ -148,6 +151,10 @@
     <Compile Include="Services\TerminalCandleBuilder.cs" />
     <Compile Include="Services\TerminalCommandService.cs" />
     <Compile Include="Services\TerminalConnector.cs" />
+    <Page Include="Controls\FindSecurityWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\WorkAreaControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
