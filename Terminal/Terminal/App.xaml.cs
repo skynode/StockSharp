@@ -26,5 +26,16 @@ namespace StockSharp.Terminal
 			MessageBox.Show(MainWindow, e.Exception.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			e.Handled = true;
 		}
+
+		private void App_OnStartup(object sender, StartupEventArgs e)
+		{
+            DevExpress.Xpf.Docking.DockLayoutManagerParameters.DockingItemIntervalHorz = 1;
+            DevExpress.Xpf.Docking.DockLayoutManagerParameters.DockingItemIntervalVert = 1;
+	        DevExpress.Xpf.Docking.DockLayoutManagerParameters.DockingRootMargin = new Thickness(0);
+
+			//DevExpress.Xpf.Core.ThemeManager.ApplicationThemeName = DevExpress.Xpf.Core.Theme.DXStyleName;
+			//DevExpress.Xpf.Core.ThemeManager.ApplicationThemeName = DevExpress.Xpf.Core.Theme.Office2010BlackName;
+			//DevExpress.Xpf.Core.ThemeManager.ApplicationThemeName = DevExpress.Xpf.Core.Theme.MetropolisDarkName;
+		}
 	}
 }

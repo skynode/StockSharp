@@ -19,6 +19,9 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using DevExpress.Xpf.Bars;
 using StockSharp.Logging;
 using Ecng.Configuration;
 using Ecng.Serialization;
@@ -27,6 +30,7 @@ using Ecng.ComponentModel;
 using Ecng.Localization;
 using Ecng.Xaml;
 using MoreLinq;
+using StockSharp.Alerts;
 using StockSharp.BusinessEntities;
 using StockSharp.Localization;
 using StockSharp.Studio.Controls;
@@ -65,6 +69,7 @@ namespace StockSharp.Terminal
 		{
 			LocalizedStrings.ActiveLanguage = Languages.English;
 			ConfigManager.RegisterService<IStudioCommandService>(new TerminalCommandService());
+			ConfigManager.RegisterService<IAlertService>(new AlertService("AlertSvc"));
 
 			InitializeComponent();
 			Instance = this;
@@ -86,18 +91,24 @@ namespace StockSharp.Terminal
 			{
 				cmdSvc.Register<RequestBindSource>(this, true, cmd => new BindConnectorCommand(ConfigManager.GetService<IConnector>(), cmd.Control).SyncProcess(this));
 				_connectorService.InitConnector();
+
+				foreach (var c in ControlTypes)
+				{
+					var ctlType = c;
+
+					_ribbonGroupWindows.Items.Add(new BarButtonItem
+					{
+						Glyph = new BitmapImage(ctlType.GetIconUrl()),
+						Content = ctlType.GetDisplayName(),
+						Command = new DelegateCommand(o => OnCreateWindowClick(ctlType))
+					});
+				}
 			};
 
 			Closing += (sender, args) =>
 			{
 				new XmlSerializer<SettingsStorage>().Serialize(_workAreaControl.Save(), LayoutFile);
 			};
-
-			ControlTypes.ForEach(t => NewControlComboBox.Items.Add(new ComboBoxItem
-			{
-				Content = t.GetDisplayName(),
-				Tag = t
-			}));
 
 			WindowState = WindowState.Maximized;
 
@@ -149,25 +160,17 @@ namespace StockSharp.Terminal
 
 		private void LookupSecurities()
 		{
-			new LookupSecuritiesCommand(new Security
-			{
-				Code = LookupCode.Text.Trim(),
-				Type = LookupType.SelectedType,
-			}).Process(this);
+//			new LookupSecuritiesCommand(new Security
+//			{
+//				Code = LookupCode.Text.Trim(),
+//				Type = LookupType.SelectedType,
+//			}).Process(this);
 		}
 
-		private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		private void OnCreateWindowClick(Type ctlType)
 		{
-			if(NewControlComboBox.SelectedIndex == -1)
-				return;
-
-			var controlType = ((ComboBoxItem) NewControlComboBox.SelectedItem).Tag as Type;
-			if(controlType == null)
-				return;
-
-			_workAreaControl.HandleNewPanelSelection(controlType);
-
-			NewControlComboBox.SelectedIndex = -1;
+			if(ctlType != null)
+				_workAreaControl.HandleNewPanelSelection(ctlType);
 		}
 	}
 }

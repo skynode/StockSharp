@@ -1,13 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using StockSharp.Algo.Candles;
+using System.Windows.Controls;
 
 namespace StockSharp.Studio.Core.Commands {
 	public class SubscribeCandleChartCommand : BaseStudioCommand {
 		public CandleSeries Series {get;}
+		public Control Control {get;}
 
-		public SubscribeCandleChartCommand(CandleSeries ser)
+		public SubscribeCandleChartCommand(CandleSeries ser, Control control)
 		{
 			Series = ser;
+			Control = control;
+		}
+	}
+
+	public class ChartDataSubscriptionCommand : BaseStudioCommand {
+		public CandleSeries Series {get;}
+		public Func<IEnumerable<TimeFrameCandle>> AllCandlesGetter {get;} // tmp solution for indicators
+		public Control Control {get;}
+
+		public ChartDataSubscriptionCommand(CandleSeries ser, Func<IEnumerable<TimeFrameCandle>> getter, Control control)
+		{
+			Series = ser;
+			AllCandlesGetter = getter;
+			Control = control;
 		}
 	}
 
@@ -30,8 +47,5 @@ namespace StockSharp.Studio.Core.Commands {
 			Series = series;
 			Candles = candles;
 		}
-	}
-
-	public class CandleChartResetCommand : BaseStudioCommand {
 	}
 }

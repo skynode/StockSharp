@@ -170,7 +170,12 @@ namespace StockSharp.Terminal.Services
 
 			cmdSvc.Register<CancelAllOrdersCommand>(this, false, cmd => _connector.Orders.Where(o => o.State == OrderStates.Active).ForEach(o => _connector.CancelOrder(o)));
 
-			cmdSvc.Register<SubscribeCandleChartCommand>(this, false, cmd => _connector.SubscribeCandles(cmd.Series));
+			cmdSvc.Register<SubscribeCandleChartCommand>(this, false, cmd =>
+			{
+				_connector.SubscribeCandles(cmd.Series);
+				new ChartDataSubscriptionCommand(cmd.Series, () => _connector.GetSubscribedCandles(cmd.Series), cmd.Control).Process(this);
+			});
+
 			cmdSvc.Register<UnsubscribeCandleChartCommand>(this, false, cmd => _connector.UnsubscribeCandles(cmd.Series));
 
 //			cmdSvc.Register<SubscribeTradeElementCommand>(this, false, cmd => Subscribe(_tradeElements, cmd.Security, cmd.Element));
@@ -331,7 +336,7 @@ namespace StockSharp.Terminal.Services
 		private void OnConnectionChanged(bool isConnected)
 		{
 			if (isConnected)
-				new CandleChartResetCommand().Process(this);
+				new ChartResetElementsCommand(null).Process(this);
 
 			ChangeConnectStatusEvent?.Invoke(IsConnected = isConnected);
 		}

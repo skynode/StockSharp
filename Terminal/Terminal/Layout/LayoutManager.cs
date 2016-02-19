@@ -151,7 +151,7 @@ namespace StockSharp.Terminal.Layout
 			{
 				_panels.Clear();
 
-				DockCtl.RestoreLayoutFromXml("docklayout.xml");
+				//DockCtl.RestoreLayoutFromXml("docklayout.xml");
 
 				//using(var stream = new MemoryStream(settings.Base64()))
 				//	DockCtl.RestoreLayoutFromStream(stream);
@@ -184,7 +184,7 @@ namespace StockSharp.Terminal.Layout
 
 		public string SaveLayout()
 		{
-			DockCtl.SaveLayoutToXml("docklayout.xml");
+			//DockCtl.SaveLayoutToXml("docklayout.xml");
 
 			return string.Empty;
 

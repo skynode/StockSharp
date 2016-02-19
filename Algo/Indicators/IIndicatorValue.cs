@@ -234,7 +234,10 @@ namespace StockSharp.Algo.Indicators
 		/// <returns>Value.</returns>
 		public override T GetValue<T>()
 		{
-			ThrowIfEmpty();
+			//ThrowIfEmpty();
+			if(IsEmpty)
+				return default(T);
+
 			return Value.To<T>();
 		}
 

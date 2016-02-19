@@ -169,6 +169,7 @@ namespace StockSharp.Messages
 				PortfolioName = message.PortfolioName,
 				ExecutionType = ExecutionTypes.Transaction,
 				UserOrderId = message.UserOrderId,
+				HasOrderInfo = true,
 			};
 		}
 
@@ -191,6 +192,7 @@ namespace StockSharp.Messages
 				ExecutionType = ExecutionTypes.Transaction,
 				Condition = message.Condition,
 				UserOrderId = message.UserOrderId,
+				HasOrderInfo = true,
 			};
 		}
 
@@ -214,6 +216,7 @@ namespace StockSharp.Messages
 				ExecutionType = ExecutionTypes.Transaction,
 				Condition = message.Condition,
 				UserOrderId = message.UserOrderId,
+				HasOrderInfo = true,
 			};
 		}
 

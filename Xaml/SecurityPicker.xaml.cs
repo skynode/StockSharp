@@ -266,9 +266,6 @@ namespace StockSharp.Xaml
 		{
 			get
 			{
-				if (!_ownProvider)
-					throw new InvalidOperationException();
-
 				return _securities;
 			}
 		}

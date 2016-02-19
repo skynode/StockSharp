@@ -89,14 +89,12 @@ namespace StockSharp.Studio.Controls
 		public virtual void Load(SettingsStorage storage)
 		{
 			Title = storage.GetValue<string>(nameof(Title));
-			//Icon = storage.GetValue<Uri>(nameof(Icon));
 			Key = storage.GetValue<string>(nameof(Key));
 		}
 
 		public virtual void Save(SettingsStorage storage)
 		{
 			storage.SetValue(nameof(Title), Title);
-			//storage.SetValue(nameof(Icon), Icon);
 			storage.SetValue(nameof(Key), Key);
 		}
 

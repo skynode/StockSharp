@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Ecng.Collections;
 using MoreLinq;
 using StockSharp.Algo;
@@ -97,6 +98,14 @@ namespace StockSharp.Terminal.Services {
 
 			UnSubscribeMarketData(series.Security, MarketDataTypes.CandleTimeFrame);
 		}
+
+		public IEnumerable<TimeFrameCandle> GetSubscribedCandles(CandleSeries subscriber)
+		{
+			var key = new SubscriptionKey(subscriber.Security.Id, (TimeSpan) subscriber.Arg);
+			var subscription = _candleSubscriptions.TryGetValue(key);
+
+			return subscription == null ? Enumerable.Empty<TimeFrameCandle>() : subscription.CandleBuilder.AllCandles;
+		} 
 
 		private void CandleBuilderOnCandle(TimeFrameCandle candle)
 		{

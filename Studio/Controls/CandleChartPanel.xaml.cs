@@ -19,13 +19,16 @@ namespace StockSharp.Studio.Controls
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using MoreLinq;
 
 	using Ecng.Configuration;
 	using Ecng.Serialization;
 	using Ecng.ComponentModel;
 	using Ecng.Xaml.Charting.Common;
 	using Ecng.Common;
+	using Ecng.Collections;
 
+	using StockSharp.Algo.Indicators;
 	using StockSharp.BusinessEntities;
 	using StockSharp.Algo.Candles;
 	using StockSharp.Configuration;
@@ -47,9 +50,14 @@ namespace StockSharp.Studio.Controls
 			private set { SetField(ref _series, value, nameof(Series)); }
 		}
 
+		private readonly SynchronizedDictionary<ChartIndicatorElement, IIndicator> _indicators = new SynchronizedDictionary<ChartIndicatorElement, IIndicator>();
+
 		ChartArea _area = new ChartArea();
 		ChartCandleElement _candleElement;
+		Func<IEnumerable<TimeFrameCandle>> _allCandlesGetter;
 		readonly TimeSpan _timeFrame = TimeSpan.FromMinutes(5);
+
+		DateTimeOffset _lastTime;
 
 		public CandleChartPanel()
 		{
@@ -59,7 +67,7 @@ namespace StockSharp.Studio.Controls
 
 			var cmdSvc = ConfigManager.GetService<IStudioCommandService>();
 			cmdSvc.Register<CandleDataCommand>(this, false, OnCandleCommand);
-			cmdSvc.Register<CandleChartResetCommand>(this, true, cmd => Reset());
+			cmdSvc.Register<ChartResetElementsCommand>(this, true, cmd => ResetData());
 			cmdSvc.Register<SelectCommand>(this, true, cmd =>
 			{
 				if(ChartPanel.Security != null)
@@ -71,16 +79,54 @@ namespace StockSharp.Studio.Controls
 
 				ChartPanel.Security = sec;
 			});
+
+			cmdSvc.Register<ChartDataSubscriptionCommand>(this, false, cmd =>
+			{
+				_allCandlesGetter = cmd.AllCandlesGetter;
+			});
 			
 			ChartPanel.RegisterOrder += order => new RegisterOrderCommand(order).Process(this);
 			ChartPanel.MinimumRange = 200;
 			ChartPanel.IsInteracted = true;
 			ChartPanel.FillIndicators();
 
-			WhenLoaded(() =>
+			ChartPanel.UnSubscribeElement += OnChartPanelUnSubscribeElement;
+			ChartPanel.SubscribeIndicatorElement += Chart_OnSubscribeIndicatorElement;
+//			ChartPanel.SubscribeCandleElement += OnChartPanelSubscribeCandleElement;
+//			ChartPanel.SubscribeOrderElement += OnChartPanelSubscribeOrderElement;
+//			ChartPanel.SubscribeTradeElement += OnChartPanelSubscribeTradeElement;
+
+			WhenLoaded(OnSettingsUpdated);
+		}
+
+		private void OnChartPanelUnSubscribeElement(IChartElement element)
+		{
+			var ind = element as ChartIndicatorElement;
+
+			if(ind != null)
+				_indicators.Remove(ind);
+		}
+
+		private void Chart_OnSubscribeIndicatorElement(ChartIndicatorElement element, CandleSeries series, IIndicator indicator)
+		{
+			if(_allCandlesGetter == null || _indicators.ContainsKey(element))
+				return;
+
+			lock (_lock)
 			{
-				OnSettingsUpdated();
-			});
+				_indicators.Add(element, indicator);
+
+				var values = _allCandlesGetter()
+					.Select(candle =>
+					{
+						return new RefPair<DateTimeOffset, IDictionary<IChartElement, object>>(candle.OpenTime, new Dictionary<IChartElement, object>
+						{
+							{ element, indicator.Process(candle) }
+						});
+					});
+
+				ChartPanel.Draw(values);
+			}
 		}
 
 		private void OnCandleCommand(CandleDataCommand cmd)
@@ -90,8 +136,18 @@ namespace StockSharp.Studio.Controls
 				if(cmd.Series != Series || Series == null)
 					return;
 
-				var values = cmd.Candles.Select(c => new RefPair<DateTimeOffset, IDictionary<IChartElement, object>>
-														(c.OpenTime, new Dictionary<IChartElement, object> {{ _candleElement, c }}));
+				var values = cmd.Candles.Select(c =>
+				{
+					var dict = new Dictionary<IChartElement, object> {{ _candleElement, c }};
+					_indicators.ForEach(kv => dict.Add(kv.Key, kv.Value.Process(c)));
+
+					if(c.OpenTime < _lastTime)
+						throw new InvalidOperationException($"Unordered chart data: lastTime={_lastTime}, newTime={c.OpenTime}");
+
+					_lastTime = c.OpenTime;
+
+					return new RefPair<DateTimeOffset, IDictionary<IChartElement, object>>(c.OpenTime, dict);
+				});
 
 				ChartPanel.Draw(values);
 			}
@@ -136,6 +192,17 @@ namespace StockSharp.Studio.Controls
 			storage.SetValue(nameof(ChartPanel), ChartPanel.Save());
 		}
 
+		private void ResetData()
+		{
+			lock (_lock)
+			{
+				_candleElement.Do(e => ChartPanel.Reset(new[] {e}));
+				_indicators.Values.ForEach(i => i.Reset());
+
+				_lastTime = DateTimeOffset.MinValue;
+			}
+		}
+
 		private void Reset()
 		{
 			lock (_lock)
@@ -145,6 +212,9 @@ namespace StockSharp.Studio.Controls
 					ChartPanel.RemoveElement(_area, e);
 					_candleElement = null;
 				});
+
+				_indicators.Clear();
+				_lastTime = DateTimeOffset.MinValue;
 
 				ChartPanel.ClearAreas();
 				_area = null;
@@ -179,10 +249,10 @@ namespace StockSharp.Studio.Controls
 				ChartPanel.AddArea(_area);
 
 				_candleElement = new ChartCandleElement();
-				ChartPanel.AddElement(_area, _candleElement);
+				ChartPanel.AddElement(_area, _candleElement, Series);
 			}
 
-			new SubscribeCandleChartCommand(Series).Process(this);
+			new SubscribeCandleChartCommand(Series, this).Process(this);
 		}
 
 	}

@@ -72,6 +72,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\References\DevExpress\DevExpress.Xpf.LayoutControl.v15.2.dll</HintPath>
     </Reference>
+    <Reference Include="DevExpress.Xpf.Ribbon.v15.2, Version=15.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="Ecng.Collections">
       <HintPath>..\..\References\Ecng\Ecng.Collections.dll</HintPath>
     </Reference>
@@ -208,6 +209,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Alerts\Alerts.csproj">
+      <Project>{96725e45-f785-4612-9743-bfb40a9e725d}</Project>
+      <Name>Alerts</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Algo\Algo.csproj">
       <Project>{2A5C6FAD-106C-4A4A-B602-77A6B1034CA2}</Project>
       <Name>Algo</Name>

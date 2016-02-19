@@ -18,9 +18,8 @@
 								dxdo:RestoreLayoutOptions.RemoveOldPanels="False"
 								dxdo:RestoreLayoutOptions.RemoveOldLayoutGroups="False">
 		-->
-		<dxdo:DockLayoutManager x:Name="DockManager" dxdo:RestoreLayoutOptions.RemoveOldPanels="False">
-
-			<dxdo:LayoutGroup x:Name="Root" dxdo:RestoreLayoutOptions.RemoveOldPanels="False"/>
+		<dxdo:DockLayoutManager x:Name="DockManager" dxdo:RestoreLayoutOptions.RemoveOldPanels="False" FloatingMode="Desktop">
+			<dxdo:LayoutGroup x:Name="Root" DestroyOnClosingChildren="False"/>
 		</dxdo:DockLayoutManager>
 	</Grid>
 </controls:BaseStudioControl>
