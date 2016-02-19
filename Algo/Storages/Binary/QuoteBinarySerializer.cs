@@ -101,16 +101,7 @@ namespace StockSharp.Algo.Storages.Binary
 
 				metaInfo.LastPrice = metaInfo.FirstPrice = firstDepth != null ? GetDepthPrice(firstDepth) : 0;
 
-				//pyh: будет баг если первый стакан пустой и с другим временем.
-				//metaInfo.FirstTime = firstDepth.LastChangeTime;
-
-				if(firstDepth == null)
-					firstDepth = messages.FirstOrDefault();
-
-				if(firstDepth == null)
-					throw new ArgumentException(LocalizedStrings.Str931, nameof(messages));
-
-				metaInfo.ServerOffset = firstDepth.ServerTime.Offset;
+				metaInfo.ServerOffset = (firstDepth ?? messages.First()).ServerTime.Offset;
 			}
 
 			writer.WriteInt(messages.Count());

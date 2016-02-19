@@ -955,7 +955,7 @@ namespace StockSharp.Algo
 
 		private void ProcessQuotesMessage(Security security, QuoteChangeMessage message, bool fromLevel1)
 		{
-			if (MarketDepthsChanged != null || MarketDepthChanged != null)
+			if (MarketDepthChanged != null || MarketDepthsChanged != null)
 			{
 				var marketDepth = GetMarketDepth(security);
 
