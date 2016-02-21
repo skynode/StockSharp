@@ -17,6 +17,7 @@ Copyright 2010 by StockSharp, LLC
 namespace StockSharp.Terminal.Layout
 {
 	using System;
+	using System.Text;
 	using System.Windows;
 	using System.Collections.Generic;
 	using System.Globalization;
@@ -112,7 +113,13 @@ namespace StockSharp.Terminal.Layout
 			if (storage == null)
 				throw new ArgumentNullException(nameof(storage));
 
-			var controls = DockCtl.GetItems().OfType<LayoutPanel>().Select(p => p.Content).OfType<BaseStudioControl>().ToArray();
+			var controls = DockCtl.GetItems()
+								.OfType<LayoutPanel>()
+								.Where(p => !p.IsClosed)
+								.Select(p => p.Content)
+								.OfType<BaseStudioControl>()
+								.ToArray();
+
 			storage.SetValue("Controls", controls.Select(SaveControl).ToArray());
 
 			var layout = SaveDockLayout();
@@ -128,12 +135,12 @@ namespace StockSharp.Terminal.Layout
 			{
 				_panels.Clear();
 
-				using(var stream = new MemoryStream(settings.Base64()))
+				using(var stream = new MemoryStream(Encoding.UTF8.GetBytes(settings)))
 					DockCtl.RestoreLayoutFromStream(stream);
 
 				foreach (var panel in DockCtl.GetItems().OfType<LayoutPanel>())
 				{
-					if(panel.Name.IsEmpty())
+					if(panel.IsClosed || panel.Name.IsEmpty())
 						continue;
 
 					var content = controls.TryGetValue(panel.Name);
@@ -158,7 +165,7 @@ namespace StockSharp.Terminal.Layout
 				DockCtl.SaveLayoutToStream(stream);
 				stream.Position = 0;
 
-				return stream.ReadBuffer().Base64();
+				return Encoding.UTF8.GetString(stream.ReadBuffer());
 			}
 		}
 
