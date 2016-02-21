@@ -1293,13 +1293,6 @@
                     <Type type="string">Ecng.Serialization.SettingsStorage, Ecng.Serialization</Type>
                     <Value type="Ecng.Serialization.SettingsStorage, Ecng.Serialization">
                       <KeyValuePairBeginStringAndObjectEnd>
-                        <key>SecurityId</key>
-                        <value>
-                          <Type type="string">string</Type>
-                          <Value type="string">ESH6@CME</Value>
-                        </value>
-                      </KeyValuePairBeginStringAndObjectEnd>
-                      <KeyValuePairBeginStringAndObjectEnd>
                         <key>CandleType</key>
                         <value>
                           <Type type="string">string</Type>
@@ -1355,10 +1348,7 @@
                     <Value type="Ecng.Serialization.SettingsStorage, Ecng.Serialization">
                       <KeyValuePairBeginStringAndObjectEnd>
                         <key>Security</key>
-                        <value>
-                          <Type type="string">string</Type>
-                          <Value type="string">ESH6@CME</Value>
-                        </value>
+                        <value isNull="true" />
                       </KeyValuePairBeginStringAndObjectEnd>
                       <KeyValuePairBeginStringAndObjectEnd>
                         <key>Portfolio</key>
@@ -2467,17 +2457,10 @@
                           <Type type="string">Ecng.Serialization.SettingsStorage, Ecng.Serialization</Type>
                           <Value type="Ecng.Serialization.SettingsStorage, Ecng.Serialization">
                             <KeyValuePairBeginStringAndObjectEnd>
-                              <key>TimeFrameCandle_ESH6@CME_00-05-00</key>
+                              <key>TimeFrameCandle__00-05-00</key>
                               <value>
                                 <Type type="string">Ecng.Serialization.SettingsStorage, Ecng.Serialization</Type>
                                 <Value type="Ecng.Serialization.SettingsStorage, Ecng.Serialization">
-                                  <KeyValuePairBeginStringAndObjectEnd>
-                                    <key>SecurityId</key>
-                                    <value>
-                                      <Type type="string">string</Type>
-                                      <Value type="string">ESH6@CME</Value>
-                                    </value>
-                                  </KeyValuePairBeginStringAndObjectEnd>
                                   <KeyValuePairBeginStringAndObjectEnd>
                                     <key>CandleType</key>
                                     <value>
@@ -3244,7 +3227,7 @@
                                 <key>Series</key>
                                 <value>
                                   <Type type="string">string</Type>
-                                  <Value type="string">TimeFrameCandle_ESH6@CME_00-05-00</Value>
+                                  <Value type="string">TimeFrameCandle__00-05-00</Value>
                                 </value>
                               </KeyValuePairBeginStringAndObjectEnd>
                             </SettingsStorage>
@@ -6590,6 +6573,20 @@
                   </value>
                 </KeyValuePairBeginStringAndObjectEnd>
                 <KeyValuePairBeginStringAndObjectEnd>
+                  <key>Title</key>
+                  <value>
+                    <Type type="string">string</Type>
+                    <Value type="string">Trades</Value>
+                  </value>
+                </KeyValuePairBeginStringAndObjectEnd>
+                <KeyValuePairBeginStringAndObjectEnd>
+                  <key>Key</key>
+                  <value>
+                    <Type type="string">string</Type>
+                    <Value type="string">_8ce55db3de1143faba18a6cf60783c5c</Value>
+                  </value>
+                </KeyValuePairBeginStringAndObjectEnd>
+                <KeyValuePairBeginStringAndObjectEnd>
                   <key>TradesGrid</key>
                   <value>
                     <Type type="string">Ecng.Serialization.SettingsStorage, Ecng.Serialization</Type>
@@ -7872,563 +7869,6 @@
                   </value>
                 </KeyValuePairBeginStringAndObjectEnd>
               </SettingsStorage>
-              <SettingsStorage>
-                <KeyValuePairBeginStringAndObjectEnd>
-                  <key>ControlType</key>
-                  <value>
-                    <Type type="string">string</Type>
-                    <Value type="string">StockSharp.Studio.Controls.TradesPanel, StockSharp.Studio.Controls</Value>
-                  </value>
-                </KeyValuePairBeginStringAndObjectEnd>
-                <KeyValuePairBeginStringAndObjectEnd>
-                  <key>Title</key>
-                  <value>
-                    <Type type="string">string</Type>
-                    <Value type="string">Trades feed</Value>
-                  </value>
-                </KeyValuePairBeginStringAndObjectEnd>
-                <KeyValuePairBeginStringAndObjectEnd>
-                  <key>Key</key>
-                  <value>
-                    <Type type="string">string</Type>
-                    <Value type="string">_91c2736c81f6469daeb4d168891a2b64</Value>
-                  </value>
-                </KeyValuePairBeginStringAndObjectEnd>
-                <KeyValuePairBeginStringAndObjectEnd>
-                  <key>GridSettings</key>
-                  <value>
-                    <Type type="string">Ecng.Serialization.SettingsStorage, Ecng.Serialization</Type>
-                    <Value type="Ecng.Serialization.SettingsStorage, Ecng.Serialization">
-                      <KeyValuePairBeginStringAndObjectEnd>
-                        <key>Columns</key>
-                        <value>
-                          <Type type="string">Ecng.Serialization.SettingsStorage[], Ecng.Serialization</Type>
-                          <Value type="Ecng.Serialization.SettingsStorage[], Ecng.Serialization">
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">70</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Visible</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">0</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">70</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Visible</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">1</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">120</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Visible</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">2</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">50</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Collapsed</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">3</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">120</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Collapsed</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">4</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">60</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Visible</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">5</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">50</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Visible</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">6</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">40</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Collapsed</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">7</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">60</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Visible</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">8</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">60</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Collapsed</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">9</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">60</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Collapsed</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">10</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                            <SettingsStorage>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>SortDirection</key>
-                                <value isNull="true" />
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthType</key>
-                                <value>
-                                  <Type type="string">System.Windows.Controls.DataGridLengthUnitType, PresentationFramework</Type>
-                                  <Value type="System.Windows.Controls.DataGridLengthUnitType, PresentationFramework">Pixel</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>WidthValue</key>
-                                <value>
-                                  <Type type="string">double</Type>
-                                  <Value type="double">60</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>Visibility</key>
-                                <value>
-                                  <Type type="string">System.Windows.Visibility, PresentationCore</Type>
-                                  <Value type="System.Windows.Visibility, PresentationCore">Collapsed</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                              <KeyValuePairBeginStringAndObjectEnd>
-                                <key>DisplayIndex</key>
-                                <value>
-                                  <Type type="string">int</Type>
-                                  <Value type="int">11</Value>
-                                </value>
-                              </KeyValuePairBeginStringAndObjectEnd>
-                            </SettingsStorage>
-                          </Value>
-                        </value>
-                      </KeyValuePairBeginStringAndObjectEnd>
-                      <KeyValuePairBeginStringAndObjectEnd>
-                        <key>AutoScroll</key>
-                        <value>
-                          <Type type="string">bool</Type>
-                          <Value type="bool">False</Value>
-                        </value>
-                      </KeyValuePairBeginStringAndObjectEnd>
-                      <KeyValuePairBeginStringAndObjectEnd>
-                        <key>GroupingColumns</key>
-                        <value>
-                          <Type type="string">System.String[], mscorlib</Type>
-                          <Value type="System.String[], mscorlib" />
-                        </value>
-                      </KeyValuePairBeginStringAndObjectEnd>
-                      <KeyValuePairBeginStringAndObjectEnd>
-                        <key>ShowHeaderInGroupTitle</key>
-                        <value>
-                          <Type type="string">bool</Type>
-                          <Value type="bool">True</Value>
-                        </value>
-                      </KeyValuePairBeginStringAndObjectEnd>
-                      <KeyValuePairBeginStringAndObjectEnd>
-                        <key>DdeSettings</key>
-                        <value>
-                          <Type type="string">Ecng.Serialization.SettingsStorage, Ecng.Serialization</Type>
-                          <Value type="Ecng.Serialization.SettingsStorage, Ecng.Serialization">
-                            <KeyValuePairBeginStringAndObjectEnd>
-                              <key>Service</key>
-                              <value>
-                                <Type type="string">string</Type>
-                                <Value type="string">EXCEL</Value>
-                              </value>
-                            </KeyValuePairBeginStringAndObjectEnd>
-                            <KeyValuePairBeginStringAndObjectEnd>
-                              <key>Topic</key>
-                              <value>
-                                <Type type="string">string</Type>
-                                <Value type="string">[Book1.xlsx]Sheet1</Value>
-                              </value>
-                            </KeyValuePairBeginStringAndObjectEnd>
-                            <KeyValuePairBeginStringAndObjectEnd>
-                              <key>ColumnOffset</key>
-                              <value>
-                                <Type type="string">int</Type>
-                                <Value type="int">0</Value>
-                              </value>
-                            </KeyValuePairBeginStringAndObjectEnd>
-                            <KeyValuePairBeginStringAndObjectEnd>
-                              <key>RowOffset</key>
-                              <value>
-                                <Type type="string">int</Type>
-                                <Value type="int">0</Value>
-                              </value>
-                            </KeyValuePairBeginStringAndObjectEnd>
-                            <KeyValuePairBeginStringAndObjectEnd>
-                              <key>ShowHeaders</key>
-                              <value>
-                                <Type type="string">bool</Type>
-                                <Value type="bool">False</Value>
-                              </value>
-                            </KeyValuePairBeginStringAndObjectEnd>
-                          </Value>
-                        </value>
-                      </KeyValuePairBeginStringAndObjectEnd>
-                    </Value>
-                  </value>
-                </KeyValuePairBeginStringAndObjectEnd>
-                <KeyValuePairBeginStringAndObjectEnd>
-                  <key>Securities</key>
-                  <value>
-                    <Type type="string">System.String[], mscorlib</Type>
-                    <Value type="System.String[], mscorlib" />
-                  </value>
-                </KeyValuePairBeginStringAndObjectEnd>
-                <KeyValuePairBeginStringAndObjectEnd>
-                  <key>AlertSettings</key>
-                  <value>
-                    <Type type="string">Ecng.Serialization.SettingsStorage, Ecng.Serialization</Type>
-                    <Value type="Ecng.Serialization.SettingsStorage, Ecng.Serialization">
-                      <KeyValuePairBeginStringAndObjectEnd>
-                        <key>AlertSchema</key>
-                        <value>
-                          <Type type="string">Ecng.Serialization.SettingsStorage, Ecng.Serialization</Type>
-                          <Value type="Ecng.Serialization.SettingsStorage, Ecng.Serialization">
-                            <KeyValuePairBeginStringAndObjectEnd>
-                              <key>Rules</key>
-                              <value>
-                                <Type type="string">System.Collections.Generic.List`1[[StockSharp.Alerts.AlertRule, StockSharp.Alerts, Version=4.3.14.0, Culture=neutral, PublicKeyToken=null]], mscorlib</Type>
-                                <Value type="System.Collections.Generic.List`1[[StockSharp.Alerts.AlertRule, StockSharp.Alerts, Version=4.3.14.0, Culture=neutral, PublicKeyToken=null]], mscorlib" />
-                              </value>
-                            </KeyValuePairBeginStringAndObjectEnd>
-                            <KeyValuePairBeginStringAndObjectEnd>
-                              <key>AlertType</key>
-                              <value isNull="true" />
-                            </KeyValuePairBeginStringAndObjectEnd>
-                            <KeyValuePairBeginStringAndObjectEnd>
-                              <key>Caption</key>
-                              <value isNull="true" />
-                            </KeyValuePairBeginStringAndObjectEnd>
-                            <KeyValuePairBeginStringAndObjectEnd>
-                              <key>Message</key>
-                              <value isNull="true" />
-                            </KeyValuePairBeginStringAndObjectEnd>
-                          </Value>
-                        </value>
-                      </KeyValuePairBeginStringAndObjectEnd>
-                    </Value>
-                  </value>
-                </KeyValuePairBeginStringAndObjectEnd>
-                <KeyValuePairBeginStringAndObjectEnd>
-                  <key>VolumeFilter</key>
-                  <value isNull="true" />
-                </KeyValuePairBeginStringAndObjectEnd>
-              </SettingsStorage>
             </Value>
           </value>
         </KeyValuePairBeginStringAndObjectEnd>
@@ -8436,7 +7876,237 @@
           <key>Layout</key>
           <value>
             <Type type="string">string</Type>
-            <Value type="string">77u/PFh0cmFTZXJpYWxpemVyIHZlcnNpb249IjEuMCIgYXBwbGljYXRpb249IkRvY2tMYXlvdXRNYW5hZ2VyIj4NCiAgPHByb3BlcnR5IG5hbWU9IiNMYXlvdXRWZXJzaW9uIiBpc251bGw9InRydWUiIC8+DQogIDxwcm9wZXJ0eSBuYW1lPSIkRG9ja0xheW91dE1hbmFnZXIiIGlza2V5PSJ0cnVlIiB2YWx1ZT0iRG9ja0xheW91dE1hbmFnZXIiPg0KICAgIDxwcm9wZXJ0eSBuYW1lPSJNYW51YWxDbG9zZWRQYW5lbHNCYXJWaXNpYmlsaXR5Ij5mYWxzZTwvcHJvcGVydHk+DQogICAgPHByb3BlcnR5IG5hbWU9IkZsb2F0aW5nTW9kZSI+RGVza3RvcDwvcHJvcGVydHk+DQogICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW1zIiBpc2tleT0idHJ1ZSIgdmFsdWU9IjE1Ij4NCiAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtMSIgaXNudWxsPSJ0cnVlIiBpc2tleT0idHJ1ZSI+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVTZWxlY3RlZFRhYlBhZ2VJbmRleCI+LTE8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRG9ja1NpdHVhdGlvbiIgaXNrZXk9InRydWUiIHZhbHVlPSIwIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iVHlwZU5hbWUiPkxheW91dEdyb3VwPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudE5hbWUiIGlzbnVsbD0idHJ1ZSIgLz4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudENvbGxlY3Rpb25OYW1lIiBpc251bGw9InRydWUiIC8+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJOYW1lIj5kb2NrSXRlbTE8L3Byb3BlcnR5Pg0KICAgICAgPC9wcm9wZXJ0eT4NCiAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtMiIgaXNudWxsPSJ0cnVlIiBpc2tleT0idHJ1ZSI+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVTZWxlY3RlZFRhYlBhZ2VJbmRleCI+LTE8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iT3JpZW50YXRpb24iPlZlcnRpY2FsPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkFsbG93U3BsaXR0ZXJzIj50cnVlPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW1XaWR0aCI+MC4zMTU5NjkyMzYxNDc1MjIqPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW1IZWlnaHQiPio8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRG9ja1NpdHVhdGlvbiIgaXNrZXk9InRydWUiIHZhbHVlPSIwIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iVHlwZU5hbWUiPkxheW91dEdyb3VwPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudE5hbWUiPmRvY2tJdGVtMTwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnRDb2xsZWN0aW9uTmFtZSIgaXNudWxsPSJ0cnVlIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iTmFtZSI+ZG9ja0l0ZW0yPC9wcm9wZXJ0eT4NCiAgICAgIDwvcHJvcGVydHk+DQogICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbTMiIGlzbnVsbD0idHJ1ZSIgaXNrZXk9InRydWUiPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRmxvYXRpbmdCb3VuZHMiPjAsMCwwLDA8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRmxvYXRpbmdPZmZzZXQiPjAsMDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtV2lkdGgiPjAuMjk0MjEwODAyMzA3Mjg2KjwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJGbG9hdFNpemUiPjMzNCw0MjI8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iSXNBY3RpdmUiPmZhbHNlPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkFsbG93Q2xvc2UiPnRydWU8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRG9ja1NpdHVhdGlvbiIgaXNrZXk9InRydWUiIHZhbHVlPSIwIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iVHlwZU5hbWUiPkxheW91dFBhbmVsPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudE5hbWUiPmRvY2tJdGVtMjwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnRDb2xsZWN0aW9uTmFtZSIgaXNudWxsPSJ0cnVlIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iTmFtZSI+X2M0YWI2OTA1OGRiZTQyMDE5ZTU5MmU2YzUzMDY4MmI1PC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkNhcHRpb24iIHR5cGU9IlN5c3RlbS5TdHJpbmciPlRyYWRlcyBmZWVkPC9wcm9wZXJ0eT4NCiAgICAgIDwvcHJvcGVydHk+DQogICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbTQiIGlzbnVsbD0idHJ1ZSIgaXNrZXk9InRydWUiPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRmxvYXRpbmdCb3VuZHMiPjAsMCwwLDA8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRmxvYXRpbmdPZmZzZXQiPjAsMDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtV2lkdGgiPio8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iRmxvYXRTaXplIj4yNzIsNTcxPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IklzQWN0aXZlIj5mYWxzZTwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJBbGxvd0Nsb3NlIj50cnVlPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlNlcmlhbGl6YWJsZURvY2tTaXR1YXRpb24iIGlza2V5PSJ0cnVlIiB2YWx1ZT0iMCIgLz4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlR5cGVOYW1lIj5MYXlvdXRQYW5lbDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnROYW1lIj5kb2NrSXRlbTI8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iUGFyZW50Q29sbGVjdGlvbk5hbWUiIGlzbnVsbD0idHJ1ZSIgLz4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ik5hbWUiPl8yZWZmNzkzZGFkMjE0NWEwODMwMjQ2OTZjNGM2MWVjYTwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJDYXB0aW9uIiB0eXBlPSJTeXN0ZW0uU3RyaW5nIj5NYXJrZXQgZGVwdGg8L3Byb3BlcnR5Pg0KICAgICAgPC9wcm9wZXJ0eT4NCiAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtNSIgaXNudWxsPSJ0cnVlIiBpc2tleT0idHJ1ZSI+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVTZWxlY3RlZFRhYlBhZ2VJbmRleCI+LTE8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iT3JpZW50YXRpb24iPlZlcnRpY2FsPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkFsbG93U3BsaXR0ZXJzIj50cnVlPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW1XaWR0aCI+Mi4yNzczNjQwOTcxODU4MSo8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbUhlaWdodCI+KjwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVEb2NrU2l0dWF0aW9uIiBpc2tleT0idHJ1ZSIgdmFsdWU9IjAiIC8+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJUeXBlTmFtZSI+TGF5b3V0R3JvdXA8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iUGFyZW50TmFtZSI+ZG9ja0l0ZW0xPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudENvbGxlY3Rpb25OYW1lIiBpc251bGw9InRydWUiIC8+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJOYW1lIj5kb2NrSXRlbTM8L3Byb3BlcnR5Pg0KICAgICAgPC9wcm9wZXJ0eT4NCiAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtNiIgaXNudWxsPSJ0cnVlIiBpc2tleT0idHJ1ZSI+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVGbG9hdGluZ0JvdW5kcyI+MCwwLDAsMDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVGbG9hdGluZ09mZnNldCI+MCwwPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW1XaWR0aCI+Mi4yOTkxMjI1MzEwMjYwNCo8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbUhlaWdodCI+MS4zMTA1MzYwNDQzNjIyOSo8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iRmxvYXRTaXplIj40MDAsMzAwPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IklzQWN0aXZlIj50cnVlPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkFsbG93Q2xvc2UiPnRydWU8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRG9ja1NpdHVhdGlvbiIgaXNrZXk9InRydWUiIHZhbHVlPSIwIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iVHlwZU5hbWUiPkxheW91dFBhbmVsPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudE5hbWUiPmRvY2tJdGVtMzwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnRDb2xsZWN0aW9uTmFtZSIgaXNudWxsPSJ0cnVlIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iTmFtZSI+XzZiNDA5YTA4ZTlhZDQ4NWQ4OWEyOTQ1MTBjMWI3NTc1PC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkNhcHRpb24iIHR5cGU9IlN5c3RlbS5TdHJpbmciPkNoYXJ0PC9wcm9wZXJ0eT4NCiAgICAgIDwvcHJvcGVydHk+DQogICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbTciIGlzbnVsbD0idHJ1ZSIgaXNrZXk9InRydWUiPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlU2VsZWN0ZWRUYWJQYWdlSW5kZXgiPi0xPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ik9yaWVudGF0aW9uIj5Ib3Jpem9udGFsPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkFsbG93U3BsaXR0ZXJzIj50cnVlPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW1XaWR0aCI+KjwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtSGVpZ2h0Ij4wLjY4OTQ2Mzk1NTYzNzcwNio8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRG9ja1NpdHVhdGlvbiIgaXNrZXk9InRydWUiIHZhbHVlPSIwIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iVHlwZU5hbWUiPkxheW91dEdyb3VwPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudE5hbWUiPmRvY2tJdGVtMzwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnRDb2xsZWN0aW9uTmFtZSIgaXNudWxsPSJ0cnVlIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iTmFtZSI+ZG9ja0l0ZW00PC9wcm9wZXJ0eT4NCiAgICAgIDwvcHJvcGVydHk+DQogICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbTgiIGlzbnVsbD0idHJ1ZSIgaXNrZXk9InRydWUiPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRmxvYXRpbmdCb3VuZHMiPjAsMCwwLDA8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRmxvYXRpbmdPZmZzZXQiPjAsMDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtV2lkdGgiPjAuODU0MjExMTE0MDI5NDcxKjwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJGbG9hdFNpemUiPjM4OCwyODg8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iSXNBY3RpdmUiPmZhbHNlPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkFsbG93Q2xvc2UiPnRydWU8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRG9ja1NpdHVhdGlvbiIgaXNrZXk9InRydWUiIHZhbHVlPSIwIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iVHlwZU5hbWUiPkxheW91dFBhbmVsPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudE5hbWUiPmRvY2tJdGVtNDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnRDb2xsZWN0aW9uTmFtZSIgaXNudWxsPSJ0cnVlIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iTmFtZSI+X2NlZWE5YzQwOGEzZjRhODRhYWQ0ZmQ4MmQ1OTQwYjc1PC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkNhcHRpb24iIHR5cGU9IlN5c3RlbS5TdHJpbmciPlNlY3VyaXRpZXM8L3Byb3BlcnR5Pg0KICAgICAgPC9wcm9wZXJ0eT4NCiAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtOSIgaXNudWxsPSJ0cnVlIiBpc2tleT0idHJ1ZSI+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVTZWxlY3RlZFRhYlBhZ2VJbmRleCI+LTE8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iT3JpZW50YXRpb24iPlZlcnRpY2FsPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkFsbG93U3BsaXR0ZXJzIj50cnVlPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW1XaWR0aCI+MS4xNDU3ODg4ODU5NzA1Myo8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbUhlaWdodCI+MC42ODk0NjM5NTU2Mzc3MDYqPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlNlcmlhbGl6YWJsZURvY2tTaXR1YXRpb24iIGlza2V5PSJ0cnVlIiB2YWx1ZT0iMCIgLz4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlR5cGVOYW1lIj5MYXlvdXRHcm91cDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnROYW1lIj5kb2NrSXRlbTQ8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iUGFyZW50Q29sbGVjdGlvbk5hbWUiIGlzbnVsbD0idHJ1ZSIgLz4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ik5hbWUiPmRvY2tJdGVtNTwvcHJvcGVydHk+DQogICAgICA8L3Byb3BlcnR5Pg0KICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW0xMCIgaXNudWxsPSJ0cnVlIiBpc2tleT0idHJ1ZSI+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVGbG9hdGluZ0JvdW5kcyI+MCwwLDAsMDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVGbG9hdGluZ09mZnNldCI+MCwwPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW1XaWR0aCI+MS4xNDU3ODg4ODU5NzA1Myo8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbUhlaWdodCI+MC44MTY2Mjc5MDkyODc4NTYqPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkZsb2F0U2l6ZSI+Mzg4LDI4ODwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJc0FjdGl2ZSI+ZmFsc2U8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iQWxsb3dDbG9zZSI+dHJ1ZTwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVEb2NrU2l0dWF0aW9uIiBpc2tleT0idHJ1ZSIgdmFsdWU9IjAiIC8+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJUeXBlTmFtZSI+TGF5b3V0UGFuZWw8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iUGFyZW50TmFtZSI+ZG9ja0l0ZW01PC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudENvbGxlY3Rpb25OYW1lIiBpc251bGw9InRydWUiIC8+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJOYW1lIj5fYmQwMWQ2NDY3N2FiNDEyOTg1N2E4NDlkOWU4Y2UyZWY8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iQ2FwdGlvbiIgdHlwZT0iU3lzdGVtLlN0cmluZyI+T3JkZXJzPC9wcm9wZXJ0eT4NCiAgICAgIDwvcHJvcGVydHk+DQogICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbTExIiBpc251bGw9InRydWUiIGlza2V5PSJ0cnVlIj4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlNlcmlhbGl6YWJsZVNlbGVjdGVkVGFiUGFnZUluZGV4Ij4tMTwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJPcmllbnRhdGlvbiI+SG9yaXpvbnRhbDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJBbGxvd1NwbGl0dGVycyI+dHJ1ZTwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtV2lkdGgiPio8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbUhlaWdodCI+MC44NzI4MzYwNDYzNDk4NDkqPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlNlcmlhbGl6YWJsZURvY2tTaXR1YXRpb24iIGlza2V5PSJ0cnVlIiB2YWx1ZT0iMCIgLz4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlR5cGVOYW1lIj5MYXlvdXRHcm91cDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnROYW1lIj5kb2NrSXRlbTU8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iUGFyZW50Q29sbGVjdGlvbk5hbWUiIGlzbnVsbD0idHJ1ZSIgLz4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ik5hbWUiPmRvY2tJdGVtNzwvcHJvcGVydHk+DQogICAgICA8L3Byb3BlcnR5Pg0KICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW0xMiIgaXNudWxsPSJ0cnVlIiBpc2tleT0idHJ1ZSI+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVGbG9hdGluZ0JvdW5kcyI+MCwwLDAsMDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVGbG9hdGluZ09mZnNldCI+MCwwPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW1IZWlnaHQiPjAuODcyODM2MDQ2MzQ5ODQ5KjwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJGbG9hdFNpemUiPjM4OCwyODg8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iSXNBY3RpdmUiPmZhbHNlPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkFsbG93Q2xvc2UiPnRydWU8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlRG9ja1NpdHVhdGlvbiIgaXNrZXk9InRydWUiIHZhbHVlPSIwIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iVHlwZU5hbWUiPkxheW91dFBhbmVsPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudE5hbWUiPmRvY2tJdGVtNzwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnRDb2xsZWN0aW9uTmFtZSIgaXNudWxsPSJ0cnVlIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iTmFtZSI+X2VhYmVkYzNmNmI5ZDQ2MjY4NThjNTU0ZDg1MjI5NGM0PC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkNhcHRpb24iIHR5cGU9IlN5c3RlbS5TdHJpbmciPlRyYWRlczwvcHJvcGVydHk+DQogICAgICA8L3Byb3BlcnR5Pg0KICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW0xMyIgaXNudWxsPSJ0cnVlIiBpc2tleT0idHJ1ZSI+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVGbG9hdGluZ0JvdW5kcyI+MCwwLDAsMDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVGbG9hdGluZ09mZnNldCI+MCwwPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkZsb2F0U2l6ZSI+NDI5LDMwNTwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJc0FjdGl2ZSI+ZmFsc2U8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iQWxsb3dDbG9zZSI+dHJ1ZTwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVEb2NrU2l0dWF0aW9uIiBpc2tleT0idHJ1ZSIgdmFsdWU9IjAiIC8+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJUeXBlTmFtZSI+TGF5b3V0UGFuZWw8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iUGFyZW50TmFtZSI+ZG9ja0l0ZW03PC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlBhcmVudENvbGxlY3Rpb25OYW1lIiBpc251bGw9InRydWUiIC8+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJOYW1lIj5fMGUwNTliM2JlNzI4NGUxNWFkYWEwOGFjZDZlYzNjZDI8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iQ2FwdGlvbiIgdHlwZT0iU3lzdGVtLlN0cmluZyI+UG9ydGZvbGlvczwvcHJvcGVydHk+DQogICAgICA8L3Byb3BlcnR5Pg0KICAgICAgPHByb3BlcnR5IG5hbWU9Ikl0ZW0xNCIgaXNudWxsPSJ0cnVlIiBpc2tleT0idHJ1ZSI+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVGbG9hdGluZ0JvdW5kcyI+MjA0LDYxMyw0MDAsMzAwPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlNlcmlhbGl6YWJsZUZsb2F0aW5nT2Zmc2V0Ij42LDg3PC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkZsb2F0U2l6ZSI+NDAwLDMwMDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJc0FjdGl2ZSI+ZmFsc2U8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iQWxsb3dDbG9zZSI+dHJ1ZTwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVEb2NrU2l0dWF0aW9uIiBpc2tleT0idHJ1ZSIgdmFsdWU9IjEiPg0KICAgICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJJdGVtMSIgaXNudWxsPSJ0cnVlIiBpc2tleT0idHJ1ZSI+DQogICAgICAgICAgICA8cHJvcGVydHkgbmFtZT0iRG9ja1N0YXRlIj5GbG9hdGluZzwvcHJvcGVydHk+DQogICAgICAgICAgICA8cHJvcGVydHkgbmFtZT0iUGFyZW50TmFtZSI+ZG9ja0l0ZW02PC9wcm9wZXJ0eT4NCiAgICAgICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJPd25lck5hbWUiPl85MWMyNzM2YzgxZjY0NjlkYWViNGQxNjg4OTFhMmI2NDwvcHJvcGVydHk+DQogICAgICAgICAgICA8cHJvcGVydHkgbmFtZT0iSW5kZXgiPjA8L3Byb3BlcnR5Pg0KICAgICAgICAgIDwvcHJvcGVydHk+DQogICAgICAgIDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJUeXBlTmFtZSI+TGF5b3V0UGFuZWw8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iUGFyZW50TmFtZSIgaXNudWxsPSJ0cnVlIiAvPg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iUGFyZW50Q29sbGVjdGlvbk5hbWUiPiRDbG9zZWRQYW5lbHM8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iTmFtZSI+XzkxYzI3MzZjODFmNjQ2OWRhZWI0ZDE2ODg5MWEyYjY0PC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkNhcHRpb24iIHR5cGU9IlN5c3RlbS5TdHJpbmciPlRyYWRlcyBmZWVkPC9wcm9wZXJ0eT4NCiAgICAgIDwvcHJvcGVydHk+DQogICAgICA8cHJvcGVydHkgbmFtZT0iSXRlbTE1IiBpc251bGw9InRydWUiIGlza2V5PSJ0cnVlIj4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkZsb2F0TG9jYXRpb24iPjIwNCw2MTM8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2hvdWxkUmVzdG9yZU9uQWN0aXZhdGUiPmZhbHNlPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IlNlcmlhbGl6YWJsZUlzTWF4aW1pemVkIj5mYWxzZTwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVaT3JkZXIiPjA8L3Byb3BlcnR5Pg0KICAgICAgICA8cHJvcGVydHkgbmFtZT0iU2VyaWFsaXphYmxlU2VsZWN0ZWRUYWJQYWdlSW5kZXgiPi0xPC9wcm9wZXJ0eT4NCiAgICAgICAgPHByb3BlcnR5IG5hbWU9IkZsb2F0U2l6ZSI+NDAwLDMwMDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJTZXJpYWxpemFibGVEb2NrU2l0dWF0aW9uIiBpc2tleT0idHJ1ZSIgdmFsdWU9IjAiIC8+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJUeXBlTmFtZSI+RmxvYXRHcm91cDwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnROYW1lIiBpc251bGw9InRydWUiIC8+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJQYXJlbnRDb2xsZWN0aW9uTmFtZSI+JERlY29tcG9zZWRJdGVtczwvcHJvcGVydHk+DQogICAgICAgIDxwcm9wZXJ0eSBuYW1lPSJOYW1lIj5kb2NrSXRlbTY8L3Byb3BlcnR5Pg0KICAgICAgPC9wcm9wZXJ0eT4NCiAgICA8L3Byb3BlcnR5Pg0KICAgIDxwcm9wZXJ0eSBuYW1lPSJEb2NraW5nU3R5bGUiPlZTMjAxMDwvcHJvcGVydHk+DQogICAgPHByb3BlcnR5IG5hbWU9IlJlc3RvcmVMYXlvdXRPcHRpb25zLkZsb2F0UGFuZWxzUmVzdG9yZU9mZnNldCIgT3duZXJUeXBlPSJEZXZFeHByZXNzLlhwZi5Eb2NraW5nLlJlc3RvcmVMYXlvdXRPcHRpb25zIiBEZXBlbmRlbmN5UHJvcGVydHlUeXBlPSJTeXN0ZW0uV2luZG93cy5Qb2ludCI+Niw4NzwvcHJvcGVydHk+DQogIDwvcHJvcGVydHk+DQo8L1h0cmFTZXJpYWxpemVyPg==</Value>
+            <Value type="string">﻿&lt;XtraSerializer version="1.0" application="DockLayoutManager"&gt;
+  &lt;property name="#LayoutVersion" isnull="true" /&gt;
+  &lt;property name="$DockLayoutManager" iskey="true" value="DockLayoutManager"&gt;
+    &lt;property name="ManualClosedPanelsBarVisibility"&gt;false&lt;/property&gt;
+    &lt;property name="FloatingMode"&gt;Desktop&lt;/property&gt;
+    &lt;property name="Items" iskey="true" value="16"&gt;
+      &lt;property name="Item1" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableSelectedTabPageIndex"&gt;-1&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutGroup&lt;/property&gt;
+        &lt;property name="ParentName" isnull="true" /&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;dockItem1&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item2" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableSelectedTabPageIndex"&gt;-1&lt;/property&gt;
+        &lt;property name="Orientation"&gt;Vertical&lt;/property&gt;
+        &lt;property name="AllowSplitters"&gt;true&lt;/property&gt;
+        &lt;property name="ItemWidth"&gt;0.315969236147522*&lt;/property&gt;
+        &lt;property name="ItemHeight"&gt;*&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutGroup&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem1&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;dockItem2&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item3" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableFloatingBounds"&gt;0,0,0,0&lt;/property&gt;
+        &lt;property name="SerializableFloatingOffset"&gt;0,0&lt;/property&gt;
+        &lt;property name="ItemWidth"&gt;0.294210802307286*&lt;/property&gt;
+        &lt;property name="FloatSize"&gt;334,422&lt;/property&gt;
+        &lt;property name="IsActive"&gt;false&lt;/property&gt;
+        &lt;property name="AllowClose"&gt;true&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutPanel&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem2&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;_c4ab69058dbe42019e592e6c530682b5&lt;/property&gt;
+        &lt;property name="Caption" type="System.String"&gt;Trades feed&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item4" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableFloatingBounds"&gt;0,0,0,0&lt;/property&gt;
+        &lt;property name="SerializableFloatingOffset"&gt;0,0&lt;/property&gt;
+        &lt;property name="ItemWidth"&gt;*&lt;/property&gt;
+        &lt;property name="FloatSize"&gt;272,571&lt;/property&gt;
+        &lt;property name="IsActive"&gt;false&lt;/property&gt;
+        &lt;property name="AllowClose"&gt;true&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutPanel&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem2&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;_2eff793dad2145a083024696c4c61eca&lt;/property&gt;
+        &lt;property name="Caption" type="System.String"&gt;Market depth&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item5" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableSelectedTabPageIndex"&gt;-1&lt;/property&gt;
+        &lt;property name="Orientation"&gt;Vertical&lt;/property&gt;
+        &lt;property name="AllowSplitters"&gt;true&lt;/property&gt;
+        &lt;property name="ItemWidth"&gt;2.27736409718581*&lt;/property&gt;
+        &lt;property name="ItemHeight"&gt;*&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutGroup&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem1&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;dockItem3&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item6" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableFloatingBounds"&gt;0,0,0,0&lt;/property&gt;
+        &lt;property name="SerializableFloatingOffset"&gt;0,0&lt;/property&gt;
+        &lt;property name="ItemWidth"&gt;2.29912253102604*&lt;/property&gt;
+        &lt;property name="ItemHeight"&gt;1.31053604436229*&lt;/property&gt;
+        &lt;property name="FloatSize"&gt;400,300&lt;/property&gt;
+        &lt;property name="IsActive"&gt;false&lt;/property&gt;
+        &lt;property name="AllowClose"&gt;true&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutPanel&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem3&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;_6b409a08e9ad485d89a294510c1b7575&lt;/property&gt;
+        &lt;property name="Caption" type="System.String"&gt;Chart&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item7" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableSelectedTabPageIndex"&gt;-1&lt;/property&gt;
+        &lt;property name="Orientation"&gt;Horizontal&lt;/property&gt;
+        &lt;property name="AllowSplitters"&gt;true&lt;/property&gt;
+        &lt;property name="ItemWidth"&gt;*&lt;/property&gt;
+        &lt;property name="ItemHeight"&gt;0.689463955637706*&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutGroup&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem3&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;dockItem4&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item8" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableFloatingBounds"&gt;0,0,0,0&lt;/property&gt;
+        &lt;property name="SerializableFloatingOffset"&gt;0,0&lt;/property&gt;
+        &lt;property name="ItemWidth"&gt;0.854211114029471*&lt;/property&gt;
+        &lt;property name="FloatSize"&gt;388,288&lt;/property&gt;
+        &lt;property name="IsActive"&gt;false&lt;/property&gt;
+        &lt;property name="AllowClose"&gt;true&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutPanel&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem4&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;_ceea9c408a3f4a84aad4fd82d5940b75&lt;/property&gt;
+        &lt;property name="Caption" type="System.String"&gt;Securities&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item9" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableSelectedTabPageIndex"&gt;-1&lt;/property&gt;
+        &lt;property name="Orientation"&gt;Vertical&lt;/property&gt;
+        &lt;property name="AllowSplitters"&gt;true&lt;/property&gt;
+        &lt;property name="ItemWidth"&gt;1.14578888597053*&lt;/property&gt;
+        &lt;property name="ItemHeight"&gt;0.689463955637706*&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutGroup&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem4&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;dockItem5&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item10" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableFloatingBounds"&gt;0,0,0,0&lt;/property&gt;
+        &lt;property name="SerializableFloatingOffset"&gt;0,0&lt;/property&gt;
+        &lt;property name="ItemWidth"&gt;1.14578888597053*&lt;/property&gt;
+        &lt;property name="ItemHeight"&gt;0.816627909287856*&lt;/property&gt;
+        &lt;property name="FloatSize"&gt;388,288&lt;/property&gt;
+        &lt;property name="IsActive"&gt;false&lt;/property&gt;
+        &lt;property name="AllowClose"&gt;true&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutPanel&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem5&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;_bd01d64677ab4129857a849d9e8ce2ef&lt;/property&gt;
+        &lt;property name="Caption" type="System.String"&gt;Orders&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item11" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableSelectedTabPageIndex"&gt;-1&lt;/property&gt;
+        &lt;property name="Orientation"&gt;Horizontal&lt;/property&gt;
+        &lt;property name="AllowSplitters"&gt;true&lt;/property&gt;
+        &lt;property name="ItemWidth"&gt;*&lt;/property&gt;
+        &lt;property name="ItemHeight"&gt;0.872836046349849*&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutGroup&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem5&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;dockItem7&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item12" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableFloatingBounds"&gt;0,0,0,0&lt;/property&gt;
+        &lt;property name="SerializableFloatingOffset"&gt;0,0&lt;/property&gt;
+        &lt;property name="FloatSize"&gt;388,288&lt;/property&gt;
+        &lt;property name="IsActive"&gt;true&lt;/property&gt;
+        &lt;property name="AllowClose"&gt;true&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutPanel&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem7&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;_8ce55db3de1143faba18a6cf60783c5c&lt;/property&gt;
+        &lt;property name="Caption" type="System.String"&gt;Trades&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item13" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableFloatingBounds"&gt;0,0,0,0&lt;/property&gt;
+        &lt;property name="SerializableFloatingOffset"&gt;0,0&lt;/property&gt;
+        &lt;property name="FloatSize"&gt;429,305&lt;/property&gt;
+        &lt;property name="IsActive"&gt;false&lt;/property&gt;
+        &lt;property name="AllowClose"&gt;true&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;LayoutPanel&lt;/property&gt;
+        &lt;property name="ParentName"&gt;dockItem7&lt;/property&gt;
+        &lt;property name="ParentCollectionName" isnull="true" /&gt;
+        &lt;property name="Name"&gt;_0e059b3be7284e15adaa08acd6ec3cd2&lt;/property&gt;
+        &lt;property name="Caption" type="System.String"&gt;Portfolios&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item14" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableFloatingBounds"&gt;204,613,400,300&lt;/property&gt;
+        &lt;property name="SerializableFloatingOffset"&gt;6,87&lt;/property&gt;
+        &lt;property name="FloatSize"&gt;400,300&lt;/property&gt;
+        &lt;property name="IsActive"&gt;false&lt;/property&gt;
+        &lt;property name="AllowClose"&gt;true&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="1"&gt;
+          &lt;property name="Item1" isnull="true" iskey="true"&gt;
+            &lt;property name="DockState"&gt;Floating&lt;/property&gt;
+            &lt;property name="ParentName"&gt;dockItem6&lt;/property&gt;
+            &lt;property name="OwnerName"&gt;_91c2736c81f6469daeb4d168891a2b64&lt;/property&gt;
+            &lt;property name="Index"&gt;0&lt;/property&gt;
+          &lt;/property&gt;
+        &lt;/property&gt;
+        &lt;property name="TypeName"&gt;LayoutPanel&lt;/property&gt;
+        &lt;property name="ParentName" isnull="true" /&gt;
+        &lt;property name="ParentCollectionName"&gt;$ClosedPanels&lt;/property&gt;
+        &lt;property name="Name"&gt;_91c2736c81f6469daeb4d168891a2b64&lt;/property&gt;
+        &lt;property name="Caption" type="System.String"&gt;Trades feed&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item15" isnull="true" iskey="true"&gt;
+        &lt;property name="SerializableFloatingBounds"&gt;0,0,0,0&lt;/property&gt;
+        &lt;property name="SerializableFloatingOffset"&gt;0,0&lt;/property&gt;
+        &lt;property name="ItemHeight"&gt;0.872836046349849*&lt;/property&gt;
+        &lt;property name="FloatSize"&gt;388,288&lt;/property&gt;
+        &lt;property name="IsActive"&gt;false&lt;/property&gt;
+        &lt;property name="AllowClose"&gt;true&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="1"&gt;
+          &lt;property name="Item1" isnull="true" iskey="true"&gt;
+            &lt;property name="DockState"&gt;Docked&lt;/property&gt;
+            &lt;property name="ParentName"&gt;dockItem7&lt;/property&gt;
+            &lt;property name="OwnerName"&gt;_eabedc3f6b9d4626858c554d852294c4&lt;/property&gt;
+            &lt;property name="Index"&gt;0&lt;/property&gt;
+          &lt;/property&gt;
+        &lt;/property&gt;
+        &lt;property name="TypeName"&gt;LayoutPanel&lt;/property&gt;
+        &lt;property name="ParentName" isnull="true" /&gt;
+        &lt;property name="ParentCollectionName"&gt;$ClosedPanels&lt;/property&gt;
+        &lt;property name="Name"&gt;_eabedc3f6b9d4626858c554d852294c4&lt;/property&gt;
+        &lt;property name="Caption" type="System.String"&gt;Trades&lt;/property&gt;
+      &lt;/property&gt;
+      &lt;property name="Item16" isnull="true" iskey="true"&gt;
+        &lt;property name="FloatLocation"&gt;204,613&lt;/property&gt;
+        &lt;property name="ShouldRestoreOnActivate"&gt;false&lt;/property&gt;
+        &lt;property name="SerializableIsMaximized"&gt;false&lt;/property&gt;
+        &lt;property name="SerializableZOrder"&gt;0&lt;/property&gt;
+        &lt;property name="SerializableSelectedTabPageIndex"&gt;-1&lt;/property&gt;
+        &lt;property name="FloatSize"&gt;400,300&lt;/property&gt;
+        &lt;property name="SerializableDockSituation" iskey="true" value="0" /&gt;
+        &lt;property name="TypeName"&gt;FloatGroup&lt;/property&gt;
+        &lt;property name="ParentName" isnull="true" /&gt;
+        &lt;property name="ParentCollectionName"&gt;$DecomposedItems&lt;/property&gt;
+        &lt;property name="Name"&gt;dockItem6&lt;/property&gt;
+      &lt;/property&gt;
+    &lt;/property&gt;
+    &lt;property name="DockingStyle"&gt;VS2010&lt;/property&gt;
+    &lt;property name="RestoreLayoutOptions.FloatPanelsRestoreOffset" OwnerType="DevExpress.Xpf.Docking.RestoreLayoutOptions" DependencyPropertyType="System.Windows.Point"&gt;6,87&lt;/property&gt;
+  &lt;/property&gt;
+&lt;/XtraSerializer&gt;</Value>
           </value>
         </KeyValuePairBeginStringAndObjectEnd>
       </Value>
