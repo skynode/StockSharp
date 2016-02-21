@@ -117,13 +117,10 @@ namespace StockSharp.Studio.Controls
 				_indicators.Add(element, indicator);
 
 				var values = _allCandlesGetter()
-					.Select(candle =>
+					.Select(candle => new RefPair<DateTimeOffset, IDictionary<IChartElement, object>>(candle.OpenTime, new Dictionary<IChartElement, object>
 					{
-						return new RefPair<DateTimeOffset, IDictionary<IChartElement, object>>(candle.OpenTime, new Dictionary<IChartElement, object>
-						{
-							{ element, indicator.Process(candle) }
-						});
-					});
+						{ element, indicator.Process(candle) }
+					})).ToArray();
 
 				ChartPanel.Draw(values);
 			}

@@ -17,9 +17,6 @@ Copyright 2010 by StockSharp, LLC
 using System;
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using DevExpress.Xpf.Bars;
 using StockSharp.Logging;
@@ -29,7 +26,6 @@ using Ecng.Common;
 using Ecng.ComponentModel;
 using Ecng.Localization;
 using Ecng.Xaml;
-using MoreLinq;
 using StockSharp.Alerts;
 using StockSharp.BusinessEntities;
 using StockSharp.Localization;
@@ -90,6 +86,9 @@ namespace StockSharp.Terminal
 
 			Loaded += (sender, args) =>
 			{
+	            if(Properties.Settings.Default.WindowMaximized)
+					WindowState = WindowState.Maximized;
+
 				cmdSvc.Register<RequestBindSource>(this, true, cmd => new BindConnectorCommand(ConfigManager.GetService<IConnector>(), cmd.Control).SyncProcess(this));
 				_connectorService.InitConnector();
 
@@ -108,10 +107,10 @@ namespace StockSharp.Terminal
 
 			Closing += (sender, args) =>
 			{
+		        Properties.Settings.Default.WindowMaximized = WindowState == WindowState.Maximized;
+	            Properties.Settings.Default.Save();
 				new XmlSerializer<SettingsStorage>().Serialize(_workAreaControl.Save(), LayoutFile);
 			};
-
-			WindowState = WindowState.Maximized;
 
 			try
 			{

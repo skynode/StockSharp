@@ -3,20 +3,20 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-		xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
-		xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
-		xmlns:dxprg="http://schemas.devexpress.com/winfx/2008/xaml/propertygrid"
 		xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon"
 		xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
 		xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
 		xmlns:local="clr-namespace:StockSharp.Terminal.Controls"
 		xmlns:loc="clr-namespace:StockSharp.Localization;assembly=StockSharp.Localization"
-		xmlns:xaml="http://schemas.stocksharp.com/xaml"
-		xmlns:terminal="clr-namespace:StockSharp.Terminal"
 		mc:Ignorable="d"
 		DataContext="{Binding RelativeSource={RelativeSource Self}}"
-		Height="600" Width="800" Title="Trade Terminal"
-		xmlns:ribbon="http://schemas.devexpress.com/winfx/2008/xaml/ribbon">
+		Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
+		Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}"
+		Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
+		Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
+		Title="Trade Terminal"
+		xmlns:ribbon="http://schemas.devexpress.com/winfx/2008/xaml/ribbon"
+		xmlns:p="clr-namespace:StockSharp.Terminal.Properties">
 
 	<DockPanel>
 		<dxr:RibbonControl DockPanel.Dock="Top" RibbonStyle="OfficeSlim" ToolbarShowMode="Hide" ShowApplicationButton="False">
