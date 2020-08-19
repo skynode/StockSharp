@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <topic id="82437493-cd53-41eb-b756-d913af0f4f8e" revisionNumber="0">
 	<developerWalkthroughDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 
@@ -20,10 +20,10 @@
 			<list class="ordered">
 				<listItem>
 					<codeEntityReference>T:StockSharp.Logging.FileLogListener</codeEntityReference> - записывает сообщения в текстовый файл.
-					Рекомендуется использовать для уже сделаного робота, и использовать логи в форс-мажорных ситуациях.
+					Рекомендуется использовать для уже сделанного робота, и использовать логи в форс-мажорных ситуациях.
 				</listItem>
 				<listItem>
-					<codeEntityReference>T:StockSharp.Logging.SoundLogListener</codeEntityReference> - проигрывает звуковое сообщение когда приходит
+					<codeEntityReference>T:StockSharp.Xaml.SoundLogListener</codeEntityReference> - проигрывает звуковое сообщение когда приходит
 					новое сообщение. Рекомендуется использовать, если за роботом нет постоянного внимания.
 				</listItem>
 				<listItem>
@@ -39,26 +39,18 @@
 					<codeEntityReference>T:StockSharp.Logging.EmailLogListener</codeEntityReference> - отсылает сообщения на указанный email адрес.
 					Рекомендуется использовать, если робот расположен на непостоянно контролируемом компьютере	(на сервере у хостера).
 				</listItem>
-				<!-- <listItem>
-					<codeEntityReference>T:StockSharp.Logging.SmsLogListener</codeEntityReference> - отсылает сообщения на телефон через Google
-					Calendar. Рекомендуется использовать, если робот расположен на непостоянно контролируемом компьютере (на сервере у провайдера).
-				</listItem> -->
 				<listItem>
 					<codeEntityReference>T:StockSharp.Xaml.GuiLogListener</codeEntityReference> - отображает сообщения через
 					специальное окно <codeEntityReference>T:StockSharp.Xaml.LogWindow</codeEntityReference>. Умеет работать в двух режимах: когда
 					все сообщения пишутся в одно окно, и когда для каждого <codeEntityReference>T:StockSharp.Logging.ILogSource</codeEntityReference> создается
 					отдельное окно. Рекомендуется использовать, если робот обладает графическим интерфейсом.
 				</listItem>
-				<listItem>
-					<codeEntityReference>T:StockSharp.Logging.Log4NetLogListener</codeEntityReference> - записывает сообщения через специальную
-					библиотеку <token>log4net</token>. Рекомендуется для тех, кто уже знаком с данной библиотекой.
-				</listItem>
 			</list>
 			<para>
 				<codeEntityReference>T:StockSharp.Logging.LogListener</codeEntityReference> можно настроить на фильтрацию сообщений через
 				свойство <codeEntityReference>P:StockSharp.Logging.LogListener.Filters</codeEntityReference>. Например, через фильтры
 				можно задать, какой тип сообщений стоит обрабатывать. Это особенно полезно в случаях использования
-				<codeEntityReference>T:StockSharp.Logging.SoundLogListener</codeEntityReference> или
+				<codeEntityReference>T:StockSharp.Xaml.SoundLogListener</codeEntityReference> или
 				<codeEntityReference>T:StockSharp.Logging.EmailLogListener</codeEntityReference>, чтобы, к примеру, посылать e-mail только 
 				в критических ситуациях (ошибка алгоритма торговли), а не на каждое отладочное сообщение.
 			</para>
@@ -122,12 +114,6 @@
       <codeEntityReference>T:MyNamespace.MyClass</codeEntityReference>
       <codeEntityReference>P:MyNamespace.MyClass.MyProp</codeEntityReference>
       <codeEntityReference>M:System.IO.File.OpenText(System.String)</codeEntityReference>
-
-      <externalLink>
-        <linkText>Sandcastle Styles</linkText>
-        <linkAlternateText>Sandcastle Styles on CodePlex</linkAlternateText>
-        <linkUri>http://codeplex.com/SandcastleStyles</linkUri>
-      </externalLink>
 
       <externalLink>
         <linkText>Change Log</linkText>

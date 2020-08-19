@@ -39,30 +39,20 @@ namespace StockSharp.Algo.Commissions
 
 		private readonly CachedSynchronizedSet<ICommissionRule> _rules = new CachedSynchronizedSet<ICommissionRule>();
 
-		/// <summary>
-		/// The list of commission calculating rules.
-		/// </summary>
+		/// <inheritdoc />
 		public ISynchronizedCollection<ICommissionRule> Rules => _rules;
 
-		/// <summary>
-		/// Total commission.
-		/// </summary>
+		/// <inheritdoc />
 		public virtual decimal Commission { get; private set; }
 
-		/// <summary>
-		/// To reset the state.
-		/// </summary>
+		/// <inheritdoc />
 		public virtual void Reset()
 		{
 			Commission = 0;
 			_rules.Cache.ForEach(r => r.Reset());
 		}
 
-		/// <summary>
-		/// To calculate commission.
-		/// </summary>
-		/// <param name="message">The message containing the information about the order or own trade.</param>
-		/// <returns>The commission. If the commission can not be calculated then <see langword="null" /> will be returned.</returns>
+		/// <inheritdoc />
 		public virtual decimal? Process(Message message)
 		{
 			switch (message.Type)
@@ -77,7 +67,20 @@ namespace StockSharp.Algo.Commissions
 					if (_rules.Count == 0)
 						return null;
 
-					var commission = _rules.Cache.Sum(rule => rule.Process(message));
+					decimal? commission = null;
+
+					foreach (var rule in _rules.Cache)
+					{
+						var ruleCom = rule.Process(message);
+
+						if (ruleCom != null)
+						{
+							if (commission == null)
+								commission = 0;
+
+							commission += ruleCom.Value;
+						}
+					}
 
 					if (commission != null)
 						Commission += commission.Value;
@@ -107,14 +110,8 @@ namespace StockSharp.Algo.Commissions
 			storage.SetValue(nameof(Rules), Rules.Select(r => r.SaveEntire(false)).ToArray());
 		}
 
-		string ICommissionRule.Title
-		{
-			get { throw new NotSupportedException(); }
-		}
+		string ICommissionRule.Title => throw new NotSupportedException();
 
-		Unit ICommissionRule.Value
-		{
-			get { throw new NotSupportedException(); }
-		}
+		Unit ICommissionRule.Value => throw new NotSupportedException();
 	}
 }

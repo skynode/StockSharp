@@ -3,7 +3,7 @@
   <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
        <introduction>
       <para>
-      	<codeEntityReference>T:StockSharp.Xaml.NewsGrid</codeEntityReference> - таблица для отображения новостей. В основе данного компонента лежит <link xlink:href="88a40124-43a6-4be9-b04b-a245000fca70">универсальная таблица</link>.
+      	<codeEntityReference>T:StockSharp.Xaml.NewsGrid</codeEntityReference> - таблица для отображения новостей.
       </para>
       <para>
       
@@ -18,22 +18,16 @@
   				<para><codeEntityReference>P:StockSharp.Xaml.NewsGrid.FirstSelectedNews</codeEntityReference> - выбранная новость.</para>
   			</listItem>
   			<listItem>
-  				<para><codeEntityReference>P:StockSharp.Xaml.NewsGrid.SelectedNews</codeEntityReference> - выбраннаые новости.</para>
+  				<para><codeEntityReference>P:StockSharp.Xaml.NewsGrid.SelectedNews</codeEntityReference> - выбранные новости.</para>
   			</listItem>
   			<listItem>
   				<para><codeEntityReference>P:StockSharp.Xaml.NewsGrid.NewsProvider</codeEntityReference> - поставщик новостей.</para>
   			</listItem>
 		</list>
-		
-	  <!--><para>
-	  Внеший вид компонета в составе <codeEntityReference>T:StockSharp.Xaml.NewsPanel</codeEntityReference>, а также фрагменты кода см. в разделе <link xlink:href="00026219-17a5-4749-82ab-ec018aa1ab0b">NewsPanel</link>.
-      </para>-->
       <para>
-	  Ниже показаны внеший вид компонета, а также фрагменты кода с его использованием. Пример кода взят из <legacyItalic>Samples/AlfaDirect/SampleAlfa</legacyItalic>.
+Ниже показаны фрагменты кода с его использованием. Пример кода взят из <legacyItalic>Samples/Common/SampleConnection</legacyItalic>.
       </para>
-      
-      <!-- <mediaLink><image placement="left" xlink:href="GUI_TradeGrid" /></mediaLink> -->
-      
+
        <code title="XAML" language="XAML">
 	  				<![CDATA[
 <Window	x:Class="SampleAlfa.NewsWindow"
@@ -47,56 +41,18 @@
 	  				]]>
               </code>
               <code title="C#" language="C#">
-              		<![CDATA[
+					  <![CDATA[					  
+private readonly Connector _connector = new Connector();
+
 private void ConnectClick(object sender, RoutedEventArgs e)
 {
-	try
-	{
-		if (!_isConnected)
-		{
-			if (Trader == null)
-			{
-				// создаем подключение
-				Trader = new AlfaTrader { LogLevel = LogLevels.Debug };
+	.................................................
+	// устанавливаем поставщика новостей
+	_newsWindow.NewsPanel.NewsProvider = _connector;
 
-                ..................................................
-
-				// подписываемся на событие успешного соединения
-				Trader.Connected += () =>
-				{
-					this.GuiAsync(() => ChangeConnectStatus(true));
-
-					// запускаем подписку на новости
-					Trader.RegisterNews();
-				};
-
-               ..................................................
-
-				// устанавливаем поставщика новостей
-				_newsWindow.NewsPanel.NewsProvider = Trader;
-
-				ShowSecurities.IsEnabled = ShowNews.IsEnabled =
-				ShowMyTrades.IsEnabled = ShowOrders.IsEnabled = ShowStopOrders.IsEnabled =
-				ShowPortfolios.IsEnabled = true;
-
-				// добавляет новости в сетку NewsGrid
-				Trader.NewNews += news => _newsWindow.NewsPanel.NewsGrid.News.Add(news);
-			}
-
-			Trader.Login = TextBoxLogin.Text;
-			Trader.Password = PasswordBox.Password;
-			Trader.Connect();
-		}
-		else
-		{
-			Trader.UnRegisterNews();
-			Trader.Disconnect();
-		}
-	}
-	catch (Exception ex)
-	{
-		MessageBox.Show(this, ex.Message, LocalizedStrings.Str152);
-	}
+	// добавляет новости в сетку NewsGrid
+	_connector.NewNews += news => _newsWindow.NewsPanel.NewsGrid.News.Add(news);
+	.................................................
 }
 	  				]]>
              </code>

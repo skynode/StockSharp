@@ -56,8 +56,7 @@
       <steps class="bullet">
         <step>
           <content>
-			  <code language="C#">
-					var trader = new SmartTrader(login, password);
+			  <code language="C#">				
 					
 					// выводим текущее локальное время
 					Console.WriteLine(TimeHelper.Now);
@@ -73,15 +72,6 @@
         </step>
       </steps>
     </procedure>
-    
-    <relatedTopics>
-     	<externalLink>
-			<linkText>Временные метки хранилища</linkText>
-			<linkAlternateText>Временные метки хранилища</linkAlternateText>
-			<linkUri>http://stocksharp.com/forum/yaf_postst5416_Vriemiennyie-mietki-khranilishcha.aspx</linkUri>
-			<linkTarget>_blank</linkTarget>
-		</externalLink>
-     </relatedTopics>   
     
   </developerWalkthroughDocument>
 </topic>

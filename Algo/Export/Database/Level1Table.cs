@@ -21,44 +21,29 @@ namespace StockSharp.Algo.Export.Database
 
 	using Ecng.Common;
 
-	using StockSharp.BusinessEntities;
 	using StockSharp.Messages;
 
 	class Level1Table : Table<Level1ChangeMessage>
 	{
-		public Level1Table(Security security)
-			: base("Level1", CreateColumns(security))
+		public Level1Table(decimal? priceStep, decimal? volumeStep)
+			: base("Level1", CreateColumns(priceStep, volumeStep))
 		{
 		}
 
 		private static Type GetDbType(Level1Fields field)
 		{
-			switch (field)
-			{
-				case Level1Fields.LastTrade:
-				case Level1Fields.BestBid:
-				case Level1Fields.BestAsk:
-					return null;
-				case Level1Fields.Decimals:
-				case Level1Fields.BidsCount:
-				case Level1Fields.AsksCount:
-				case Level1Fields.TradesCount:
-				case Level1Fields.State:
-					return typeof(int);
-				case Level1Fields.LastTradeId:
-					return typeof(long);
-				case Level1Fields.LastTradeOrigin:
-					return typeof(int?);
-				case Level1Fields.BestBidTime:
-				case Level1Fields.BestAskTime:
-				case Level1Fields.LastTradeTime:
-					return typeof(DateTimeOffset);
-				default:
-					return typeof(decimal);
-			}
+			var type = field.ToType();
+
+			if (type == null)
+				return null;
+
+			if (type.IsEnum)
+				type = type.GetEnumUnderlyingType();
+
+			return type.IsClass ? type : typeof(Nullable<>).Make(type);
 		}
 
-		private static IEnumerable<ColumnDescription> CreateColumns(Security security)
+		private static IEnumerable<ColumnDescription> CreateColumns(decimal? priceStep, decimal? volumeStep)
 		{
 			yield return new ColumnDescription(nameof(SecurityId.SecurityCode))
 			{
@@ -72,8 +57,9 @@ namespace StockSharp.Algo.Export.Database
 			};
 			yield return new ColumnDescription(nameof(Level1ChangeMessage.ServerTime)) { DbType = typeof(DateTimeOffset) };
 			yield return new ColumnDescription(nameof(Level1ChangeMessage.LocalTime)) { DbType = typeof(DateTimeOffset) };
+			yield return new ColumnDescription(nameof(Level1ChangeMessage.SeqNum)) { DbType = typeof(long?) };
 
-			foreach (var field in Enumerator.GetValues<Level1Fields>())
+			foreach (var field in Enumerator.GetValues<Level1Fields>().ExcludeObsolete())
 			{
 				var columnType = GetDbType(field);
 
@@ -96,7 +82,7 @@ namespace StockSharp.Algo.Export.Database
 					case Level1Fields.BestAskPrice:
 					case Level1Fields.HighBidPrice:
 					case Level1Fields.LowAskPrice:
-						step = security.PriceStep ?? 1;
+						step = priceStep ?? 1;
 						break;
 					case Level1Fields.OpenInterest:
 					case Level1Fields.BidsVolume:
@@ -106,10 +92,7 @@ namespace StockSharp.Algo.Export.Database
 					case Level1Fields.Volume:
 					case Level1Fields.BestBidVolume:
 					case Level1Fields.BestAskVolume:
-						step = security.VolumeStep ?? 1;
-						break;
-					case Level1Fields.Multiplier:
-						step = security.Multiplier ?? 1;
+						step = volumeStep ?? 1;
 						break;
 				}
 
@@ -132,6 +115,7 @@ namespace StockSharp.Algo.Export.Database
 						{ nameof(SecurityId.BoardCode), m.SecurityId.BoardCode },
 						{ nameof(Level1ChangeMessage.ServerTime), m.ServerTime },
 						{ nameof(Level1ChangeMessage.LocalTime), m.LocalTime },
+						{ nameof(Level1ChangeMessage.SeqNum), m.SeqNum.DefaultAsNull() },
 					};
 
 					foreach (var pair in m.Changes)

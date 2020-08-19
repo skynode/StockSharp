@@ -13,12 +13,15 @@ Created: 2015, 11, 11, 2:32 PM
 Copyright 2010 by StockSharp, LLC
 *******************************************************************************************/
 #endregion S# License
+
 namespace StockSharp.Messages
 {
 	using System;
-	using System.ComponentModel;
+	using System.ComponentModel.DataAnnotations;
 	using System.Runtime.Serialization;
+	using System.ComponentModel;
 
+	using Ecng.Common;
 	using Ecng.Serialization;
 
 	using StockSharp.Localization;
@@ -28,16 +31,14 @@ namespace StockSharp.Messages
 	/// </summary>
 	[System.Runtime.Serialization.DataContract]
 	[Serializable]
-	public class SecurityMessage : Message
+	public class SecurityMessage : BaseSubscriptionIdMessage<SecurityMessage>, ISecurityIdMessage
 	{
-		/// <summary>
-		/// Security ID.
-		/// </summary>
+		/// <inheritdoc />
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.Str361Key)]
 		[DescriptionLoc(LocalizedStrings.SecurityIdKey, true)]
 		[MainCategory]
-		[ReadOnly(true)]
+		[TypeConverter(typeof(StringToSecurityIdTypeConverter))]
 		public SecurityId SecurityId { get; set; }
 
 		/// <summary>
@@ -69,6 +70,26 @@ namespace StockSharp.Messages
 		public decimal? VolumeStep { get; set; }
 
 		/// <summary>
+		/// Minimum volume allowed in order.
+		/// </summary>
+		[DataMember]
+		[DisplayNameLoc(LocalizedStrings.MinVolumeKey)]
+		[DescriptionLoc(LocalizedStrings.MinVolumeDescKey)]
+		[MainCategory]
+		[Nullable]
+		public decimal? MinVolume { get; set; }
+
+		/// <summary>
+		/// Maximum volume allowed in order.
+		/// </summary>
+		[DataMember]
+		[DisplayNameLoc(LocalizedStrings.MaxVolumeKey)]
+		[DescriptionLoc(LocalizedStrings.MaxVolumeDescKey)]
+		[MainCategory]
+		[Nullable]
+		public decimal? MaxVolume { get; set; }
+
+		/// <summary>
 		/// Lot multiplier.
 		/// </summary>
 		[DataMember]
@@ -87,7 +108,7 @@ namespace StockSharp.Messages
 		[MainCategory]
 		[Nullable]
 		public int? Decimals { get; set; }
-		
+
 		/// <summary>
 		/// Minimum price step.
 		/// </summary>
@@ -107,6 +128,15 @@ namespace StockSharp.Messages
 		[MainCategory]
 		[Nullable]
 		public SecurityTypes? SecurityType { get; set; }
+
+		/// <summary>
+		/// Type in ISO 10962 standard.
+		/// </summary>
+		[DataMember]
+		[DisplayNameLoc(LocalizedStrings.CfiCodeKey)]
+		[DescriptionLoc(LocalizedStrings.CfiCodeDescKey)]
+		[MainCategory]
+		public string CfiCode { get; set; }
 
 		/// <summary>
 		/// Security expiration date (for derivatives - expiration, for bonds — redemption).
@@ -135,6 +165,16 @@ namespace StockSharp.Messages
 		[DisplayNameLoc(LocalizedStrings.UnderlyingAssetKey)]
 		[DescriptionLoc(LocalizedStrings.UnderlyingAssetCodeKey)]
 		public string UnderlyingSecurityCode { get; set; }
+
+		/// <summary>
+		/// Minimum volume allowed in order for underlying security.
+		/// </summary>
+		[DataMember]
+		[DisplayNameLoc(LocalizedStrings.UnderlyingMinVolumeKey)]
+		[DescriptionLoc(LocalizedStrings.UnderlyingMinVolumeDescKey)]
+		[MainCategory]
+		[Nullable]
+		public decimal? UnderlyingSecurityMinVolume { get; set; }
 
 		/// <summary>
 		/// Option strike price.
@@ -173,12 +213,6 @@ namespace StockSharp.Messages
 		public CurrencyTypes? Currency { get; set; }
 
 		/// <summary>
-		/// ID of the original message <see cref="SecurityLookupMessage.TransactionId"/> for which this message is a response.
-		/// </summary>
-		[DataMember]
-		public long OriginalTransactionId { get; set; }
-
-		/// <summary>
 		/// Security class.
 		/// </summary>
 		[DataMember]
@@ -186,6 +220,71 @@ namespace StockSharp.Messages
 		[DescriptionLoc(LocalizedStrings.SecurityClassKey)]
 		[MainCategory]
 		public string Class { get; set; }
+
+		/// <summary>
+		/// Number of issued contracts.
+		/// </summary>
+		[DataMember]
+		public decimal? IssueSize { get; set; }
+
+		/// <summary>
+		/// Date of issue.
+		/// </summary>
+		[DataMember]
+		public DateTimeOffset? IssueDate { get; set; }
+
+		/// <summary>
+		/// Underlying security type.
+		/// </summary>
+		[DataMember]
+		[MainCategory]
+		public SecurityTypes? UnderlyingSecurityType { get; set; }
+
+		/// <summary>
+		/// Can have short positions.
+		/// </summary>
+		[DataMember]
+		[MainCategory]
+		public bool? Shortable { get; set; }
+
+		/// <summary>
+		/// Basket security type. Can be <see langword="null"/> in case of regular security.
+		/// </summary>
+		[DataMember]
+		[Display(
+			ResourceType = typeof(LocalizedStrings),
+			Name = LocalizedStrings.CodeKey,
+			Description = LocalizedStrings.BasketCodeKey,
+			GroupName = LocalizedStrings.BasketKey,
+			Order = 200)]
+		public string BasketCode { get; set; }
+
+		/// <summary>
+		/// Basket security expression. Can be <see langword="null"/> in case of regular security.
+		/// </summary>
+		[DataMember]
+		[Display(
+			ResourceType = typeof(LocalizedStrings),
+			Name = LocalizedStrings.ExpressionKey,
+			Description = LocalizedStrings.ExpressionDescKey,
+			GroupName = LocalizedStrings.BasketKey,
+			Order = 201)]
+		public string BasketExpression { get; set; }
+
+		/// <summary>
+		/// Face value.
+		/// </summary>
+		[DataMember]
+		public decimal? FaceValue { get; set; }
+
+		/// <summary>
+		/// Identifier on primary exchange.
+		/// </summary>
+		[DataMember]
+		public SecurityId PrimaryId { get; set; }
+
+		/// <inheritdoc />
+		public override DataType DataType => DataType.Securities;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SecurityMessage"/>.
@@ -196,7 +295,7 @@ namespace StockSharp.Messages
 		}
 
 		/// <summary>
-		/// Initialize <see cref="SecurityMessage"/>.
+		/// Initializes a new instance of the <see cref="SecurityMessage"/>.
 		/// </summary>
 		/// <param name="type">Message type.</param>
 		protected SecurityMessage(MessageTypes type)
@@ -205,52 +304,138 @@ namespace StockSharp.Messages
 		}
 
 		/// <summary>
-		/// Create a copy of <see cref="SecurityMessage"/>.
+		/// Copy the message into the <paramref name="destination" />.
 		/// </summary>
-		/// <returns>Copy.</returns>
-		public override Message Clone()
+		/// <param name="destination">The object, to which copied information.</param>
+		/// <param name="copyOriginalTransactionId">Copy <see cref="IOriginalTransactionIdMessage.OriginalTransactionId"/>.</param>
+		public void CopyTo(SecurityMessage destination, bool copyOriginalTransactionId)
 		{
-			var clone = new SecurityMessage();
-			CopyTo(clone);
-			return clone;
+			var originTransId = destination.OriginalTransactionId;
+
+			CopyTo(destination);
+
+			if (!copyOriginalTransactionId)
+				destination.OriginalTransactionId = originTransId;
+		}
+
+		/// <inheritdoc />
+		public override void CopyTo(SecurityMessage destination)
+		{
+			CopyEx(destination, true);
 		}
 
 		/// <summary>
 		/// Copy the message into the <paramref name="destination" />.
 		/// </summary>
-		/// <param name="destination">The object, which copied information.</param>
-		public void CopyTo(SecurityMessage destination)
+		/// <param name="destination">The object, to which copied information.</param>
+		/// <param name="copyBase">Copy <see cref="BaseSubscriptionIdMessage{TMessage}"/>.</param>
+		public void CopyEx(SecurityMessage destination, bool copyBase)
 		{
-			if (destination == null)
-				throw new ArgumentNullException(nameof(destination));
+			if (copyBase)
+				base.CopyTo(destination);
 
 			destination.SecurityId = SecurityId;
 			destination.Name = Name;
 			destination.ShortName = ShortName;
 			destination.Currency = Currency;
 			destination.ExpiryDate = ExpiryDate;
-			destination.OriginalTransactionId = OriginalTransactionId;
 			destination.OptionType = OptionType;
 			destination.PriceStep = PriceStep;
 			destination.Decimals = Decimals;
 			destination.SecurityType = SecurityType;
+			destination.CfiCode = CfiCode;
 			destination.SettlementDate = SettlementDate;
 			destination.Strike = Strike;
 			destination.UnderlyingSecurityCode = UnderlyingSecurityCode;
 			destination.VolumeStep = VolumeStep;
+			destination.MinVolume = MinVolume;
+			destination.MaxVolume = MaxVolume;
 			destination.Multiplier = Multiplier;
 			destination.Class = Class;
 			destination.BinaryOptionType = BinaryOptionType;
-			destination.LocalTime = LocalTime;
+			destination.IssueSize = IssueSize;
+			destination.IssueDate = IssueDate;
+			destination.UnderlyingSecurityType = UnderlyingSecurityType;
+			destination.UnderlyingSecurityMinVolume = UnderlyingSecurityMinVolume;
+			destination.Shortable = Shortable;
+			destination.BasketCode = BasketCode;
+			destination.BasketExpression = BasketExpression;
+			destination.FaceValue = FaceValue;
+			destination.PrimaryId = PrimaryId;
 		}
 
-		/// <summary>
-		/// Returns a string that represents the current object.
-		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
+		/// <inheritdoc />
 		public override string ToString()
 		{
-			return base.ToString() + $",Sec={SecurityId}";
+			var str = base.ToString() + $",Sec={SecurityId}";
+
+			if (SecurityType != null)
+				str += $",SecType={SecurityType}";
+
+			if (!Name.IsEmpty())
+				str += $",Name={Name}";
+
+			if (!ShortName.IsEmpty())
+				str += $",Short={ShortName}";
+
+			if (ExpiryDate != null)
+				str += $",Exp={ExpiryDate}";
+
+			if (PriceStep != null)
+				str += $",Price={PriceStep}";
+
+			if (VolumeStep != null)
+				str += $",Vol={VolumeStep}";
+
+			if (MinVolume != null)
+				str += $",MinVol={MinVolume}";
+
+			if (MaxVolume != null)
+				str += $",MaxVol={MaxVolume}";
+
+			if (Decimals != null)
+				str += $",Dec={Decimals}";
+
+			if (Multiplier != null)
+				str += $",Mult={Multiplier}";
+
+			if (SettlementDate != null)
+				str += $",Sett={SettlementDate}";
+
+			if (Currency != null)
+				str += $",Cur={Currency}";
+
+			if (OptionType != null)
+				str += $",Opt={OptionType}";
+
+			if (Strike != null)
+				str += $",Strike={Strike}";
+
+			if (CfiCode != null)
+				str += $",CFI={CfiCode}";
+
+			if (UnderlyingSecurityCode != null)
+				str += $",Under={UnderlyingSecurityCode}";
+
+			if (Class != null)
+				str += $",Class={Class}";
+
+			if (BinaryOptionType != null)
+				str += $",Bin={BinaryOptionType}";
+
+			if (Shortable != null)
+				str += $",Strike={Shortable}";
+
+			if (BasketCode != null)
+				str += $",Basket={BasketCode}/{BasketExpression}";
+
+			if (FaceValue != null)
+				str += $",FaceValue={FaceValue}";
+
+			if (PrimaryId != default)
+				str += $",Primary={PrimaryId}";
+
+			return str;
 		}
 	}
 }

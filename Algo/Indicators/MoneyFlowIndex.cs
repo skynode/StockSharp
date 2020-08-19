@@ -25,6 +25,7 @@ namespace StockSharp.Algo.Indicators
 	/// </summary>
 	[DisplayName("MFI")]
 	[DescriptionLoc(LocalizedStrings.MoneyFlowIndexKey)]
+	[IndicatorIn(typeof(CandleIndicatorValue))]
 	public class MoneyFlowIndex : LengthIndicator<decimal>
 	{
 		private decimal _previousPrice;
@@ -38,18 +39,17 @@ namespace StockSharp.Algo.Indicators
 		{
 		    Length = 14;
 		}
-		
+
 		/// <summary>
-		/// Initializes a new instance of the <see cref="MoneyFlowIndex"/> using a specified length.
+		/// Initializes a new instance of the <see cref="MoneyFlowIndex"/>.
 		/// </summary>
+		/// <param name="length">Period length.</param>
 		public MoneyFlowIndex(int length)
 		{
 		    Length = length;
 		}
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
@@ -58,16 +58,10 @@ namespace StockSharp.Algo.Indicators
 			_previousPrice = 0;
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _positiveFlow.IsFormed && _negativeFlow.IsFormed;
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var candle = input.GetValue<Candle>();

@@ -1,24 +1,8 @@
-#region S# License
-/******************************************************************************************
-NOTICE!!!  This program and source code is owned and licensed by
-StockSharp, LLC, www.stocksharp.com
-Viewing or use of this code requires your acceptance of the license
-agreement found at https://github.com/StockSharp/StockSharp/blob/master/LICENSE
-Removal of this comment is a violation of the license agreement.
-
-Project: StockSharp.Algo.Strategies.Testing.Algo
-File: BatchEmulation.cs
-Created: 2015, 11, 11, 2:32 PM
-
-Copyright 2010 by StockSharp, LLC
-*******************************************************************************************/
-#endregion S# License
 namespace StockSharp.Algo.Strategies.Testing
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Threading.Tasks;
 
 	using Ecng.Collections;
 	using Ecng.Common;
@@ -29,156 +13,65 @@ namespace StockSharp.Algo.Strategies.Testing
 	using StockSharp.Algo.Storages;
 	using StockSharp.Algo.Testing;
 	using StockSharp.BusinessEntities;
-	using StockSharp.Logging;
 	using StockSharp.Messages;
+	using StockSharp.Logging;
+	using StockSharp.Localization;
 
 	/// <summary>
 	/// The batch emulator of strategies.
 	/// </summary>
-	public class BatchEmulation
+	public class BatchEmulation : BaseLogReceiver
 	{
-		private sealed class BasketEmulationAdapter : BasketMessageAdapter
+		private readonly List<HistoryEmulationConnector> _currentConnectors = new List<HistoryEmulationConnector>();
+		private IMessageAdapter _histAdapter;
+		private bool _cancelEmulation;
+
+		private readonly SyncObject _sync = new SyncObject();
+
+		private readonly ISecurityProvider _securityProvider;
+		private readonly IPortfolioProvider _portfolioProvider;
+		private readonly IExchangeInfoProvider _exchangeInfoProvider;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="BatchEmulation"/>.
+		/// </summary>
+		/// <param name="securities">Instruments, the operation will be performed with.</param>
+		/// <param name="portfolios">Portfolios, the operation will be performed with.</param>
+		/// <param name="storageRegistry">Market data storage.</param>
+		public BatchEmulation(IEnumerable<Security> securities, IEnumerable<Portfolio> portfolios, IStorageRegistry storageRegistry)
+			: this(new CollectionSecurityProvider(securities), new CollectionPortfolioProvider(portfolios), new InMemoryExchangeInfoProvider(), storageRegistry, StorageFormats.Binary, storageRegistry.DefaultDrive)
 		{
-			private readonly EmulationSettings _settings;
-			private bool _isInitialized;
-
-			public BasketEmulationAdapter(IdGenerator transactionIdGenerator, EmulationSettings settings)
-				: base(transactionIdGenerator)
-			{
-				_settings = settings;
-			}
-
-			private DateTimeOffset _currentTime;
-
-			public override DateTimeOffset CurrentTime => _currentTime;
-
-			protected override void OnSendInMessage(Message message)
-			{
-				_currentTime = message.LocalTime;
-
-				switch (message.Type)
-				{
-					case MessageTypes.Connect:
-					{
-						if (!_isInitialized)
-						{
-							//CreateInnerAdapters();
-
-							_isInitialized = true;
-						}
-					
-						GetSortedAdapters().ForEach(a => a.SendInMessage(message.Clone()));
-						break;
-					}
-
-					case MessageTypes.OrderRegister:
-					case MessageTypes.OrderReplace:
-					case MessageTypes.OrderPairReplace:
-					case MessageTypes.OrderCancel:
-					case MessageTypes.OrderGroupCancel:
-					case MessageTypes.MarketData:
-						base.OnSendInMessage(message);
-						break;
-
-					case MessageTypes.CandleTimeFrame:
-					case MessageTypes.CandlePnF:
-					case MessageTypes.CandleRange:
-					case MessageTypes.CandleRenko:
-					case MessageTypes.CandleTick:
-					case MessageTypes.CandleVolume:
-						GetSortedAdapters().ForEach(a => a.SendInMessage(message.Clone()));
-						break;
-
-					default:
-						GetSortedAdapters().ForEach(a => a.SendInMessage(message)); //TODO Clone работает не для всех месседжей
-						break;
-				}
-			}
-
-			protected override void OnInnerAdapterNewOutMessage(IMessageAdapter innerAdapter, Message message)
-			{
-				switch (message.Type)
-				{
-					case MessageTypes.Connect:
-					case MessageTypes.Disconnect:
-						base.OnInnerAdapterNewOutMessage(innerAdapter, message);
-						break;
-
-					case MessageTypes.Execution:
-					{
-						var execMsg = (ExecutionMessage)message;
-
-						if (execMsg.ExecutionType != ExecutionTypes.Transaction)
-						{
-							if (innerAdapter != InnerAdapters.LastOrDefault())
-								return;
-						}
-
-						base.OnInnerAdapterNewOutMessage(innerAdapter, message);
-						break;
-					}
-
-					default:
-					{
-						// на выход данные идут только из одного адаптера
-						if (innerAdapter != InnerAdapters.LastOrDefault())
-							return;
-
-						base.OnInnerAdapterNewOutMessage(innerAdapter, message);
-						break;
-					}
-				}
-			}
-
-			//protected override void CreateInnerAdapters()
-			//{
-			//	var tradeIdGenerator = new IncrementalIdGenerator();
-			//	var orderIdGenerator = new IncrementalIdGenerator();
-
-			//	foreach (var session in SessionHolder.InnerSessions)
-			//	{
-			//		if (!session.IsTransactionEnabled)
-			//			continue;
-
-			//		var adapter = (EmulationMessageAdapter)session.CreateTransactionAdapter();
-
-			//		ApplySettings(adapter, tradeIdGenerator, orderIdGenerator);
-			//		AddInnerAdapter(adapter, SessionHolder.InnerSessions[session]);
-			//	}
-			//}
-
-			private void ApplySettings(EmulationMessageAdapter adapter, IncrementalIdGenerator tradeIdGenerator, IncrementalIdGenerator orderIdGenerator)
-			{
-				adapter.Emulator.Settings.Load(_settings.Save());
-				((MarketEmulator)adapter.Emulator).TradeIdGenerator = tradeIdGenerator;
-				((MarketEmulator)adapter.Emulator).OrderIdGenerator = orderIdGenerator;
-			}
-
-			public override void SendOutMessage(Message message)
-			{
-				// обрабатываем только TimeMsg, которые получены из исторического адаптера
-				// все, что приходит с незаполненным временем добавляется в других местах
-				if (message.Type == MessageTypes.Time && message.LocalTime.IsDefault())
-					return;
-
-				base.SendOutMessage(message);
-			}
 		}
 
-		private readonly SynchronizedDictionary<Strategy, Tuple<Portfolio, Security>> _strategyInfo = new SynchronizedDictionary<Strategy, Tuple<Portfolio, Security>>();
-		//private readonly HistoryBasketSessionHolder _basketSessionHolder;
+		/// <summary>
+		/// Initializes a new instance of the <see cref="BatchEmulation"/>.
+		/// </summary>
+		/// <param name="securityProvider">The provider of information about instruments.</param>
+		/// <param name="portfolioProvider">The portfolio to be used to register orders. If value is not given, the portfolio with default name Simulator will be created.</param>
+		/// <param name="exchangeInfoProvider">Exchanges and trading boards provider.</param>
+		/// <param name="storageRegistry">Market data storage.</param>
+		/// <param name="storageFormat">The format of market data. <see cref="StorageFormats.Binary"/> is used by default.</param>
+		/// <param name="drive">The storage which is used by default. By default, <see cref="IStorageRegistry.DefaultDrive"/> is used.</param>
+		public BatchEmulation(ISecurityProvider securityProvider, IPortfolioProvider portfolioProvider, IExchangeInfoProvider exchangeInfoProvider, IStorageRegistry storageRegistry, StorageFormats storageFormat = StorageFormats.Binary, IMarketDataDrive drive = null)
+		{
+			_securityProvider = securityProvider ?? throw new ArgumentNullException(nameof(securityProvider));
+			_portfolioProvider = portfolioProvider ?? throw new ArgumentNullException(nameof(portfolioProvider));
+			_exchangeInfoProvider = exchangeInfoProvider ?? throw new ArgumentNullException(nameof(exchangeInfoProvider));
 
-		private EmulationStates _prev = EmulationStates.Stopped;
+			EmulationSettings = new EmulationSettings();
 
-		private IEnumerator<IEnumerable<Strategy>> _batches;
-		private Strategy[] _batch = ArrayHelper.Empty<Strategy>();
-		private bool _cancelEmulation;
-		private TimeSpan _progressStep;
-		private DateTime _nextTime;
-		private int _totalBatches;
-		private int _currentBatch;
+			StorageSettings = new StorageCoreSettings
+			{
+				StorageRegistry = storageRegistry,
+				Drive = drive,
+				Format = storageFormat,
+			};
+		}
 
-		private IEnumerable<Security> EmulatorSecurities => ((HistoryMessageAdapter)EmulationConnector.MarketDataAdapter).SecurityProvider.LookupAll();
+		/// <summary>
+		/// Storage settings.
+		/// </summary>
+		public StorageCoreSettings StorageSettings { get; }
 
 		/// <summary>
 		/// Emulation settings.
@@ -186,54 +79,18 @@ namespace StockSharp.Algo.Strategies.Testing
 		public EmulationSettings EmulationSettings { get; }
 
 		/// <summary>
-		/// The emulational connection.
-		/// </summary>
-		public HistoryEmulationConnector EmulationConnector { get; }
-
-		/// <summary>
-		/// The startegy for testing.
-		/// </summary>
-		public IEnumerable<Strategy> Strategies { get; set; }
-
-		/// <summary>
 		/// Has the emulator ended its operation due to end of data, or it was interrupted through the <see cref="BatchEmulation.Stop"/>method.
 		/// </summary>
-		public bool IsFinished => EmulationConnector.IsFinished;
+		public bool IsFinished { get; private set; }
 
-		private int _progress;
-
-		/// <summary>
-		/// The current progress of paper trade process.
-		/// </summary>
-		public int CurrentProgress
-		{
-			get { return _progress; }
-			set
-			{
-				if (_progress == value)
-					return;
-
-				_progress = value;
-
-				TotalProgress = (int)((100m / _totalBatches) * (_currentBatch + _progress / 100m));
-
-				ProgressChanged?.Invoke(_progress, TotalProgress);
-			}
-		}
-
-		/// <summary>
-		/// The general progress of paper trade.
-		/// </summary>
-		public int TotalProgress { get; set; }
-
-		private EmulationStates _state = EmulationStates.Stopped;
+		private ChannelStates _state = ChannelStates.Stopped;
 		
 		/// <summary>
 		/// The emulator state.
 		/// </summary>
-		public EmulationStates State
+		public ChannelStates State
 		{
-			get { return _state; }
+			get => _state;
 			private set
 			{
 				if (_state == value)
@@ -246,323 +103,210 @@ namespace StockSharp.Algo.Strategies.Testing
 		}
 
 		/// <summary>
-		/// Current tested strategies.
-		/// </summary>
-		public IEnumerable<Strategy> BatchStrategies => _batch;
-
-		/// <summary>
 		/// The event on change of paper trade state.
 		/// </summary>
-		public event Action<EmulationStates, EmulationStates> StateChanged;
+		public event Action<ChannelStates, ChannelStates> StateChanged;
 
 		/// <summary>
 		/// The event of paper trade progress change.
 		/// </summary>
-		public event Action<int, int> ProgressChanged;
+		public event Action<Connector, int, int, IEnumerable<Strategy>> ProgressChanged;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="BatchEmulation"/>.
+		/// Server time changed <see cref="Connector.CurrentTime"/>. It passed the time difference since the last call of the event. The first time the event passes the value <see cref="TimeSpan.Zero"/>.
 		/// </summary>
-		/// <param name="securities">Instruments, the operation will be performed with.</param>
-		/// <param name="portfolios">Portfolios, the operation will be performed with.</param>
-		/// <param name="storageRegistry">Market data storage.</param>
-		public BatchEmulation(IEnumerable<Security> securities, IEnumerable<Portfolio> portfolios, IStorageRegistry storageRegistry)
-			: this((ISecurityProvider)new CollectionSecurityProvider(securities), portfolios, storageRegistry)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="BatchEmulation"/>.
-		/// </summary>
-		/// <param name="securityProvider">The provider of information about instruments.</param>
-		/// <param name="portfolios">Portfolios, the operation will be performed with.</param>
-		/// <param name="storageRegistry">Market data storage.</param>
-		public BatchEmulation(ISecurityProvider securityProvider, IEnumerable<Portfolio> portfolios, IStorageRegistry storageRegistry)
-		{
-			if (securityProvider == null)
-				throw new ArgumentNullException(nameof(securityProvider));
-
-			if (portfolios == null)
-				throw new ArgumentNullException(nameof(portfolios));
-
-			if (storageRegistry == null)
-				throw new ArgumentNullException(nameof(storageRegistry));
-
-			Strategies = Enumerable.Empty<Strategy>();
-
-			EmulationSettings = new EmulationSettings();
-			EmulationConnector = new HistoryEmulationConnector(securityProvider, portfolios, storageRegistry)
-			{
-				UpdateSecurityLastQuotes = false,
-				UpdateSecurityByLevel1 = false
-			};
-
-			EmulationConnector.StateChanged += EmulationConnectorOnStateChanged;
-			EmulationConnector.MarketTimeChanged += EmulationConnectorOnMarketTimeChanged;
-			EmulationConnector.Disconnected += EmulationConnectorOnDisconnected;
-			EmulationConnector.NewSecurities += EmulationConnectorOnNewSecurities;
-		}
-
-		private void EmulationConnectorOnStateChanged()
-		{
-			switch (EmulationConnector.State)
-			{
-				case EmulationStates.Starting:
-				{
-					if (_prev != EmulationStates.Stopped)
-						break;
-
-					_nextTime = EmulationSettings.StartTime + _progressStep;
-					CurrentProgress = 0;
-
-					ApplySettings();
-					break;
-				}
-
-				case EmulationStates.Started:
-					State = EmulationStates.Started;
-					break;
-
-				case EmulationStates.Stopping:
-					break;
-
-				case EmulationStates.Stopped:
-					CurrentProgress = 100;
-					OnEmulationStopped();
-					break;
-			}
-
-			_prev = EmulationConnector.State;
-		}
-
-		private void EmulationConnectorOnMarketTimeChanged(TimeSpan timeSpan)
-		{
-			if (EmulationConnector.CurrentTime < _nextTime && EmulationConnector.CurrentTime < EmulationSettings.StopTime)
-				return;
-
-			_nextTime += _progressStep;
-			CurrentProgress++;
-		}
-
-		private void EmulationConnectorOnDisconnected()
-		{
-			if (_cancelEmulation)
-				return;
-
-			TryStartNextBatch();
-		}
-
-		private void EmulationConnectorOnNewSecurities(IEnumerable<Security> securities)
-		{
-			foreach (var s in securities)
-			{
-				var level1Info = new Level1ChangeMessage
-				{
-					SecurityId = s.ToSecurityId(),
-					ServerTime = EmulationSettings.StartTime
-				};
-
-				if (s.PriceStep != null)
-					level1Info.TryAdd(Level1Fields.PriceStep, s.PriceStep.Value);
-
-				if (s.StepPrice != null)
-					level1Info.TryAdd(Level1Fields.StepPrice, s.StepPrice.Value);
-
-				level1Info.TryAdd(Level1Fields.MinPrice, s.MinPrice ?? 1m);
-				level1Info.TryAdd(Level1Fields.MaxPrice, s.MaxPrice ?? 1000000m);
-
-				if (s.MarginBuy != null)
-					level1Info.TryAdd(Level1Fields.MarginBuy, s.MarginBuy.Value);
-
-				if (s.MarginSell != null)
-					level1Info.TryAdd(Level1Fields.MarginSell, s.MarginSell.Value);
-
-				// fill level1 values
-				EmulationConnector.SendInMessage(level1Info);
-			}
-		}
+		public event Action<Connector, TimeSpan> MarketTimeChanged;
 
 		/// <summary>
 		/// Start emulation.
 		/// </summary>
 		/// <param name="strategies">The strategies.</param>
-		/// <param name="iterationCount"></param>
+		/// <param name="iterationCount">Iteration count.</param>
 		public void Start(IEnumerable<Strategy> strategies, int iterationCount)
 		{
-			if (strategies == null)
+			if (strategies is null)
 				throw new ArgumentNullException(nameof(strategies));
 
-			_progressStep = ((EmulationSettings.StopTime - EmulationSettings.StartTime).Ticks / 100).To<TimeSpan>();
-			
+			if (iterationCount <= 0)
+				throw new ArgumentOutOfRangeException(nameof(iterationCount), iterationCount, LocalizedStrings.Str1219);
+
 			_cancelEmulation = false;
-			_totalBatches = (int)((decimal)iterationCount / EmulationSettings.BatchSize).Ceiling();
-			_currentBatch = -1;
-
-			CurrentProgress = 0;
 			
-			State = EmulationStates.Starting;
+			State = ChannelStates.Starting;
 
-			_batches = strategies.Batch(EmulationSettings.BatchSize).GetEnumerator();
+			var totalBatches = (int)((decimal)iterationCount / EmulationSettings.BatchSize).Ceiling();
 
-			TryStartNextBatch();
+			if (totalBatches == 0)
+				throw new ArgumentOutOfRangeException("totalBatches == 0");
+
+			var batchWeight = 100.0 / totalBatches;
+
+			TryStartNextBatch(strategies.Batch(EmulationSettings.BatchSize).GetEnumerator(), -1, totalBatches, batchWeight);
 		}
 
-		private void TryStartNextBatch()
+		private void TryStartNextBatch(IEnumerator<IEnumerable<Strategy>> batches,
+			int currentBatch, int totalBatches, double batchWeight)
 		{
-			if (!_batches.MoveNext() || _cancelEmulation)
+			if (batches is null)
+				throw new ArgumentNullException(nameof(batches));
+
+			lock (_sync)
 			{
-				State = EmulationStates.Stopping;
-				State = EmulationStates.Stopped;
-				return;
-			}
-
-			_batch = _batches.Current.ToArray();
-			_currentBatch ++;
-
-			EmulationConnector.ClearCache();
-
-			InitAdapters(_batch);
-
-			EmulationConnector.HistoryMessageAdapter.StartDate = EmulationSettings.StartTime;
-			EmulationConnector.HistoryMessageAdapter.StopDate = EmulationSettings.StopTime;
-
-			EmulationConnector.LookupSecuritiesResult += OnEmulationConnectorOnLookupSecuritiesResult;
-
-			EmulationConnector.Connect();
-		}
-
-		private void InitAdapters(IEnumerable<Strategy> strategies)
-		{
-			//var adapter = EmulationConnector.Adapter;
-			//var adapters = adapter.Portfolios.ToArray();
-
-			//foreach (var pair in adapters)
-			//{
-			//	adapter.Portfolios.Remove(pair.Key);
-			//	adapter.InnerAdapters.Remove(pair.Value);
-			//}
-
-			//adapter.InnerAdapters.RemoveWhere(a => a is EmulationMessageAdapter);
-			//adapter.InnerAdapters.Add(new EmulationMessageAdapter(EmulationConnector.TransactionIdGenerator));
-
-			var id = 0;
-
-			foreach (var strategy in strategies)
-			{
-				_strategyInfo[strategy] = new Tuple<Portfolio, Security>(strategy.Portfolio, strategy.Security);
-
-				var portfolio = strategy.Portfolio.Clone();
-				portfolio.Name += "_" + ++id;
-				EmulationConnector.RegisterPortfolio(portfolio);
-
-				//var strategyAdapter = new EmulationMessageAdapter(EmulationConnector.TransactionIdGenerator);
-
-				//adapter.InnerAdapters.Add(strategyAdapter);
-				//adapter.Portfolios[portfolio.Name] = strategyAdapter;
-
-				strategy.Connector = EmulationConnector;
-				strategy.Portfolio = portfolio;
-				//strategy.Security = EmulationConnector.LookupById(strategy.Security.Id);
-			}
-		}
-
-		private void ApplySettings()
-		{
-			var securities = EmulatorSecurities.ToArray();
-
-			if (EmulationConnector.State == EmulationStates.Stopped || EmulationConnector.State == EmulationStates.Starting)
-			{
-				var realData = false;
-
-				switch (EmulationSettings.TradeDataMode)
+				if (_cancelEmulation || !batches.MoveNext())
 				{
-					case EmulationMarketDataModes.Generate:
-					{
-						foreach (var sec in securities)
-							EmulationConnector.RegisterTrades(new RandomWalkTradeGenerator(EmulationConnector.GetSecurityId(sec)));
+					IsFinished = !_cancelEmulation;
 
-						break;
+					State = ChannelStates.Stopping;
+					State = ChannelStates.Stopped;
+
+					if (_histAdapter != null)
+					{
+						_histAdapter.Dispose();
+						_histAdapter = null;
 					}
 
-					case EmulationMarketDataModes.Storage:
-					{
-						realData = true;
-						break;
-					}
+					return;
 				}
 
-				switch (EmulationSettings.DepthDataMode)
-				{
-					case EmulationMarketDataModes.Generate:
-					{
-						foreach (var sec in securities)
-							EmulationConnector.RegisterMarketDepth(new TrendMarketDepthGenerator(EmulationConnector.GetSecurityId(sec)));
+				var batch = batches.Current.ToArray();
+				currentBatch++;
 
-						break;
-					}
-					case EmulationMarketDataModes.Storage:
-						realData = true;
-						break;
+				if (currentBatch == 0)
+				{
+					State = ChannelStates.Starting;
+					State = ChannelStates.Started;
 				}
 
-				if (EmulationSettings.OrderLogDataMode == EmulationMarketDataModes.Storage)
-					realData = true;
-
-				if (!realData)
-					EmulationConnector.HistoryMessageAdapter.StorageRegistry = null;
+				InitAdapters(batches, batch, currentBatch, totalBatches, batchWeight);
 			}
-
-			EmulationConnector.MarketTimeChangedInterval = EmulationSettings.MarketTimeChangedInterval;
-			EmulationConnector.LogLevel = EmulationSettings.LogLevel;
-
-			MemoryStatistics.Instance.LogLevel = EmulationSettings.LogLevel;
 		}
 
-		private void OnEmulationConnectorOnLookupSecuritiesResult(IEnumerable<Security> ss)
+		private void InitAdapters(IEnumerator<IEnumerable<Strategy>> batches, Strategy[] batch,
+			int currentBatch, int totalBatches, double batchWeight)
 		{
-			EmulationConnector.LookupSecuritiesResult -= OnEmulationConnectorOnLookupSecuritiesResult;
+			if (batch is null)
+				throw new ArgumentNullException(nameof(batch));
 
-			// start strategy before emulation started
-			OnEmulationStarting();
+			if (batch.Length == 0)
+				throw new ArgumentOutOfRangeException(nameof(batch));
 
-			// start historical data loading when connection established successfully and all data subscribed
-			EmulationConnector.Start();
-		}
-
-		private void OnEmulationStarting()
-		{
-			MemoryStatistics.Instance.Clear(false);
-
-			//ResetState(EmulatorSecurities);
-
-			foreach (var strategy in _batch)
+			_histAdapter = new SubscriptionOnlineMessageAdapter(new HistoryMessageAdapter(new IncrementalIdGenerator(), _securityProvider)
 			{
+				StorageRegistry = StorageSettings.StorageRegistry,
+				Drive = StorageSettings.Drive,
+				StorageFormat = StorageSettings.Format,
+				StartDate = EmulationSettings.StartTime,
+				StopDate = EmulationSettings.StopTime,
+				Parent = this,
+			});
+
+			var progress = new SynchronizedDictionary<HistoryEmulationConnector, int>();
+			var left = batch.Length;
+
+			var nextProgress = 1;
+
+			_currentConnectors.Clear();
+
+			foreach (var strategy in batch)
+			{
+				var inChannel = new InMemoryMessageChannel(new MessageByLocalTimeQueue(), "Emulator in", _histAdapter.AddErrorLog);
+
+				var connector = new HistoryEmulationConnector(_histAdapter, false, inChannel, _securityProvider, _portfolioProvider, _exchangeInfoProvider)
+				{
+					Parent = this,
+				};
+				connector.EmulationAdapter.Settings.Load(EmulationSettings.Save());
+				
+				strategy.Connector = connector;
+
 				strategy.Reset();
 				strategy.Start();
+
+				progress.Add(connector, 0);
+
+				connector.ProgressChanged += step =>
+				{
+					var avgStep = 0;
+
+					lock (progress.SyncRoot)
+					{
+						progress[connector] = step;
+						avgStep = (int)progress.Values.Average();
+					}
+
+					if (avgStep < nextProgress)
+						return;
+
+					nextProgress++;
+
+					ProgressChanged?.Invoke(connector, step, (int)(currentBatch * batchWeight + ((avgStep * batchWeight) / 100)), batch);
+				};
+
+				connector.MarketTimeChanged += diff => MarketTimeChanged?.Invoke(connector, diff);
+
+				connector.StateChanged += () =>
+				{
+					if (connector.State == ChannelStates.Stopped)
+					{
+						left--;
+
+						if (left == 0)
+							TryStartNextBatch(batches, currentBatch, totalBatches, batchWeight);
+					}
+				};
+
+				_currentConnectors.Add(connector);
+			}
+
+			foreach (var connectors in _currentConnectors)
+				connectors.Connect();
+
+			_histAdapter.SendInMessage(new ConnectMessage());
+			_histAdapter.SendInMessage(new EmulationStateMessage { State = ChannelStates.Starting });
+		}
+
+		/// <summary>
+		/// To suspend the emulation.
+		/// </summary>
+		public void Suspend()
+		{
+			lock (_sync)
+			{
+				if (State != ChannelStates.Started)
+					return;
+
+				State = ChannelStates.Suspending;
+
+				foreach (var connector in _currentConnectors)
+				{
+					if (connector.State == ChannelStates.Started)
+						connector.Suspend();
+				}
+
+				State = ChannelStates.Suspended;
 			}
 		}
 
-		private void OnEmulationStopped()
+		/// <summary>
+		/// To resume the emulation.
+		/// </summary>
+		public void Resume()
 		{
-			foreach (var strategy in _batch)
+			lock (_sync)
 			{
-				strategy.Stop();
+				if (State != ChannelStates.Suspended)
+					return;
 
-				strategy.GetCandleManager()?.Dispose();
+				State = ChannelStates.Starting;
 
-				var tuple = _strategyInfo.TryGetValue(strategy);
+				foreach (var connector in _currentConnectors)
+				{
+					if (connector.State == ChannelStates.Suspended)
+						connector.Start();
+				}
 
-				if (tuple == null)
-					continue;
-
-				strategy.Security = tuple.Item2;
-				strategy.Portfolio = tuple.Item1;
+				State = ChannelStates.Started;
 			}
-
-			_batch = ArrayHelper.Empty<Strategy>();
-			_strategyInfo.Clear();
-
-			EmulationConnector.Disconnect();
 		}
 
 		/// <summary>
@@ -570,8 +314,27 @@ namespace StockSharp.Algo.Strategies.Testing
 		/// </summary>
 		public void Stop()
 		{
-			_cancelEmulation = true;
-			EmulationConnector.Disconnect();
+			lock (_sync)
+			{
+				if (!(State == ChannelStates.Started || State == ChannelStates.Suspended))
+					return;
+
+				State = ChannelStates.Stopping;
+
+				_cancelEmulation = true;
+
+				foreach (var connector in _currentConnectors)
+				{
+					if (connector.State == ChannelStates.Started ||
+						connector.State == ChannelStates.Starting ||
+						connector.State == ChannelStates.Suspended ||
+						connector.State == ChannelStates.Suspending)
+						connector.Disconnect();
+				}
+			
+				_histAdapter.SendInMessage(new EmulationStateMessage { State = ChannelStates.Stopping });
+				_histAdapter.SendInMessage(new DisconnectMessage());
+			}
 		}
 	}
 }

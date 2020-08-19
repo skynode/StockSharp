@@ -20,13 +20,21 @@ namespace StockSharp.Algo.Strategies
 	using System.ComponentModel;
 
 	using Ecng.Common;
+	using Ecng.Collections;
 	using Ecng.Serialization;
 
+	using StockSharp.Localization;
+
 	/// <summary>
-	/// The startegy parameter.
+	/// The strategy parameter.
 	/// </summary>
 	public interface IStrategyParam : IPersistable
 	{
+		/// <summary>
+		/// Parameter identifier.
+		/// </summary>
+		string Id { get; }
+
 		/// <summary>
 		/// Parameter name.
 		/// </summary>
@@ -67,7 +75,18 @@ namespace StockSharp.Algo.Strategies
 		/// <param name="strategy">Strategy.</param>
 		/// <param name="name">Parameter name.</param>
 		public StrategyParam(Strategy strategy, string name)
-			: this(strategy, name, default(T))
+			: this(strategy, name, name, default)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="StrategyParam{T}"/>.
+		/// </summary>
+		/// <param name="strategy">Strategy.</param>
+		/// <param name="id">Parameter identifier.</param>
+		/// <param name="name">Parameter name.</param>
+		public StrategyParam(Strategy strategy, string id, string name)
+			: this(strategy, id, name, default)
 		{
 		}
 
@@ -78,19 +97,38 @@ namespace StockSharp.Algo.Strategies
 		/// <param name="name">Parameter name.</param>
 		/// <param name="initialValue">The initial value.</param>
 		public StrategyParam(Strategy strategy, string name, T initialValue)
+			: this(strategy, name, name, initialValue)
 		{
-			if (strategy == null)
-				throw new ArgumentNullException(nameof(strategy));
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="StrategyParam{T}"/>.
+		/// </summary>
+		/// <param name="strategy">Strategy.</param>
+		/// <param name="id">Parameter identifier.</param>
+		/// <param name="name">Parameter name.</param>
+		/// <param name="initialValue">The initial value.</param>
+		public StrategyParam(Strategy strategy, string id, string name, T initialValue)
+		{
+			if (id.IsEmpty())
+				throw new ArgumentNullException(nameof(id));
 
 			if (name.IsEmpty())
 				throw new ArgumentNullException(nameof(name));
 
-			_strategy = strategy;
+			_strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
+			Id = id;
 			Name = name;
 			_value = initialValue;
 
-			_strategy.Parameters.Add(this);
+			if (!_strategy.Parameters.TryAdd(id, this))
+				throw new ArgumentException(LocalizedStrings.CompositionAlreadyExistParams.Put(name, string.Empty), nameof(name));
 		}
+
+		/// <summary>
+		/// Parameter identifier.
+		/// </summary>
+		public string Id { get; private set; }
 
 		/// <summary>
 		/// Parameter name.
@@ -109,10 +147,7 @@ namespace StockSharp.Algo.Strategies
 		/// </summary>
 		public T Value
 		{
-			get
-			{
-				return _value;
-			}
+			get => _value;
 			set
 			{
 				if (!AllowNull && value.IsNull())
@@ -121,8 +156,7 @@ namespace StockSharp.Algo.Strategies
 				if (EqualityComparer<T>.Default.Equals(_value, value))
 					return;
 
-				var propChange = _value as INotifyPropertyChanged;
-				if (propChange != null)
+				if (_value is INotifyPropertyChanged propChange)
 					propChange.PropertyChanged -= OnValueInnerStateChanged;
 
 				_value = value;
@@ -156,8 +190,8 @@ namespace StockSharp.Algo.Strategies
 
 		object IStrategyParam.Value
 		{
-			get { return Value; }
-			set { Value = (T)value; }
+			get => Value;
+			set => Value = (T)value;
 		}
 
 		/// <summary>
@@ -166,11 +200,12 @@ namespace StockSharp.Algo.Strategies
 		/// <param name="storage">Settings storage.</param>
 		public void Load(SettingsStorage storage)
 		{
-			Name = storage.GetValue<string>("Name");
-			Value = storage.GetValue<T>("Value");
-			OptimizeFrom = storage.GetValue<T>("OptimizeFrom");
-			OptimizeTo = storage.GetValue<T>("OptimizeTo");
-			OptimizeStep = storage.GetValue<object>("OptimizeStep");
+			Id = storage.GetValue<string>(nameof(Id));
+			Name = storage.GetValue<string>(nameof(Name));
+			Value = storage.GetValue<T>(nameof(Value));
+			OptimizeFrom = storage.GetValue<T>(nameof(OptimizeFrom));
+			OptimizeTo = storage.GetValue<T>(nameof(OptimizeTo));
+			OptimizeStep = storage.GetValue<object>(nameof(OptimizeStep));
 		}
 
 		/// <summary>
@@ -179,51 +214,12 @@ namespace StockSharp.Algo.Strategies
 		/// <param name="storage">Settings storage.</param>
 		public void Save(SettingsStorage storage)
 		{
-			storage.SetValue("Name", Name);
-			storage.SetValue("Value", Value);
-			storage.SetValue("OptimizeFrom", OptimizeFrom);
-			storage.SetValue("OptimizeTo", OptimizeTo);
-			storage.SetValue("OptimizeStep", OptimizeStep);
-		}
-	}
-
-	/// <summary>
-	/// The auxiliary class for <see cref="StrategyParam{T}"/>.
-	/// </summary>
-	public static class StrategyParamHelper
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="StrategyParam{T}"/>.
-		/// </summary>
-		/// <typeparam name="T">The type of the parameter value.</typeparam>
-		/// <param name="strategy">Strategy.</param>
-		/// <param name="name">Parameter name.</param>
-		/// <param name="initialValue">The initial value.</param>
-		/// <returns>The startegy parameter.</returns>
-		public static StrategyParam<T> Param<T>(this Strategy strategy, string name, T initialValue = default(T))
-		{
-			return new StrategyParam<T>(strategy, name, initialValue);
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="StrategyParam{T}"/>.
-		/// </summary>
-		/// <typeparam name="T">The type of the parameter value.</typeparam>
-		/// <param name="param">The startegy parameter.</param>
-		/// <param name="optimizeFrom">The From value at optimization.</param>
-		/// <param name="optimizeTo">The To value at optimization.</param>
-		/// <param name="optimizeStep">The Increment value at optimization.</param>
-		/// <returns>The startegy parameter.</returns>
-		public static StrategyParam<T> Optimize<T>(this StrategyParam<T> param, T optimizeFrom = default(T), T optimizeTo = default(T), T optimizeStep = default(T))
-		{
-			if (param == null)
-				throw new ArgumentNullException(nameof(param));
-
-			param.OptimizeFrom = optimizeFrom;
-			param.OptimizeTo = optimizeTo;
-			param.OptimizeStep = optimizeStep;
-
-			return param;
+			storage.SetValue(nameof(Id), Id);
+			storage.SetValue(nameof(Name), Name);
+			storage.SetValue(nameof(Value), Value);
+			storage.SetValue(nameof(OptimizeFrom), OptimizeFrom);
+			storage.SetValue(nameof(OptimizeTo), OptimizeTo);
+			storage.SetValue(nameof(OptimizeStep), OptimizeStep);
 		}
 	}
 }

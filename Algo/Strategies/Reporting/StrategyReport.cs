@@ -53,12 +53,12 @@ namespace StockSharp.Algo.Strategies.Reporting
 		/// <summary>
 		/// The name of the file, in which the report is generated.
 		/// </summary>
-		public string FileName { get; private set; }
+		public string FileName { get; }
 
 		/// <summary>
 		/// Strategies, requiring the report generation.
 		/// </summary>
-		public IEnumerable<Strategy> Strategies { get; private set; }
+		public IEnumerable<Strategy> Strategies { get; }
 
 		/// <summary>
 		/// To generate the report.
@@ -115,7 +115,7 @@ namespace StockSharp.Algo.Strategies.Reporting
 				case OrderStates.Failed:
 					return LocalizedStrings.Str152;
 				default:
-					throw new ArgumentOutOfRangeException(nameof(state));
+					throw new ArgumentOutOfRangeException(nameof(state), state, LocalizedStrings.Str1219);
 			}
 		}
 
@@ -132,16 +132,10 @@ namespace StockSharp.Algo.Strategies.Reporting
 					return LocalizedStrings.Str1353;
 				case OrderTypes.Market:
 					return LocalizedStrings.Str241;
-				case OrderTypes.Repo:
-					return LocalizedStrings.Str243;
-				case OrderTypes.Rps:
-					return LocalizedStrings.Str1354;
-				case OrderTypes.ExtRepo:
-					return LocalizedStrings.Str244;
 				case null:
 					return string.Empty;
 				default:
-					throw new ArgumentOutOfRangeException(nameof(type));
+					throw new ArgumentOutOfRangeException(nameof(type), type, LocalizedStrings.Str1219);
 			}
 		}
 	}

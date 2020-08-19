@@ -16,7 +16,10 @@ Copyright 2010 by StockSharp, LLC
 namespace StockSharp.Messages
 {
 	using System;
+	using System.ComponentModel.DataAnnotations;
 	using System.Runtime.Serialization;
+
+	using Ecng.Common;
 
 	using StockSharp.Localization;
 
@@ -31,14 +34,14 @@ namespace StockSharp.Messages
 		/// Active.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.Str248Key)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.Str248Key)]
 		Active,
 		
 		/// <summary>
 		/// Blocked.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.Str249Key)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.Str249Key)]
 		Blocked,
 	}
 
@@ -47,11 +50,10 @@ namespace StockSharp.Messages
 	/// </summary>
 	[DataContract]
 	[Serializable]
-	public class PortfolioMessage : Message
+	public class PortfolioMessage : BaseSubscriptionIdMessage<PortfolioMessage>,
+	        ISubscriptionMessage, IPortfolioNameMessage
 	{
-		/// <summary>
-		/// Portfolio code name.
-		/// </summary>
+		/// <inheritdoc />
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.NameKey)]
 		[DescriptionLoc(LocalizedStrings.Str247Key)]
@@ -72,39 +74,56 @@ namespace StockSharp.Messages
 		/// </summary>
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.BoardKey)]
-		[DescriptionLoc(LocalizedStrings.BoardCodeKey)]
+		[DescriptionLoc(LocalizedStrings.BoardCodeKey, true)]
 		[MainCategory]
 		public string BoardCode { get; set; }
 
 		/// <summary>
-		/// Portfolio state.
+		/// Client code assigned by the broker.
 		/// </summary>
 		[DataMember]
-		[DisplayNameLoc(LocalizedStrings.StateKey)]
-		[DescriptionLoc(LocalizedStrings.Str252Key)]
 		[MainCategory]
-		public PortfolioStates? State { get; set; }
+		[DisplayNameLoc(LocalizedStrings.ClientCodeKey)]
+		[DescriptionLoc(LocalizedStrings.ClientCodeDescKey)]
+		public string ClientCode { get; set; }
 
-		/// <summary>
-		/// ID of the original message <see cref="PortfolioMessage.TransactionId"/> for which this message is a response.
-		/// </summary>
-		[DataMember]
-		public long OriginalTransactionId { get; set; }
+		///// <summary>
+		///// Portfolio state.
+		///// </summary>
+		//[DataMember]
+		//[DisplayNameLoc(LocalizedStrings.StateKey)]
+		//[DescriptionLoc(LocalizedStrings.Str252Key)]
+		//[MainCategory]
+		//public PortfolioStates? State { get; set; }
 
-		/// <summary>
-		/// Subscription/unsubscription portfolio changes transaction id.
-		/// </summary>
+		/// <inheritdoc />
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.TransactionKey)]
 		[DescriptionLoc(LocalizedStrings.TransactionIdKey, true)]
 		[MainCategory]
 		public long TransactionId { get; set; }
 
-		/// <summary>
-		/// Is the message subscription portfolio changes.
-		/// </summary>
+		/// <inheritdoc />
 		[DataMember]
 		public bool IsSubscribe { get; set; }
+
+		/// <inheritdoc />
+		[DataMember]
+		[DisplayNameLoc(LocalizedStrings.Str343Key)]
+		[DescriptionLoc(LocalizedStrings.Str344Key)]
+		[MainCategory]
+		public DateTimeOffset? From { get; set; }
+
+		/// <inheritdoc />
+		[DataMember]
+		[DisplayNameLoc(LocalizedStrings.Str345Key)]
+		[DescriptionLoc(LocalizedStrings.Str346Key)]
+		[MainCategory]
+		public DateTimeOffset? To { get; set; }
+
+		/// <inheritdoc />
+		[DataMember]
+		public long? Count { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PortfolioMessage"/>.
@@ -123,41 +142,58 @@ namespace StockSharp.Messages
 		{
 		}
 
-		/// <summary>
-		/// Returns a string that represents the current object.
-		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
+		/// <inheritdoc />
+		public override DataType DataType => DataType.Portfolio(PortfolioName);
+
+		bool ISubscriptionMessage.FilterEnabled
+			=>
+			!PortfolioName.IsEmpty() || Currency != null ||
+			!BoardCode.IsEmpty() || !ClientCode.IsEmpty();
+
+		/// <inheritdoc />
 		public override string ToString()
 		{
-			return base.ToString() + $",Name={PortfolioName}";
+			var str = base.ToString() + $",Name={PortfolioName}";
+
+			if (TransactionId > 0)
+				str += $",TransId={TransactionId}";
+
+			if (Currency != null)
+				str += $",Curr={Currency.Value}";
+
+			if (!BoardCode.IsEmpty())
+				str += $",Board={BoardCode}";
+
+			if (IsSubscribe)
+				str += $",IsSubscribe={IsSubscribe}";
+
+			if (From != null)
+				str += $",From={From.Value}";
+
+			if (To != null)
+				str += $",To={To.Value}";
+
+			if (Count != null)
+				str += $",Count={Count.Value}";
+
+			return str;
 		}
 
-		/// <summary>
-		/// Create a copy of <see cref="PortfolioMessage"/>.
-		/// </summary>
-		/// <returns>Copy.</returns>
-		public override Message Clone()
+		/// <inheritdoc />
+		public override void CopyTo(PortfolioMessage destination)
 		{
-			return CopyTo(new PortfolioMessage());
-		}
+			base.CopyTo(destination);
 
-		/// <summary>
-		/// Copy the message into the <paramref name="destination" />.
-		/// </summary>
-		/// <param name="destination">The object, which copied information.</param>
-		protected PortfolioMessage CopyTo(PortfolioMessage destination)
-		{
 			destination.PortfolioName = PortfolioName;
 			destination.Currency = Currency;
 			destination.BoardCode = BoardCode;
-			destination.OriginalTransactionId = OriginalTransactionId;
 			destination.IsSubscribe = IsSubscribe;
-			destination.State = State;
+			//destination.State = State;
 			destination.TransactionId = TransactionId;
-
-			this.CopyExtensionInfo(destination);
-
-			return destination;
+			destination.ClientCode = ClientCode;
+			destination.From = From;
+			destination.To = To;
+			destination.Count = Count;
 		}
 	}
 }

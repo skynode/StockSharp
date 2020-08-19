@@ -15,6 +15,8 @@ Copyright 2010 by StockSharp, LLC
 #endregion S# License
 namespace StockSharp.Algo.Indicators
 {
+	using System.ComponentModel;
+
 	using Ecng.Serialization;
 
 	using StockSharp.Localization;
@@ -22,6 +24,7 @@ namespace StockSharp.Algo.Indicators
 	/// <summary>
 	/// The realization of one of indicator lines Alligator (Jaw, Teeth, and Lips).
 	/// </summary>
+	[Browsable(false)]
 	public class AlligatorLine : LengthIndicator<decimal>
 	{
 		private readonly MedianPrice _medianPrice;
@@ -49,7 +52,7 @@ namespace StockSharp.Algo.Indicators
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public int Shift
 		{
-			get { return _shift; }
+			get => _shift;
 			set
 			{
 				_shift = value;
@@ -68,16 +71,10 @@ namespace StockSharp.Algo.Indicators
 			base.Reset();
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => Buffer.Count > Shift;
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			//если кол-во в буфере больше Shift, то первое значение отдали в прошлый раз, удалим его.
@@ -93,24 +90,18 @@ namespace StockSharp.Algo.Indicators
 				: new DecimalIndicatorValue(this);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Load(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Load(SettingsStorage storage)
 		{
-			base.Load(settings);
-			Shift = settings.GetValue<int>(nameof(Shift));
+			base.Load(storage);
+			Shift = storage.GetValue<int>(nameof(Shift));
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Save(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Save(SettingsStorage storage)
 		{
-			base.Save(settings);
-			settings.SetValue(nameof(Shift), Shift);
+			base.Save(storage);
+			storage.SetValue(nameof(Shift), Shift);
 		}
 	}
 }

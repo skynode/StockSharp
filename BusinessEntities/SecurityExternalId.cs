@@ -20,6 +20,7 @@ namespace StockSharp.BusinessEntities
 	using System.Runtime.Serialization;
 
 	using Ecng.Common;
+	using Ecng.ComponentModel;
 	using Ecng.Serialization;
 
 	using StockSharp.Localization;
@@ -31,14 +32,23 @@ namespace StockSharp.BusinessEntities
 	[System.Runtime.Serialization.DataContract]
 	[DisplayNameLoc(LocalizedStrings.IdentifiersKey)]
 	[DescriptionLoc(LocalizedStrings.Str603Key)]
-	public struct SecurityExternalId : ICloneable<SecurityExternalId>
+	public class SecurityExternalId : NotifiableObject, ICloneable<SecurityExternalId>, IEquatable<SecurityExternalId>
 	{
-		///// <summary>
-		///// Initializes a new instance of the <see cref="SecurityExternalId"/>.
-		///// </summary>
-		//public SecurityExternalId()
-		//{
-		//}
+		private string _sedol;
+		private string _cusip;
+		private string _isin;
+		private string _ric;
+		private string _bloomberg;
+		private string _iqFeed;
+		private int? _interactiveBrokers;
+		private string _plaza;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SecurityExternalId"/>.
+		/// </summary>
+		public SecurityExternalId()
+		{
+		}
 
 		/// <summary>
 		/// ID in SEDOL format (Stock Exchange Daily Official List).
@@ -46,7 +56,15 @@ namespace StockSharp.BusinessEntities
 		[DataMember]
 		[DisplayName("SEDOL")]
 		[DescriptionLoc(LocalizedStrings.Str351Key)]
-		public string Sedol { get; set; }
+		public string Sedol
+		{
+			get => _sedol;
+			set
+			{
+				_sedol = value;
+				NotifyChanged();
+			}
+		}
 
 		/// <summary>
 		/// ID in CUSIP format (Committee on Uniform Securities Identification Procedures).
@@ -54,7 +72,15 @@ namespace StockSharp.BusinessEntities
 		[DataMember]
 		[DisplayName("CUSIP")]
 		[DescriptionLoc(LocalizedStrings.Str352Key)]
-		public string Cusip { get; set; }
+		public string Cusip
+		{
+			get => _cusip;
+			set
+			{
+				_cusip = value;
+				NotifyChanged();
+			}
+		}
 
 		/// <summary>
 		/// ID in ISIN format (International Securities Identification Number).
@@ -62,7 +88,15 @@ namespace StockSharp.BusinessEntities
 		[DataMember]
 		[DisplayName("ISIN")]
 		[DescriptionLoc(LocalizedStrings.Str353Key)]
-		public string Isin { get; set; }
+		public string Isin
+		{
+			get => _isin;
+			set
+			{
+				_isin = value;
+				NotifyChanged();
+			}
+		}
 
 		/// <summary>
 		/// ID in RIC format (Reuters Instrument Code).
@@ -70,7 +104,15 @@ namespace StockSharp.BusinessEntities
 		[DataMember]
 		[DisplayName("RIC")]
 		[DescriptionLoc(LocalizedStrings.Str354Key)]
-		public string Ric { get; set; }
+		public string Ric
+		{
+			get => _ric;
+			set
+			{
+				_ric = value;
+				NotifyChanged();
+			}
+		}
 
 		/// <summary>
 		/// ID in Bloomberg format.
@@ -78,7 +120,15 @@ namespace StockSharp.BusinessEntities
 		[DataMember]
 		[DisplayName("Bloomberg")]
 		[DescriptionLoc(LocalizedStrings.Str355Key)]
-		public string Bloomberg { get; set; }
+		public string Bloomberg
+		{
+			get => _bloomberg;
+			set
+			{
+				_bloomberg = value;
+				NotifyChanged();
+			}
+		}
 
 		/// <summary>
 		/// ID in IQFeed format.
@@ -86,7 +136,15 @@ namespace StockSharp.BusinessEntities
 		[DataMember]
 		[DisplayName("IQFeed")]
 		[DescriptionLoc(LocalizedStrings.Str356Key)]
-		public string IQFeed { get; set; }
+		public string IQFeed
+		{
+			get => _iqFeed;
+			set
+			{
+				_iqFeed = value;
+				NotifyChanged();
+			}
+		}
 
 		/// <summary>
 		/// ID in Interactive Brokers format.
@@ -95,7 +153,15 @@ namespace StockSharp.BusinessEntities
 		[DisplayName("Interactive Brokers")]
 		[DescriptionLoc(LocalizedStrings.Str357Key)]
 		[Nullable]
-		public int? InteractiveBrokers { get; set; }
+		public int? InteractiveBrokers
+		{
+			get => _interactiveBrokers;
+			set
+			{
+				_interactiveBrokers = value;
+				NotifyChanged();
+			}
+		}
 
 		/// <summary>
 		/// ID in Plaza format.
@@ -103,7 +169,15 @@ namespace StockSharp.BusinessEntities
 		[DataMember]
 		[DisplayName("Plaza")]
 		[DescriptionLoc(LocalizedStrings.Str358Key)]
-		public string Plaza { get; set; }
+		public string Plaza
+		{
+			get => _plaza;
+			set
+			{
+				_plaza = value;
+				NotifyChanged();
+			}
+		}
 
 		/// <summary>
 		/// Create a copy of <see cref="SecurityExternalId"/>.
@@ -119,54 +193,115 @@ namespace StockSharp.BusinessEntities
 				Isin = Isin,
 				Ric = Ric,
 				Sedol = Sedol,
-				InteractiveBrokers = InteractiveBrokers
+				InteractiveBrokers = InteractiveBrokers,
+				Plaza = Plaza,
 			};
 		}
 
-		/// <summary>
-		/// Returns a string that represents the current object.
-		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
+		/// <inheritdoc />
+		object ICloneable.Clone()
+		{
+			return Clone();
+		}
+
+		/// <inheritdoc />
 		public override string ToString()
 		{
 			var str = string.Empty;
 
 			if (!Bloomberg.IsEmpty())
-				str += " Bloom {0}".Put(Bloomberg);
+				str += $" Bloom {Bloomberg}";
 
 			if (!Cusip.IsEmpty())
-				str += " CUSIP {0}".Put(Cusip);
+				str += $" CUSIP {Cusip}";
 
 			if (!IQFeed.IsEmpty())
-				str += " IQFeed {0}".Put(IQFeed);
+				str += $" IQFeed {IQFeed}";
 
 			if (!Isin.IsEmpty())
-				str += " ISIN {0}".Put(Isin);
+				str += $" ISIN {Isin}";
 
 			if (!Ric.IsEmpty())
-				str += " RIC {0}".Put(Ric);
+				str += $" RIC {Ric}";
 
 			if (!Sedol.IsEmpty())
-				str += " SEDOL {0}".Put(Sedol);
+				str += $" SEDOL {Sedol}";
 
 			if (InteractiveBrokers != null)
-				str += " InteractiveBrokers {0}".Put(InteractiveBrokers);
+				str += $" InteractiveBrokers {InteractiveBrokers}";
 
 			if (!Plaza.IsEmpty())
-				str += " Plaza {0}".Put(Plaza);
+				str += $" Plaza {Plaza}";
 
 			return str;
 		}
 
+		/// <inheritdoc />
+		public override int GetHashCode() => base.GetHashCode();
+
 		/// <summary>
-		/// Creates a new object that is a copy of the current instance.
+		/// Compare <see cref="SecurityExternalId"/> on the equivalence.
 		/// </summary>
-		/// <returns>
-		/// A new object that is a copy of this instance.
-		/// </returns>
-		object ICloneable.Clone()
+		/// <param name="other">Another value with which to compare.</param>
+		/// <returns><see langword="true" />, if the specified object is equal to the current object, otherwise, <see langword="false" />.</returns>
+		public override bool Equals(object other)
 		{
-			throw new NotImplementedException();
+			return Equals((SecurityExternalId)other);
+		}
+
+		/// <inheritdoc />
+		public bool Equals(SecurityExternalId other)
+		{
+			if (other is null)
+				return false;
+
+			if (Bloomberg != other.Bloomberg)
+				return false;
+
+			if (Cusip != other.Cusip)
+				return false;
+
+			if (IQFeed != other.IQFeed)
+				return false;
+
+			if (Isin != other.Isin)
+				return false;
+
+			if (Ric != other.Ric)
+				return false;
+
+			if (Sedol != other.Sedol)
+				return false;
+
+			if (InteractiveBrokers != other.InteractiveBrokers)
+				return false;
+
+			if (Plaza != other.Plaza)
+				return false;
+
+			return true;
+		}
+
+		/// <summary>
+		/// Compare the inequality of two identifiers.
+		/// </summary>
+		/// <param name="left">Left operand.</param>
+		/// <param name="right">Right operand.</param>
+		/// <returns><see langword="true" />, if identifiers are equal, otherwise, <see langword="false" />.</returns>
+		public static bool operator !=(SecurityExternalId left, SecurityExternalId right)
+		{
+			return !(left == right);
+		}
+
+		/// <summary>
+		/// Compare two identifiers for equality.
+		/// </summary>
+		/// <param name="left">Left operand.</param>
+		/// <param name="right">Right operand.</param>
+		/// <returns><see langword="true" />, if the specified identifiers are equal, otherwise, <see langword="false" />.</returns>
+		public static bool operator ==(SecurityExternalId left, SecurityExternalId right)
+		{
+			return left?.Equals(right) == true;
 		}
 	}
 }

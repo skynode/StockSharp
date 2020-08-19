@@ -21,7 +21,6 @@ namespace StockSharp.Algo.Indicators
 	using Ecng.Serialization;
 
 	using StockSharp.Algo.Candles;
-	using StockSharp.Localization;
 
 	/// <summary>
 	/// Extension class for indicators.
@@ -35,10 +34,20 @@ namespace StockSharp.Algo.Indicators
 		/// <returns>The current value.</returns>
 		public static decimal GetCurrentValue(this IIndicator indicator)
 		{
+			return indicator.GetNullableCurrentValue() ?? 0;
+		}
+
+		/// <summary>
+		/// To get the current value of the indicator.
+		/// </summary>
+		/// <param name="indicator">Indicator.</param>
+		/// <returns>The current value.</returns>
+		public static decimal? GetNullableCurrentValue(this IIndicator indicator)
+		{
 			if (indicator == null)
 				throw new ArgumentNullException(nameof(indicator));
 
-			return indicator.GetCurrentValue<decimal>();
+			return indicator.GetCurrentValue<decimal?>();
 		}
 
 		/// <summary>
@@ -56,21 +65,32 @@ namespace StockSharp.Algo.Indicators
 		}
 
 		/// <summary>
-		/// To get the indicator value by the index (0 � last value).
+		/// To get the indicator value by the index (0 - last value).
 		/// </summary>
 		/// <param name="indicator">Indicator.</param>
 		/// <param name="index">The value index.</param>
 		/// <returns>Indicator value.</returns>
 		public static decimal GetValue(this IIndicator indicator, int index)
 		{
-			if (indicator == null)
-				throw new ArgumentNullException(nameof(indicator));
-
-			return indicator.GetValue<decimal>(index);
+			return indicator.GetNullableValue(index) ?? 0;
 		}
 
 		/// <summary>
-		/// To get the indicator value by the index (0 � last value).
+		/// To get the indicator value by the index (0 - last value).
+		/// </summary>
+		/// <param name="indicator">Indicator.</param>
+		/// <param name="index">The value index.</param>
+		/// <returns>Indicator value.</returns>
+		public static decimal? GetNullableValue(this IIndicator indicator, int index)
+		{
+			if (indicator == null)
+				throw new ArgumentNullException(nameof(indicator));
+
+			return indicator.GetValue<decimal?>(index);
+		}
+
+		/// <summary>
+		/// To get the indicator value by the index (0 - last value).
 		/// </summary>
 		/// <typeparam name="T">Value type.</typeparam>
 		/// <param name="indicator">Indicator.</param>
@@ -81,15 +101,27 @@ namespace StockSharp.Algo.Indicators
 			if (indicator == null)
 				throw new ArgumentNullException(nameof(indicator));
 
-			if (index >= indicator.Container.Count)
+			var container = indicator.Container;
+
+			if (index >= container.Count)
 			{
-				if (index == 0 && typeof(decimal) == typeof(T))
-					return 0m.To<T>();
-				else
-					throw new ArgumentOutOfRangeException(nameof(index), index, LocalizedStrings.Str914Params.Put(indicator.Name));
+				return default;
+				//if (index == 0 && typeof(decimal) == typeof(T))
+				//	return 0m.To<T>();
+				//else
+				//throw new ArgumentOutOfRangeException(nameof(index), index, LocalizedStrings.Str914Params.Put(indicator.Name));
 			}
 
-			var value = indicator.Container.GetValue(index).Item2;
+			var value = container.GetValue(index).Item2;
+
+			if (value.IsEmpty)
+			{
+				if (value is T t)
+					return t;
+
+				return default;
+			}
+
 			return typeof(IIndicatorValue).IsAssignableFrom(typeof(T)) ? value.To<T>() : value.GetValue<T>();
 		}
 
@@ -119,6 +151,7 @@ namespace StockSharp.Algo.Indicators
 		/// <summary>
 		/// To renew the indicator with numeric pair.
 		/// </summary>
+		/// <typeparam name="TValue">Value type.</typeparam>
 		/// <param name="indicator">Indicator.</param>
 		/// <param name="value">The pair of values.</param>
 		/// <param name="isFinal">If the pair final (the indicator finally forms its value and will not be changed in this point of time anymore). Default is <see langword="true" />.</param>
@@ -150,7 +183,27 @@ namespace StockSharp.Algo.Indicators
 				input = input.InputValue;
 			}
 
-			return input == null ? default(T) : input.GetValue<T>();
+			return input == null ? default : input.GetValue<T>();
+		}
+
+		/// <summary>
+		/// Get value type for specified indicator.
+		/// </summary>
+		/// <param name="indicatorType">Indicator type.</param>
+		/// <param name="isInput">Is input.</param>
+		/// <returns>Value type.</returns>
+		public static Type GetValueType(this Type indicatorType, bool isInput)
+		{
+			if (indicatorType == null)
+				throw new ArgumentNullException(nameof(indicatorType));
+
+			if (!typeof(IIndicator).IsAssignableFrom(indicatorType))
+				throw new ArgumentException(nameof(indicatorType));
+
+			return (isInput
+					? (IndicatorValueAttribute)indicatorType.GetAttribute<IndicatorInAttribute>()
+					: indicatorType.GetAttribute<IndicatorOutAttribute>()
+				)?.Type ?? typeof(DecimalIndicatorValue);
 		}
 	}
 }

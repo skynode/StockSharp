@@ -37,27 +37,25 @@ namespace SampleHistoryTesting
 		private readonly ChartTradeElement _tradesElem;
 		private readonly ChartIndicatorElement _shortElem;
 		private readonly ChartIndicatorElement _longElem;
-		private readonly ICandleManager _candleManager;
 		private readonly List<MyTrade> _myTrades = new List<MyTrade>();
-		private readonly CandleSeries _series;
-		private bool _isShortLessThenLong;
+		private readonly Subscription _series;
+		private bool? _isShortLessThenLong;
 
-		public SmaStrategy(IChart chart, ChartCandleElement candlesElem, ChartTradeElement tradesElem, 
-			SimpleMovingAverage shortMa, ChartIndicatorElement shortElem,
-			SimpleMovingAverage longMa, ChartIndicatorElement longElem,
-			ICandleManager candleManager, CandleSeries series)
+		public SmaStrategy(CandleSeries series,
+			SimpleMovingAverage longSma, SimpleMovingAverage shortSma,
+			IChart chart, ChartCandleElement candlesElem, ChartTradeElement tradesElem, 
+			ChartIndicatorElement longElem, ChartIndicatorElement shortElem)
 		{
+			_series = new Subscription(series);
+
+			ShortSma = shortSma;
+			LongSma = longSma;
+
 			_chart = chart;
 			_candlesElem = candlesElem;
 			_tradesElem = tradesElem;
 			_shortElem = shortElem;
 			_longElem = longElem;
-			_candleManager = candleManager;
-
-			_series = series;
-
-			ShortSma = shortMa;
-			LongSma = longMa;
 		}
 
 		public SimpleMovingAverage LongSma { get; }
@@ -65,18 +63,19 @@ namespace SampleHistoryTesting
 
 		protected override void OnStarted()
 		{
-			_candleManager
-				.WhenCandlesFinished(_series)
+			this
+				.WhenCandlesFinished(_series.CandleSeries)
 				.Do(ProcessCandle)
 				.Apply(this);
 
 			this
-				.WhenNewMyTrades()
-				.Do(trades => _myTrades.AddRange(trades))
+				.WhenNewMyTrade()
+				.Do(trade => _myTrades.Add(trade))
 				.Apply(this);
 
-			// store current values for short and long
-			_isShortLessThenLong = ShortSma.GetCurrentValue() < LongSma.GetCurrentValue();
+			_isShortLessThenLong = null;
+
+			Subscribe(_series);
 
 			base.OnStarted();
 		}
@@ -96,42 +95,39 @@ namespace SampleHistoryTesting
 			var longValue = LongSma.Process(candle);
 			var shortValue = ShortSma.Process(candle);
 
-			// calc new values for short and long
-			var isShortLessThenLong = ShortSma.GetCurrentValue() < LongSma.GetCurrentValue();
-
-			// crossing happened
-			if (_isShortLessThenLong != isShortLessThenLong)
+			if (LongSma.IsFormed && ShortSma.IsFormed)
 			{
-				// if short less than long, the sale, otherwise buy
-				var direction = isShortLessThenLong ? Sides.Sell : Sides.Buy;
+				// calc new values for short and long
+				var isShortLessThenLong = ShortSma.GetCurrentValue() < LongSma.GetCurrentValue();
 
-				// calc size for open position or revert
-				var volume = Position == 0 ? Volume : Position.Abs().Min(Volume) * 2;
-
-				if (!SafeGetConnector().RegisteredMarketDepths.Contains(Security))
+				if (_isShortLessThenLong == null)
 				{
-					var price = Security.GetMarketPrice(Connector, direction);
-
-					// register "market" order (limit order with guaranteed execution price)
-					if (price != null)
-						RegisterOrder(this.CreateOrder(direction, price.Value, volume));
+					_isShortLessThenLong = isShortLessThenLong;
 				}
-				else
+				else if (_isShortLessThenLong != isShortLessThenLong) // crossing happened
 				{
-					// register order (limit order)
-					RegisterOrder(this.CreateOrder(direction, (decimal)(Security.GetCurrentPrice(this, direction) ?? 0), volume));
+					// if short less than long, the sale, otherwise buy
+					var direction = isShortLessThenLong ? Sides.Sell : Sides.Buy;
+
+					// calc size for open position or revert
+					var volume = Position == 0 ? Volume : Position.Abs().Min(Volume) * 2;
+
+					// calc order price as a close price + offset
+					var price = candle.ClosePrice + ((direction == Sides.Buy ? Security.PriceStep : -Security.PriceStep) ?? 1);
+
+					RegisterOrder(this.CreateOrder(direction, price, volume));
 
 					// or revert position via market quoting
-					//var strategy = new MarketQuotingStrategy(direction, volume)
-					//{
-					//	WaitAllTrades = true,
-					//};
+					//var strategy = new MarketQuotingStrategy(direction, volume);
 					//ChildStrategies.Add(strategy);
-				}
 
-				// store current values for short and long
-				_isShortLessThenLong = isShortLessThenLong;
+					// store current values for short and long
+					_isShortLessThenLong = isShortLessThenLong;
+				}
 			}
+
+			if (_chart == null)
+				return;
 
 			var trade = _myTrades.FirstOrDefault();
 			_myTrades.Clear();

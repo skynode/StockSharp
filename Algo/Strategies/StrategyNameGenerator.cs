@@ -73,18 +73,10 @@ namespace StockSharp.Algo.Strategies
 		/// <param name="strategy">Strategy.</param>
 		public StrategyNameGenerator(Strategy strategy)
 		{
-			if (strategy == null)
-				throw new ArgumentNullException(nameof(strategy));
-
-			_strategy = strategy;
-			_strategy.SecurityChanged += () =>
+			_strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
+			_strategy.PropertyChanged += (s, e) =>
 			{
-				if (_selectors.Contains("Security"))
-					Refresh();
-			};
-			_strategy.PortfolioChanged += () =>
-			{
-				if (_selectors.Contains("Portfolio"))
+				if (_selectors.Contains(e.PropertyName))
 					Refresh();
 			};
 
@@ -94,7 +86,7 @@ namespace StockSharp.Algo.Strategies
 			_formatter.SourceExtensions.Add(new Source(_formatter, new Dictionary<string, string>
 			{
 				{ "FullName", _strategy.GetType().Name },
-				{ "ShortName", ShortName },
+				{ nameof(ShortName), ShortName },
 			}));
 
 			_selectors = new SynchronizedSet<string>();
@@ -114,7 +106,7 @@ namespace StockSharp.Algo.Strategies
 		public bool AutoGenerateStrategyName { get; set; }
 
 		/// <summary>
-		/// The startegy brief name.
+		/// The strategy brief name.
 		/// </summary>
 		public string ShortName { get; }
 
@@ -123,7 +115,7 @@ namespace StockSharp.Algo.Strategies
 		/// </summary>
 		public string Pattern
 		{
-			get { return _pattern; }
+			get => _pattern;
 			set
 			{
 				if (_pattern == value)
@@ -151,12 +143,11 @@ namespace StockSharp.Algo.Strategies
 		/// </summary>
 		public string Value
 		{
-			get { return _value ?? (_value = _strategy.Name); }
+			get => _value ?? (_value = _strategy.Name);
 			set
 			{
 				if (AutoGenerateStrategyName)
 					AutoGenerateStrategyName = false;
-					//throw new InvalidOperationException("Используется автоматическая генерация имени стратегии. Ручное изменение не допускается.");
 
 				_value = value;
 				Changed?.Invoke(_value);

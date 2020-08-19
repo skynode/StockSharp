@@ -19,6 +19,7 @@ namespace StockSharp.Algo.Indicators
 	using System.Linq;
 	using System;
 
+	using StockSharp.Algo.Candles;
 	using StockSharp.Localization;
 
 	/// <summary>
@@ -36,14 +37,10 @@ namespace StockSharp.Algo.Indicators
 			Length = 5;
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
-			var newValue = input.GetValue<decimal>();
+			var newValue = input.IsSupport(typeof(Candle)) ? input.GetValue<Candle>().HighPrice : input.GetValue<decimal>();
 
 			var lastValue = Buffer.Count == 0 ? newValue : this.GetCurrentValue();
 

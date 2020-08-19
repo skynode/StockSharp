@@ -45,7 +45,7 @@ namespace StockSharp.Algo.Indicators
 		}
 
 		/// <summary>
-		/// �Rapid� EMA period. The default value is 2.
+		/// 'Rapid' EMA period. The default value is 2.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.Str793Key)]
 		[DescriptionLoc(LocalizedStrings.Str794Key)]
@@ -53,21 +53,17 @@ namespace StockSharp.Algo.Indicators
 		public int FastSCPeriod { get; set; }
 
 		/// <summary>
-		/// �Slow� EMA period. The default value is 30.
+		/// 'Slow' EMA period. The default value is 30.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.Str795Key)]
 		[DescriptionLoc(LocalizedStrings.Str796Key)]
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public int SlowSCPeriod { get; set; }
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => Buffer.Count > Length;
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			_prevFinalValue = 0;
@@ -76,11 +72,7 @@ namespace StockSharp.Algo.Indicators
 			base.Reset();
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var newValue = input.GetValue<decimal>();
@@ -116,7 +108,7 @@ namespace StockSharp.Algo.Indicators
 
 			decimal volatility = 0;
 
-			for (int i = 1; i < buff.Count; i++)
+			for (var i = 1; i < buff.Count; i++)
 			{
 				volatility += Math.Abs(buff[i] - buff[i - 1]);
 			}
@@ -138,26 +130,20 @@ namespace StockSharp.Algo.Indicators
 			return new DecimalIndicatorValue(this, curValue);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Load(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Load(SettingsStorage storage)
 		{
-			base.Load(settings);
-			FastSCPeriod = settings.GetValue<int>(nameof(FastSCPeriod));
-			FastSCPeriod = settings.GetValue<int>(nameof(FastSCPeriod));
+			base.Load(storage);
+			FastSCPeriod = storage.GetValue<int>(nameof(FastSCPeriod));
+			FastSCPeriod = storage.GetValue<int>(nameof(FastSCPeriod));
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Save(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Save(SettingsStorage storage)
 		{
-			base.Save(settings);
-			settings.SetValue(nameof(FastSCPeriod), FastSCPeriod);
-			settings.SetValue(nameof(SlowSCPeriod), SlowSCPeriod);
+			base.Save(storage);
+			storage.SetValue(nameof(FastSCPeriod), FastSCPeriod);
+			storage.SetValue(nameof(SlowSCPeriod), SlowSCPeriod);
 		}
 	}
 }

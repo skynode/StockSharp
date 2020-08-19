@@ -6,10 +6,9 @@
 	    	
         <code language="C#">
         <![CDATA[
-private QuikTrader _trader;
+private readonly Connector _connector = new Connector();
 private Security _security;
 
-private CandleManager _candleManager;
 private CandleSeries _candleSeries;
 private SimpleMovingAverage _sma;
 
@@ -26,7 +25,7 @@ private ChartIndicatorElement _longMaElem;
 _area = new ChartArea();
 _chart.Areas.Add(_area);
 
-// Создание элемента графика представляющего свечки
+// Создание элемента графика представляющего свечи
 _candlesElem = new ChartCandleElement();
 _area.Elements.Add(_candlesElem);
 
@@ -39,13 +38,12 @@ _area.Elements.Add(_longMaElem);
 ...
 
 _sma = new SimpleMovingAverage() { Length = 80 };
-_candleManager = new CandleManager(_trader);
-_candleManager.Processing += Draw;
+_connector.CandleSeriesProcessing += DrawCandle;
 
 ...
 
 _candleSeries = new CandleSeries(typeof(TimeFrameCandle), _security, _timeFrame);
-_candleManager.Start(_candleSeries);
+_connector.SubscribeCandles(_candleSeries, DateTime.Today.Subtract(TimeSpan.FromDays(30)), DateTime.Now);
 
 ...
 
@@ -55,12 +53,15 @@ private void Draw(CandleSeries series, Candle candle)
        return;
 
 	var longValue = _sma.Process(candle);
+	var data = new ChartDrawData();
 
-	this.GuiAsync(() => _chart.Draw(candle.OpenTime, new Dictionary<IChartElement, object>
-	{
-		{ _candlesElem, candle },
-		{ _longMaElem, longValue}
-	}));
+	data
+		.Group(candle.OpenTime)
+			.Add(_candlesElem, candle)
+			.Add(_longElem, longValue);
+
+	_chart.Draw(data);
+
 }
 		]]>
 		</code>	  

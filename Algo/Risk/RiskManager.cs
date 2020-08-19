@@ -24,40 +24,41 @@ namespace StockSharp.Algo.Risk
 
 	using MoreLinq;
 
+	using StockSharp.Logging;
 	using StockSharp.Messages;
 
 	/// <summary>
 	/// The risks control manager.
 	/// </summary>
-	public class RiskManager : IRiskManager
+	public class RiskManager : BaseLogReceiver, IRiskManager
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RiskManager"/>.
 		/// </summary>
 		public RiskManager()
 		{
+			_rules.Added += r => r.Parent = this;
+			_rules.Removed += r => r.Parent = null;
+			_rules.Inserted += (i, r) => r.Parent = this;
+			_rules.Clearing += () =>
+			{
+				_rules.Cache.ForEach(r => r.Parent = null);
+				return true;
+			};
 		}
 
 		private readonly CachedSynchronizedSet<IRiskRule> _rules = new CachedSynchronizedSet<IRiskRule>();
 
-		/// <summary>
-		/// Rule list.
-		/// </summary>
+		/// <inheritdoc />
 		public SynchronizedSet<IRiskRule> Rules => _rules;
 
-		/// <summary>
-		/// To reset the state.
-		/// </summary>
+		/// <inheritdoc />
 		public virtual void Reset()
 		{
 			_rules.Cache.ForEach(r => r.Reset());
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns>List of rules, activated by the message.</returns>
+		/// <inheritdoc />
 		public IEnumerable<IRiskRule> ProcessRules(Message message)
 		{
 			if (message.Type == MessageTypes.Reset)
@@ -69,34 +70,30 @@ namespace StockSharp.Algo.Risk
 			return _rules.Cache.Where(r => r.ProcessMessage(message)).ToArray();
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
-		public void Load(SettingsStorage storage)
+		/// <inheritdoc />
+		public override void Load(SettingsStorage storage)
 		{
+			Rules.Clear();
 			Rules.AddRange(storage.GetValue<SettingsStorage[]>(nameof(Rules)).Select(s => s.LoadEntire<IRiskRule>()));
+
+			base.Load(storage);
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
-		public void Save(SettingsStorage storage)
+		/// <inheritdoc />
+		public override void Save(SettingsStorage storage)
 		{
 			storage.SetValue(nameof(Rules), Rules.Select(r => r.SaveEntire(false)).ToArray());
+
+			base.Save(storage);
 		}
 
 		RiskActions IRiskRule.Action
 		{
-			get { throw new NotSupportedException(); }
-			set { throw new NotSupportedException(); }
+			get => throw new NotSupportedException();
+			set => throw new NotSupportedException();
 		}
 
-		string IRiskRule.Title
-		{
-			get { throw new NotSupportedException(); }
-		}
+		string IRiskRule.Title => throw new NotSupportedException();
 
 		bool IRiskRule.ProcessMessage(Message message)
 		{

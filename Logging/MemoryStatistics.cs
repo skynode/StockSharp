@@ -82,7 +82,7 @@ namespace StockSharp.Logging
 		/// </summary>
 		public TimeSpan Interval
 		{
-			get { return _interval; }
+			get => _interval;
 			set
 			{
 				if (_interval == value)
@@ -131,26 +131,26 @@ namespace StockSharp.Logging
 			_values.Cache.ForEach(v => v.Clear(resetCounter));
 		}
 
-		/// <summary>
-		/// Returns a string that represents the current object.
-		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
+		/// <inheritdoc />
 		public override string ToString()
 		{
-			return _values.Select(v => "{0} = {1}".Put(v.Name, v.ObjectCount)).Join(", ");
+			return _values.Cache.Select(v => $"{v.Name} = {v.ObjectCount}").JoinCommaSpace();
 		}
 
 		/// <summary>
 		/// Is the source on.
 		/// </summary>
-		public static bool IsEnabled => ConfigManager.GetService<LogManager>().Sources.OfType<MemoryStatistics>().Any();
+		public static bool IsEnabled => LogManager.Instance?.Sources.OfType<MemoryStatistics>().Any() == true;
 
 		/// <summary>
 		/// To add or to remove the source <see cref="MemoryStatistics"/> from the registered <see cref="LogManager"/>.
 		/// </summary>
 		public static void AddOrRemove()
 		{
-			var sources = ConfigManager.GetService<LogManager>().Sources;
+			var sources = LogManager.Instance?.Sources;
+
+			if (sources == null)
+				return;
 
 			var stat = sources.OfType<MemoryStatistics>().ToArray();
 

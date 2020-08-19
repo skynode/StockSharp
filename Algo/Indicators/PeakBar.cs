@@ -32,6 +32,7 @@ namespace StockSharp.Algo.Indicators
 	/// </remarks>
 	[DisplayName("PeakBar")]
 	[DescriptionLoc(LocalizedStrings.Str817Key)]
+	[IndicatorIn(typeof(CandleIndicatorValue))]
 	public class PeakBar : BaseIndicator
 	{
 		private decimal _currentMaximum = decimal.MinValue;
@@ -57,7 +58,7 @@ namespace StockSharp.Algo.Indicators
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public Unit ReversalAmount
 		{
-			get { return _reversalAmount; }
+			get => _reversalAmount;
 			set
 			{
 				if (value == null)
@@ -69,11 +70,7 @@ namespace StockSharp.Algo.Indicators
 			}
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var candle = input.GetValue<Candle>();
@@ -102,26 +99,20 @@ namespace StockSharp.Algo.Indicators
 			}
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Load(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Load(SettingsStorage storage)
 		{
-			base.Load(settings);
+			base.Load(storage);
 
-			ReversalAmount.Load(settings.GetValue<SettingsStorage>(nameof(ReversalAmount)));
+			ReversalAmount.Load(storage.GetValue<SettingsStorage>(nameof(ReversalAmount)));
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Save(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Save(SettingsStorage storage)
 		{
-			base.Save(settings);
+			base.Save(storage);
 
-			settings.SetValue(nameof(ReversalAmount), ReversalAmount.Save());
+			storage.SetValue(nameof(ReversalAmount), ReversalAmount.Save());
 		}
 	}
 }

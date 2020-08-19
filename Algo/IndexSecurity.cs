@@ -15,7 +15,6 @@ Copyright 2010 by StockSharp, LLC
 #endregion S# License
 namespace StockSharp.Algo
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 
@@ -31,126 +30,85 @@ namespace StockSharp.Algo
 	public abstract class IndexSecurity : BasketSecurity
 	{
 		/// <summary>
+		/// Ignore calculation errors.
+		/// </summary>
+		public bool IgnoreErrors { get; set; }
+
+		/// <summary>
+		/// Calculate extended information.
+		/// </summary>
+		public bool CalculateExtended { get; set; }
+
+		/// <summary>
+		/// Fill market-data gaps by zero values.
+		/// </summary>
+		public bool FillGapsByZeros { get; set; }
+
+		/// <summary>
 		/// Initialize <see cref="IndexSecurity"/>.
 		/// </summary>
 		protected IndexSecurity()
 		{
 			Type = SecurityTypes.Index;
-			Board = ExchangeBoard.Associated;
+			//Board = ExchangeBoard.Associated;
 		}
-
-		/// <summary>
-		/// To calculate the basket value.
-		/// </summary>
-		/// <param name="prices">Prices of basket composite instruments <see cref="BasketSecurity.InnerSecurities"/>.</param>
-		/// <returns>The basket value.</returns>
-		public abstract decimal Calculate(decimal[] prices);
 	}
 
 	/// <summary>
-	/// The instruments basket, based on weigh-scales <see cref="WeightedIndexSecurity.Weights"/>.
+	/// The instruments basket, based on weigh-scales <see cref="Weights"/>.
 	/// </summary>
+	[BasketCode("WI")]
 	public class WeightedIndexSecurity : IndexSecurity
 	{
-		private sealed class WeightsDictionary : CachedSynchronizedDictionary<Security, decimal>
-		{
-			private readonly WeightedIndexSecurity _parent;
-
-			public WeightsDictionary(WeightedIndexSecurity parent)
-			{
-				if (parent == null)
-					throw new ArgumentNullException(nameof(parent));
-
-				_parent = parent;
-			}
-
-			public override void Add(Security key, decimal value)
-			{
-				base.Add(key, value);
-				RefreshName();
-			}
-
-			public override bool Remove(Security key)
-			{
-				if (base.Remove(key))
-				{
-					RefreshName();
-					return true;
-				}
-
-				return false;
-			}
-
-			public override void Clear()
-			{
-				base.Clear();
-				RefreshName();
-			}
-
-			private void RefreshName()
-			{
-				_parent.Id = GetName(s => s.Id);
-				_parent.Code = GetName(s => s.Code);
-				_parent.Name = GetName(s => s.Name);
-			}
-
-			private string GetName(Func<Security, string> getSecurityName)
-			{
-				return this.Select(p => "{0} * {1}".Put(p.Value, getSecurityName(p.Key))).Join(", ");
-			}
-		}
-
 		/// <summary>
 		/// Initializes a new instance of the <see cref="WeightedIndexSecurity"/>.
 		/// </summary>
 		public WeightedIndexSecurity()
 		{
-			_weights = new WeightsDictionary(this);
+			Weights = new CachedSynchronizedDictionary<SecurityId, decimal>();
 		}
-
-		private readonly WeightsDictionary _weights;
 
 		/// <summary>
 		/// Instruments and their weighting coefficients in the basket.
 		/// </summary>
-		public SynchronizedDictionary<Security, decimal> Weights => _weights;
+		public CachedSynchronizedDictionary<SecurityId, decimal> Weights { get; }
 
-		/// <summary>
-		/// Instruments, from which this basket is created.
-		/// </summary>
-		public override IEnumerable<Security> InnerSecurities => _weights.CachedKeys;
+		/// <inheritdoc />
+		public override IEnumerable<SecurityId> InnerSecurityIds => Weights.CachedKeys;
 
-		/// <summary>
-		/// To calculate the basket value.
-		/// </summary>
-		/// <param name="prices">Prices of basket composite instruments <see cref="BasketSecurity.InnerSecurities"/>.</param>
-		/// <returns>The basket value.</returns>
-		public override decimal Calculate(decimal[] prices)
-		{
-			if (prices == null)
-				throw new ArgumentNullException(nameof(prices));
-
-			if (prices.Length != _weights.Count)// || !InnerSecurities.All(prices.ContainsKey))
-				throw new ArgumentOutOfRangeException(nameof(prices));
-
-			decimal retVal = 0;
-
-			for (var i = 0; i < prices.Length; i++)
-				retVal += _weights.CachedValues[i] * prices[i];
-
-			return retVal;
-		}
-
-		/// <summary>
-		/// Create a copy of <see cref="Security"/>.
-		/// </summary>
-		/// <returns>Copy.</returns>
+		/// <inheritdoc />
 		public override Security Clone()
 		{
 			var clone = new WeightedIndexSecurity();
-			clone.Weights.AddRange(_weights.CachedPairs);
+			clone.Weights.AddRange(Weights.CachedPairs);
 			CopyTo(clone);
 			return clone;
+		}
+
+		/// <inheritdoc />
+		protected override void FromSerializedString(string text)
+		{
+			lock (Weights.SyncRoot)
+			{
+				Weights.Clear();
+				Weights.AddRange(text.SplitByComma().Select(p =>
+				{
+					var parts = p.SplitBySep("=");
+					return new KeyValuePair<SecurityId, decimal>(parts[0].ToSecurityId(), parts[1].To<decimal>());
+				}));
+			}
+		}
+
+		/// <inheritdoc />
+		protected override string ToSerializedString()
+		{
+			return Weights.CachedPairs.Select(p => $"{p.Key.ToStringId()}={p.Value}").JoinComma();
+		}
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return Weights.CachedPairs.Select(p => $"{p.Value} * {p.Key.ToStringId()}").JoinCommaSpace();
 		}
 	}
 }

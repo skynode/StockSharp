@@ -1,67 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <topic id="b5641d6c-cc5c-4692-a5c8-87742590a0a9" revisionNumber="1">
-  <developerWalkthroughDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+   <developerWalkthroughDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
     <introduction>
-      <para>Нажав на кнопку <legacyBold>Добавить</legacyBold> в окне с источником данных, откроется окно для поиска и добавления инструментов.</para>
+      <para>If you click the <legacyBold>Instruments</legacyBold> button on the General tab, the <legacyBold>Instruments</legacyBold> panel 
+      appears. The <legacyBold>Instruments</legacyBold> panel displays all available instruments, as well as the market data for them.
+</para>
       <mediaLink>
-        <image placement="center" xlink:href="hydra_securities" />
+        <image placement="center" xlink:href="hydra_securitiesPanel_00" />
       </mediaLink>
-      <para>Первоначально база данных инструментов в <token>hydra</token> пуста, есть только вспомогательный инструмент <legacyBold>All@All</legacyBold> (при выборе данного инструмента будут скачиваться данные по всем доступным для данного источника инструментам). 
-      Поэтому, если необходимо скачивать данные для каких то конкретных инструментов, то их надо найти (поиск идет по базе данных инструментов, а также по доступным инструментам который предоставляет конкретный источник) и добавить в источник.</para>
-	  
-	  <para>Для поиска инструментов необходимо нажать соответсвующую кнопку <mediaLinkInline><image xlink:href="hydra_security_find" /></mediaLinkInline>.</para>
-	  <para>Поиск идет в зависимости от настроек выставленных в фильтре. Если фильтр пустой, то будет выведен список всех доступных инструментов.</para>
-	  <para>Фильтр можно очистить с помошью соответсвующей кнопки <mediaLinkInline><image xlink:href="hydra_security_clear_filter" /></mediaLinkInline>.</para>
       
-      <para>После того как инструменты будут найдены окно примет следующий вид.</para>
-      <mediaLink>
-        <image placement="center" xlink:href="hydra_security_full_list" />
-      </mediaLink>
-      <para>В котором будут видны все доступные для добавления инструменты.</para>
-      <alert class="caution">
-			Для <token>rts</token> и <token>ux</token> источников действует особая схема. Данные источники сами добавляют инструменты в базу
-			<token>hydra</token> по мере скачивания новой информации о сделках. Поэтому для этих источников не нужно предварительно находить
-			и настраивать инструменты.
-	  </alert>
-      <para>
-			Источники данных скачивают маркет-данные только по инструментам, которые в них добавлены (за исключением источников для <token>rts</token> и <token>ux</token>) 
-			и у которых выбран хотя бы один тип маркет-данных.
-	  </para>
-      <para>
-			Для этого, после добавления инструментов, у каждого инструмента надо выбрать небходимый для скачивания тип маркет-данных. 
-			Если не выбран ни один тип маркет-данных, то в строке с инструментом (слева) будет значок с восклицательным знаком:
-	  </para>
-	  <para>
-			Если не установлены все необходимые параметры инструмента, то в левой колонке строки с инструментом появится значок <mediaLinkInline><image xlink:href="hydra_zero" /></mediaLinkInline>.
-	  </para>
+      <para>At the bottom of the <legacyBold>Instruments</legacyBold> panel are buttons that allow to:</para>
 	  
-      <mediaLink>
-        <image placement="center" xlink:href="hydra_security_select" />
-      </mediaLink>
-      <alert class="note">
-      		<para>При нажатии на кнопку <legacyBold>All@All</legacyBold> будут удалены все добавленные в источник инструменты, и вместо них добавлен один вспомогательный инструмент All@All, 
-      		при котором будут скачиваться маркет-данные по всем доступным для источника инструментам. Например для <link xlink:href="54a1e95e-ea39-4322-9613-e74859a3a596">Quik</link> 
-      		это будет все инструменты находящиеся в таблице "Инструменты".</para>
-      		<para>Кнопка <mediaLinkInline><image xlink:href="hydra_delete" /></mediaLinkInline> позволяет удалить ненужные инструменты.</para>
-	  </alert>      
-      <para>
-			Чтобы отредактировать инструмент (например, когда инструмент был заполнен не всеми необходимыми данными), надо двойным кликом мышкой по инструменту или нажатием на кнопку <mediaLinkInline><image xlink:href="hydra_edit" /></mediaLinkInline> открыть окно,
-			в котором произвести необходимые настройки:
-		</para>
-      <mediaLink>
-        <image placement="center" xlink:href="hydra_security_edit" />
-      </mediaLink>
-      <para>
-			При необходимости можно отредактировать группу инструментов. Для этого надо выбрать группу инструментов, и нажать на кнопку <mediaLinkInline><image xlink:href="hydra_edit" /></mediaLinkInline>.
-		</para>
-      <mediaLink>
-        <image placement="center" xlink:href="hydra_securities_edit" />
-      </mediaLink>
-      <para>
-      		Если у выбранной группы инструментов есть одинаковые значения, то это поле будет заполнено данным значением. Если значения разные, то это поле будет пустым. 
-      		Например выбрано два инструмента у которох значение "Шаг цены" равно 1, у одного инструмента размер лота 10 у другого 100. Соответсвенно в поле "Шаг цены" будет 1, а поле
-      		"Шаг объема" будет пустое.
-      </para>
+<list class="bullet">
+  <listItem><para>Add a new instrument, as described in the clause  <link xlink:href="cc9ddc6c-27e9-4bc4-91e8-a418303ae201" />.</para></listItem>
+  <listItem><para>Add a new index, as described in the clause <link xlink:href="f6d767a6-150e-4fba-ad39-f48d5a0cf0e6" />.</para></listItem>
+  <listItem><para>Add a new continuous instrument, as described in the clause <link xlink:href="2a78aa1d-c8b6-4679-9d3e-4ab8e909df54" />.</para></listItem>
+  <listItem><para>Change the instrument or group of instruments, as described in the clause <link xlink:href="4323f740-7b37-47ca-bab1-d540d9c0c4f0" />.</para></listItem>
+  <listItem><para>Specify additional information about the instrument, as described in the clause <link xlink:href="b7f2c08a-2920-42a4-9887-eb0441c246cb" />.</para></listItem>
+  <listItem><para>Match the instruments and connections, as described in clause <link xlink:href="65b09400-90fa-49f3-8d71-6d4309a33934" />.</para></listItem>  
+</list>
+
+
       
     </introduction>
   </developerWalkthroughDocument>

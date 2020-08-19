@@ -17,16 +17,15 @@ namespace StockSharp.Algo.Candles
 {
 	using System;
 	using System.Collections.Generic;
-	using System.ComponentModel;
 	using System.Linq;
 	using System.Runtime.Serialization;
 
 	using Ecng.Common;
+	using Ecng.Collections;
 
 	using StockSharp.BusinessEntities;
 	using StockSharp.Messages;
 	using StockSharp.Localization;
-	using Compression;
 
 	/// <summary>
 	/// Base candle class (contains main parameters).
@@ -49,25 +48,13 @@ namespace StockSharp.Algo.Candles
 		[DescriptionLoc(LocalizedStrings.SecurityKey, true)]
 		public Security Security { get; set; }
 
-		private DateTimeOffset _openTime;
-
 		/// <summary>
 		/// Open time.
 		/// </summary>
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.CandleOpenTimeKey)]
 		[DescriptionLoc(LocalizedStrings.CandleOpenTimeKey, true)]
-		public DateTimeOffset OpenTime
-		{
-			get { return _openTime; }
-			set
-			{
-				ThrowIfFinished();
-				_openTime = value;
-			}
-		}
-
-		private DateTimeOffset _closeTime;
+		public DateTimeOffset OpenTime { get; set; }
 
 		/// <summary>
 		/// Close time.
@@ -75,17 +62,7 @@ namespace StockSharp.Algo.Candles
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.CandleCloseTimeKey)]
 		[DescriptionLoc(LocalizedStrings.CandleCloseTimeKey, true)]
-		public DateTimeOffset CloseTime
-		{
-			get { return _closeTime; }
-			set
-			{
-				ThrowIfFinished();
-				_closeTime = value;
-			}
-		}
-
-		private DateTimeOffset _highTime;
+		public DateTimeOffset CloseTime { get; set; }
 
 		/// <summary>
 		/// High time.
@@ -93,17 +70,7 @@ namespace StockSharp.Algo.Candles
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.CandleHighTimeKey)]
 		[DescriptionLoc(LocalizedStrings.CandleHighTimeKey, true)]
-		public DateTimeOffset HighTime
-		{
-			get { return _highTime; }
-			set
-			{
-				ThrowIfFinished();
-				_highTime = value;
-			}
-		}
-
-		private DateTimeOffset _lowTime;
+		public DateTimeOffset HighTime { get; set; }
 
 		/// <summary>
 		/// Low time.
@@ -111,17 +78,7 @@ namespace StockSharp.Algo.Candles
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.CandleLowTimeKey)]
 		[DescriptionLoc(LocalizedStrings.CandleLowTimeKey, true)]
-		public DateTimeOffset LowTime
-		{
-			get { return _lowTime; }
-			set
-			{
-				ThrowIfFinished();
-				_lowTime = value;
-			}
-		}
-
-		private decimal _openPrice;
+		public DateTimeOffset LowTime { get; set; }
 
 		/// <summary>
 		/// Opening price.
@@ -129,17 +86,7 @@ namespace StockSharp.Algo.Candles
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.Str79Key)]
 		[DescriptionLoc(LocalizedStrings.Str80Key)]
-		public decimal OpenPrice
-		{
-			get { return _openPrice; }
-			set
-			{
-				ThrowIfFinished();
-				_openPrice = value;
-			}
-		}
-
-		private decimal _closePrice;
+		public decimal OpenPrice { get; set; }
 
 		/// <summary>
 		/// Closing price.
@@ -147,133 +94,58 @@ namespace StockSharp.Algo.Candles
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.ClosingPriceKey)]
 		[DescriptionLoc(LocalizedStrings.Str86Key)]
-		public decimal ClosePrice
-		{
-			get { return _closePrice; }
-			set
-			{
-				ThrowIfFinished();
-				_closePrice = value;
-			}
-		}
-
-		private decimal _highPrice;
+		public decimal ClosePrice { get; set; }
 
 		/// <summary>
-		/// Maximum price.
+		/// Highest price.
 		/// </summary>
 		[DataMember]
-		[DisplayNameLoc(LocalizedStrings.Str81Key)]
+		[DisplayNameLoc(LocalizedStrings.HighestPriceKey)]
 		[DescriptionLoc(LocalizedStrings.Str82Key)]
-		public decimal HighPrice
-		{
-			get { return _highPrice; }
-			set
-			{
-				ThrowIfFinished();
-				_highPrice = value;
-			}
-		}
-
-		private decimal _lowPrice;
+		public decimal HighPrice { get; set; }
 
 		/// <summary>
-		/// Minimum price.
+		/// Lowest price.
 		/// </summary>
 		[DataMember]
-		[DisplayNameLoc(LocalizedStrings.Str83Key)]
+		[DisplayNameLoc(LocalizedStrings.LowestPriceKey)]
 		[DescriptionLoc(LocalizedStrings.Str84Key)]
-		public decimal LowPrice
-		{
-			get { return _lowPrice; }
-			set
-			{
-				ThrowIfFinished();
-				_lowPrice = value;
-			}
-		}
-
-		private decimal _totalPrice;
+		public decimal LowPrice { get; set; }
 
 		/// <summary>
-		/// Total trades volume.
+		/// Total price size.
 		/// </summary>
 		[DataMember]
-		public decimal TotalPrice
-		{
-			get { return _totalPrice; }
-			set
-			{
-				ThrowIfFinished();
-				_totalPrice = value;
-			}
-		}
-
-		private decimal? _openVolume;
+		[DisplayNameLoc(LocalizedStrings.TotalPriceKey)]
+		public decimal TotalPrice { get; set; }
 
 		/// <summary>
 		/// Volume at open.
 		/// </summary>
 		[DataMember]
-		public decimal? OpenVolume
-		{
-			get { return _openVolume; }
-			set
-			{
-				ThrowIfFinished();
-				_openVolume = value;
-			}
-		}
-
-		private decimal? _closeVolume;
+		[DisplayNameLoc(LocalizedStrings.OpenVolumeKey)]
+		public decimal? OpenVolume { get; set; }
 
 		/// <summary>
 		/// Volume at close.
 		/// </summary>
 		[DataMember]
-		public decimal? CloseVolume
-		{
-			get { return _closeVolume; }
-			set
-			{
-				ThrowIfFinished();
-				_closeVolume = value;
-			}
-		}
-
-		private decimal? _highVolume;
+		[DisplayNameLoc(LocalizedStrings.CloseVolumeKey)]
+		public decimal? CloseVolume { get; set; }
 
 		/// <summary>
 		/// Volume at high.
 		/// </summary>
 		[DataMember]
-		public decimal? HighVolume
-		{
-			get { return _highVolume; }
-			set
-			{
-				ThrowIfFinished();
-				_highVolume = value;
-			}
-		}
-
-		private decimal? _lowVolume;
+		[DisplayNameLoc(LocalizedStrings.HighVolumeKey)]
+		public decimal? HighVolume { get; set; }
 
 		/// <summary>
-		/// Minimum volume.
+		/// Volume at low.
 		/// </summary>
 		[DataMember]
-		public decimal? LowVolume
-		{
-			get { return _lowVolume; }
-			set
-			{
-				ThrowIfFinished();
-				_lowVolume = value;
-			}
-		}
-
-		private decimal _totalVolume;
+		[DisplayNameLoc(LocalizedStrings.LowVolumeKey)]
+		public decimal? LowVolume { get; set; }
 
 		/// <summary>
 		/// Total volume.
@@ -281,62 +153,19 @@ namespace StockSharp.Algo.Candles
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.VolumeKey)]
 		[DescriptionLoc(LocalizedStrings.TotalCandleVolumeKey)]
-		public decimal TotalVolume
-		{
-			get { return _totalVolume; }
-			set
-			{
-				ThrowIfFinished();
-				_totalVolume = value;
-			}
-		}
-
-		private decimal? _relativeVolume;
+		public decimal TotalVolume { get; set; }
 
 		/// <summary>
-		/// Relative colume.
+		/// Relative volume.
 		/// </summary>
 		[DataMember]
-		public decimal? RelativeVolume
-		{
-			get { return _relativeVolume; }
-			set
-			{
-				ThrowIfFinished();
-				_relativeVolume = value;
-			}
-		}
-
-		//[field: NonSerialized]
-		//private CandleSeries _series;
-
-		///// <summary>
-		///// Candles series.
-		///// </summary>
-		//public CandleSeries Series
-		//{
-		//	get { return _series; }
-		//	set { _series = value; }
-		//}
-
-		//[field: NonSerialized]
-		//private ICandleManagerSource _source;
-
-		///// <summary>
-		///// Candle's source.
-		///// </summary>
-		//public ICandleManagerSource Source
-		//{
-		//	get { return _source; }
-		//	set { _source = value; }
-		//}
+		[DisplayNameLoc(LocalizedStrings.RelativeVolumeKey)]
+		public decimal? RelativeVolume { get; set; }
 
 		/// <summary>
 		/// Candle arg.
 		/// </summary>
 		public abstract object Arg { get; set; }
-
-		private int? _totalTicks;
 
 		/// <summary>
 		/// Number of ticks.
@@ -344,51 +173,23 @@ namespace StockSharp.Algo.Candles
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.TicksKey)]
 		[DescriptionLoc(LocalizedStrings.TickCountKey)]
-		public int? TotalTicks
-		{
-			get { return _totalTicks; }
-			set
-			{
-				ThrowIfFinished();
-				_totalTicks = value;
-			}
-		}
-
-		private int? _upTicks;
+		public int? TotalTicks { get; set; }
 
 		/// <summary>
-		/// Number of uptrending ticks.
+		/// Number of up trending ticks.
 		/// </summary>
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.TickUpKey)]
 		[DescriptionLoc(LocalizedStrings.TickUpCountKey)]
-		public int? UpTicks
-		{
-			get { return _upTicks; }
-			set
-			{
-				ThrowIfFinished();
-				_upTicks = value;
-			}
-		}
-
-		private int? _downTicks;
+		public int? UpTicks { get; set; }
 
 		/// <summary>
-		/// Number of downtrending ticks.
+		/// Number of down trending ticks.
 		/// </summary>
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.TickDownKey)]
 		[DescriptionLoc(LocalizedStrings.TickDownCountKey)]
-		public int? DownTicks
-		{
-			get { return _downTicks; }
-			set
-			{
-				ThrowIfFinished();
-				_downTicks = value;
-			}
-		}
+		public int? DownTicks { get; set; }
 
 		private CandleStates _state;
 
@@ -397,10 +198,10 @@ namespace StockSharp.Algo.Candles
 		/// </summary>
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.StateKey)]
-		[DescriptionLoc(LocalizedStrings.CandleStateKey)]
+		[DescriptionLoc(LocalizedStrings.CandleStateKey, true)]
 		public CandleStates State
 		{
-			get { return _state; }
+			get => _state;
 			set
 			{
 				ThrowIfFinished();
@@ -412,7 +213,18 @@ namespace StockSharp.Algo.Candles
 		/// Price levels.
 		/// </summary>
 		[DataMember]
+		[DisplayNameLoc(LocalizedStrings.PriceLevelsKey)]
 		public IEnumerable<CandlePriceLevel> PriceLevels { get; set; }
+
+		/// <summary>
+		/// <see cref="PriceLevels"/> with minimum <see cref="CandlePriceLevel.TotalVolume"/>.
+		/// </summary>
+		public CandlePriceLevel? MinPriceLevel => PriceLevels?.OrderBy(l => l.TotalVolume).FirstOr();
+
+		/// <summary>
+		/// <see cref="PriceLevels"/> with maximum <see cref="CandlePriceLevel.TotalVolume"/>.
+		/// </summary>
+		public CandlePriceLevel? MaxPriceLevel => PriceLevels?.OrderByDescending(l => l.TotalVolume).FirstOr();
 
 		/// <summary>
 		/// Open interest.
@@ -423,9 +235,19 @@ namespace StockSharp.Algo.Candles
 		public decimal? OpenInterest { get; set; }
 
 		/// <summary>
-		/// Returns a string that represents the current object.
+		/// Sequence number.
 		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
+		/// <remarks>Zero means no information.</remarks>
+		[DataMember]
+		public long SeqNum { get; set; }
+
+		/// <summary>
+		/// Determines the message is generated from the specified <see cref="DataType"/>.
+		/// </summary>
+		[DataMember]
+		public DataType BuildFrom { get; set; }
+
+		/// <inheritdoc />
 		public override string ToString()
 		{
 			return "{0:HH:mm:ss} {1} (O:{2}, H:{3}, L:{4}, C:{5}, V:{6})"
@@ -442,8 +264,8 @@ namespace StockSharp.Algo.Candles
 		/// Copy the message into the <paramref name="destination" />.
 		/// </summary>
 		/// <typeparam name="TCandle">The candle type.</typeparam>
-		/// <param name="destination">The object, which copied information.</param>
-		/// <returns>The object, which copied information.</returns>
+		/// <param name="destination">The object, to which copied information.</param>
+		/// <returns>The object, to which copied information.</returns>
 		protected TCandle CopyTo<TCandle>(TCandle destination)
 			where TCandle : Candle
 		{
@@ -471,45 +293,11 @@ namespace StockSharp.Algo.Candles
 			destination.TotalTicks = TotalTicks;
 			destination.TotalVolume = TotalVolume;
 			//destination.VolumeProfileInfo = VolumeProfileInfo;
-			destination.PriceLevels = PriceLevels?.Select(l => l.Clone()).ToArray();
+			destination.PriceLevels = PriceLevels?./*Select(l => l.Clone()).*/ToArray();
+			destination.SeqNum = SeqNum;
+			destination.BuildFrom = BuildFrom;
 
 			return destination;
-		}
-
-		// for performance reason
-		internal void Update(ICandleBuilderSourceValue value)
-		{
-			ThrowIfFinished();
-
-			var price = value.Price;
-			var volume = value.Volume;
-			var time = value.Time;
-
-			if (price < _lowPrice)
-			{
-				_lowPrice = price;
-				_lowTime = time;
-			}
-
-			if (price > _highPrice)
-			{
-				_highPrice = price;
-				_highTime = time;
-			}
-
-			_closePrice = price;
-			_totalPrice += price * volume;
-
-			_lowVolume = (_lowVolume ?? 0m).Min(volume);
-			_highVolume = (_highVolume ?? 0m).Max(volume);
-			_closeVolume = volume;
-			_totalVolume += volume;
-
-			var dir = value.OrderDirection;
-			if (dir != null)
-				_relativeVolume = (_relativeVolume ?? 0) + (dir.Value == Sides.Buy ? volume : -volume);
-
-			_closeTime = time;
 		}
 	}
 
@@ -518,7 +306,7 @@ namespace StockSharp.Algo.Candles
 	/// </summary>
 	[DataContract]
 	[Serializable]
-	[DisplayName("Time Frame")]
+	[DisplayNameLoc(LocalizedStrings.TimeFrameCandleKey)]
 	public class TimeFrameCandle : Candle
 	{
 		/// <summary>
@@ -527,13 +315,11 @@ namespace StockSharp.Algo.Candles
 		[DataMember]
 		public TimeSpan TimeFrame { get; set; }
 
-		/// <summary>
-		/// Candle arg.
-		/// </summary>
+		/// <inheritdoc />
 		public override object Arg
 		{
-			get { return TimeFrame; }
-			set { TimeFrame = (TimeSpan)value; }
+			get => TimeFrame;
+			set => TimeFrame = (TimeSpan)value;
 		}
 
 		/// <summary>
@@ -551,28 +337,32 @@ namespace StockSharp.Algo.Candles
 	/// </summary>
 	[DataContract]
 	[Serializable]
-	[DisplayName("Tick")]
+	[DisplayNameLoc(LocalizedStrings.TickCandleKey)]
 	public class TickCandle : Candle
 	{
+		private int _maxTradeCount;
+
 		/// <summary>
 		/// Maximum tick count.
 		/// </summary>
 		[DataMember]
-		public int MaxTradeCount { get; set; }
+		public int MaxTradeCount
+		{
+			get => _maxTradeCount;
+			set
+			{
+				if (value < 0)
+					throw new ArgumentOutOfRangeException(nameof(value));
 
-		/// <summary>
-		/// Current tick count.
-		/// </summary>
-		[DataMember]
-		public int CurrentTradeCount { get; set; }
+				_maxTradeCount = value;
+			}
+		}
 
-		/// <summary>
-		/// Candle arg.
-		/// </summary>
+		/// <inheritdoc />
 		public override object Arg
 		{
-			get { return MaxTradeCount; }
-			set { MaxTradeCount = (int)value; }
+			get => MaxTradeCount;
+			set => MaxTradeCount = (int)value;
 		}
 
 		/// <summary>
@@ -590,22 +380,32 @@ namespace StockSharp.Algo.Candles
 	/// </summary>
 	[DataContract]
 	[Serializable]
-	[DisplayName("Volume")]
+	[DisplayNameLoc(LocalizedStrings.VolumeCandleKey)]
 	public class VolumeCandle : Candle
 	{
+		private decimal _volume;
+
 		/// <summary>
 		/// Maximum volume.
 		/// </summary>
 		[DataMember]
-		public decimal Volume { get; set; }
+		public decimal Volume
+		{
+			get => _volume;
+			set
+			{
+				if (value < 0)
+					throw new ArgumentOutOfRangeException(nameof(value));
 
-		/// <summary>
-		/// Candle arg.
-		/// </summary>
+				_volume = value;
+			}
+		}
+
+		/// <inheritdoc />
 		public override object Arg
 		{
-			get { return Volume; }
-			set { Volume = (decimal)value; }
+			get => Volume;
+			set => Volume = (decimal)value;
 		}
 
 		/// <summary>
@@ -623,22 +423,26 @@ namespace StockSharp.Algo.Candles
 	/// </summary>
 	[DataContract]
 	[Serializable]
-	[DisplayName("Range")]
+	[DisplayNameLoc(LocalizedStrings.RangeCandleKey)]
 	public class RangeCandle : Candle
 	{
+		private Unit _priceRange;
+
 		/// <summary>
 		/// Range of price.
 		/// </summary>
 		[DataMember]
-		public Unit PriceRange { get; set; }
+		public Unit PriceRange
+		{
+			get => _priceRange;
+			set => _priceRange = value ?? throw new ArgumentNullException(nameof(value));
+		}
 
-		/// <summary>
-		/// Candle arg.
-		/// </summary>
+		/// <inheritdoc />
 		public override object Arg
 		{
-			get { return PriceRange; }
-			set { PriceRange = (Unit)value; }
+			get => PriceRange;
+			set => PriceRange = (Unit)value;
 		}
 
 		/// <summary>
@@ -656,28 +460,32 @@ namespace StockSharp.Algo.Candles
 	/// </summary>
 	[DataContract]
 	[Serializable]
-	[DisplayName("X&0")]
+	[DisplayNameLoc(LocalizedStrings.PnFCandleKey)]
 	public class PnFCandle : Candle
 	{
+		private PnFArg _pnFArg;
+
 		/// <summary>
 		/// Value of arguments.
 		/// </summary>
 		[DataMember]
-		public PnFArg PnFArg { get; set; }
+		public PnFArg PnFArg
+		{
+			get => _pnFArg;
+			set => _pnFArg = value ?? throw new ArgumentNullException(nameof(value));
+		}
 
-		/// <summary>
-		/// Type of symbols.
-		/// </summary>
-		[DataMember]
-		public PnFTypes Type { get; set; }
+		///// <summary>
+		///// Type of symbols.
+		///// </summary>
+		//[DataMember]
+		//public PnFTypes Type { get; set; }
 
-		/// <summary>
-		/// Candle arg.
-		/// </summary>
+		/// <inheritdoc />
 		public override object Arg
 		{
-			get { return PnFArg; }
-			set { PnFArg = (PnFArg)value; }
+			get => PnFArg;
+			set => PnFArg = (PnFArg)value;
 		}
 
 		/// <summary>
@@ -686,7 +494,7 @@ namespace StockSharp.Algo.Candles
 		/// <returns>Copy.</returns>
 		public override Candle Clone()
 		{
-			return CopyTo(new PnFCandle { Type = Type });
+			return CopyTo(new PnFCandle());
 		}
 	}
 
@@ -695,22 +503,26 @@ namespace StockSharp.Algo.Candles
 	/// </summary>
 	[DataContract]
 	[Serializable]
-	[DisplayName("Renko")]
+	[DisplayNameLoc(LocalizedStrings.RenkoCandleKey)]
 	public class RenkoCandle : Candle
 	{
+		private Unit _boxSize;
+
 		/// <summary>
 		/// Possible price change range.
 		/// </summary>
 		[DataMember]
-		public Unit BoxSize { get; set; }
+		public Unit BoxSize
+		{
+			get => _boxSize;
+			set => _boxSize = value ?? throw new ArgumentNullException(nameof(value));
+		}
 
-		/// <summary>
-		/// Candle arg.
-		/// </summary>
+		/// <inheritdoc />
 		public override object Arg
 		{
-			get { return BoxSize; }
-			set { BoxSize = (Unit)value; }
+			get => BoxSize;
+			set => BoxSize = (Unit)value;
 		}
 
 		/// <summary>
@@ -720,6 +532,24 @@ namespace StockSharp.Algo.Candles
 		public override Candle Clone()
 		{
 			return CopyTo(new RenkoCandle());
+		}
+	}
+
+	/// <summary>
+	/// Heikin ashi candle.
+	/// </summary>
+	[DataContract]
+	[Serializable]
+	[DisplayNameLoc(LocalizedStrings.HeikinAshiKey)]
+	public class HeikinAshiCandle : TimeFrameCandle
+	{
+		/// <summary>
+		/// Create a copy of <see cref="HeikinAshiCandle"/>.
+		/// </summary>
+		/// <returns>Copy.</returns>
+		public override Candle Clone()
+		{
+			return CopyTo(new HeikinAshiCandle());
 		}
 	}
 }

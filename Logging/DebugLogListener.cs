@@ -27,10 +27,7 @@ namespace StockSharp.Logging
 	/// </summary>
 	public class DebugLogListener : LogListener
 	{
-		/// <summary>
-		/// To record messages.
-		/// </summary>
-		/// <param name="messages">Debug messages.</param>
+		/// <inheritdoc />
 		protected override void OnWriteMessages(IEnumerable<LogMessage> messages)
 		{
 			var sb = new StringBuilder();
@@ -67,6 +64,7 @@ namespace StockSharp.Logging
 
 			switch (level)
 			{
+				case LogLevels.Verbose:
 				case LogLevels.Debug:
 				case LogLevels.Info:
 					Trace.TraceInformation(str);

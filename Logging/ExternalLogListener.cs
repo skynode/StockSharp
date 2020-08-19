@@ -29,10 +29,7 @@ namespace StockSharp.Logging
 		/// <param name="logger">External recipient of messages.</param>
 		public ExternalLogListener(ILogListener logger)
 		{
-			if (logger == null)
-				throw new ArgumentNullException(nameof(logger));
-
-			Logger = logger;
+			Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
 		/// <summary>
@@ -40,10 +37,7 @@ namespace StockSharp.Logging
 		/// </summary>
 		public ILogListener Logger { get; }
 
-		/// <summary>
-		/// To record messages.
-		/// </summary>
-		/// <param name="messages">Debug messages.</param>
+		/// <inheritdoc />
 		protected override void OnWriteMessages(IEnumerable<LogMessage> messages)
 		{
 			Logger.WriteMessages(messages);

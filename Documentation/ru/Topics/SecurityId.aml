@@ -52,8 +52,7 @@
             <para>
             	Далее, созданный генератор нужно передать в шлюз:
             </para>
-            <code language="C#">var trader = new PlazaTrader();
-trader.SecurityIdGenerator = new CustomSecurityIdGenerator();
+            <code language="C#">var _connector.SecurityIdGenerator = new CustomSecurityIdGenerator();
 </code>
           </content>
         </step>
@@ -104,12 +103,6 @@ trader.SecurityIdGenerator = new CustomSecurityIdGenerator();
       Examples:
 
       <link xlink:href="00e97994-e9e6-46e0-b420-5be86b2f8278">Some other topic</link>
-
-      <externalLink>
-          <linkText>SHFB on CodePlex</linkText>
-          <linkAlternateText>Go to CodePlex</linkAlternateText>
-          <linkUri>http://shfb.codeplex.com</linkUri>
-      </externalLink>
 
       <codeEntityReference>T:TestDoc.TestClass</codeEntityReference>
       <codeEntityReference>P:TestDoc.TestClass.SomeProperty</codeEntityReference>

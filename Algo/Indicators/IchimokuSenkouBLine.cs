@@ -27,6 +27,7 @@ namespace StockSharp.Algo.Indicators
 	/// <summary>
 	/// Senkou (B) line.
 	/// </summary>
+	[IndicatorIn(typeof(CandleIndicatorValue))]
 	public class IchimokuSenkouBLine : LengthIndicator<decimal>
 	{
 		private readonly List<Candle> _buffer = new List<Candle>();
@@ -37,24 +38,17 @@ namespace StockSharp.Algo.Indicators
 		/// <param name="kijun">Kijun line.</param>
 		public IchimokuSenkouBLine(IchimokuLine kijun)
 		{
-			if (kijun == null)
-				throw new ArgumentNullException(nameof(kijun));
-
-			Kijun = kijun;
+			Kijun = kijun ?? throw new ArgumentNullException(nameof(kijun));
 		}
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
 			_buffer.Clear();
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _buffer.Count >= Length && Buffer.Count >= Kijun.Length;
 
 		//_buffer.Count >= Length &&
@@ -65,11 +59,7 @@ namespace StockSharp.Algo.Indicators
 		[Browsable(false)]
 		public IchimokuLine Kijun { get; }
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var candle = input.GetValue<Candle>();

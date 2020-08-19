@@ -1,18 +1,3 @@
-#region S# License
-/******************************************************************************************
-NOTICE!!!  This program and source code is owned and licensed by
-StockSharp, LLC, www.stocksharp.com
-Viewing or use of this code requires your acceptance of the license
-agreement found at https://github.com/StockSharp/StockSharp/blob/master/LICENSE
-Removal of this comment is a violation of the license agreement.
-
-Project: StockSharp.Algo.Risk.Algo
-File: RiskRule.cs
-Created: 2015, 11, 11, 2:32 PM
-
-Copyright 2010 by StockSharp, LLC
-*******************************************************************************************/
-#endregion S# License
 namespace StockSharp.Algo.Risk
 {
 	using System;
@@ -20,18 +5,17 @@ namespace StockSharp.Algo.Risk
 	using System.ComponentModel;
 
 	using Ecng.Common;
-	using Ecng.ComponentModel;
 	using Ecng.Serialization;
 	using Ecng.Collections;
 
 	using StockSharp.Messages;
-
 	using StockSharp.Localization;
+	using StockSharp.Logging;
 
 	/// <summary>
 	/// Base risk-rule.
 	/// </summary>
-	public abstract class RiskRule : NotifiableObject, IRiskRule
+	public abstract class RiskRule : BaseLogReceiver, IRiskRule, INotifyPropertyChanged
 	{
 		/// <summary>
 		/// Initialize <see cref="RiskRule"/>.
@@ -48,52 +32,65 @@ namespace StockSharp.Algo.Risk
 		[Browsable(false)]
 		public string Title
 		{
-			get { return _title; }
+			get => _title;
 			protected set
 			{
 				_title = value;
-				NotifyChanged("Title");
+				NotifyChanged(nameof(Title));
 			}
 		}
 
-		/// <summary>
-		/// Action that needs to be taken in case of rule activation.
-		/// </summary>
+		private RiskActions _action;
+
+		/// <inheritdoc />
 		[DisplayNameLoc(LocalizedStrings.Str722Key)]
 		[DescriptionLoc(LocalizedStrings.Str859Key)]
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
-		public RiskActions Action { get; set; }
+		public RiskActions Action
+		{
+			get => _action;
+			set
+			{
+				_action = value;
+				NotifyChanged(nameof(Action));
+			}
+		}
 
-		/// <summary>
-		/// To reset the state.
-		/// </summary>
+		/// <inheritdoc />
 		public virtual void Reset()
 		{
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public abstract bool ProcessMessage(Message message);
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
-		public virtual void Load(SettingsStorage storage)
+		/// <inheritdoc />
+		public override void Load(SettingsStorage storage)
 		{
 			Action = storage.GetValue<RiskActions>(nameof(Action));
+
+			base.Load(storage);
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
-		public virtual void Save(SettingsStorage storage)
+		/// <inheritdoc />
+		public override void Save(SettingsStorage storage)
 		{
 			storage.SetValue(nameof(Action), Action.To<string>());
+
+			base.Save(storage);
+		}
+
+		private PropertyChangedEventHandler _propertyChanged;
+		
+		event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+		{
+			add => _propertyChanged += value;
+			remove => _propertyChanged -= value;
+		}
+
+		private void NotifyChanged(string propertyName)
+		{
+			_propertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 
@@ -104,7 +101,16 @@ namespace StockSharp.Algo.Risk
 	[DescriptionLoc(LocalizedStrings.Str860Key)]
 	public class RiskPnLRule : RiskRule
 	{
-		private decimal _pnL;
+		private decimal? _initValue;
+
+		/// <inheritdoc />
+		public override void Reset()
+		{
+			base.Reset();
+			_initValue = null;
+		}
+
+		private Unit _pnL = new Unit();
 
 		/// <summary>
 		/// Profit-loss.
@@ -112,42 +118,53 @@ namespace StockSharp.Algo.Risk
 		[DisplayNameLoc(LocalizedStrings.PnLKey)]
 		[DescriptionLoc(LocalizedStrings.Str861Key)]
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
-		public decimal PnL
+		public Unit PnL
 		{
-			get { return _pnL; }
+			get => _pnL;
 			set
 			{
-				_pnL = value;
+				_pnL = value ?? throw new ArgumentNullException(nameof(value));
 				Title = value.To<string>();
 			}
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
-			if (message.Type != MessageTypes.PortfolioChange)
+			if (message.Type != MessageTypes.PositionChange)
 				return false;
 
-			var pfMsg = (PortfolioChangeMessage)message;
-			var currValue = (decimal?)pfMsg.Changes.TryGetValue(PositionChangeTypes.CurrentValue);
+			var pfMsg = (PositionChangeMessage)message;
+
+			if (!pfMsg.IsMoney())
+				return false;
+
+			var currValue = pfMsg.TryGetDecimal(PositionChangeTypes.CurrentValue);
 
 			if (currValue == null)
 				return false;
 
-			if (PnL > 0)
-				return currValue >= PnL;
+			if (_initValue == null)
+			{
+				_initValue = currValue.Value;
+				return false;
+			}
+
+			if (PnL.Type == UnitTypes.Limit)
+			{
+				if (PnL.Value > 0)
+					return PnL.Value <= currValue.Value;
+				else
+					return PnL.Value >= currValue.Value;
+			}
+
+			if (PnL.Value > 0)
+				return (_initValue + PnL) <= currValue.Value;
 			else
-				return currValue <= PnL;
+				return (_initValue + PnL) >= currValue.Value;
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -155,15 +172,12 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(PnL), PnL);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
 
-			PnL = storage.GetValue<decimal>(nameof(PnL));
+			PnL = storage.GetValue<Unit>(nameof(PnL));
 		}
 	}
 
@@ -184,7 +198,7 @@ namespace StockSharp.Algo.Risk
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public decimal Position
 		{
-			get { return _position; }
+			get => _position;
 			set
 			{
 				_position = value;
@@ -192,18 +206,14 @@ namespace StockSharp.Algo.Risk
 			}
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
 			if (message.Type != MessageTypes.PositionChange)
 				return false;
 
 			var posMsg = (PositionChangeMessage)message;
-			var currValue = (decimal?)posMsg.Changes.TryGetValue(PositionChangeTypes.CurrentValue);
+			var currValue = posMsg.TryGetDecimal(PositionChangeTypes.CurrentValue);
 
 			if (currValue == null)
 				return false;
@@ -214,10 +224,7 @@ namespace StockSharp.Algo.Risk
 				return currValue <= Position;
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -225,10 +232,7 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(Position), Position);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
@@ -255,28 +259,25 @@ namespace StockSharp.Algo.Risk
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public TimeSpan Time
 		{
-			get { return _time; }
+			get => _time;
 			set
 			{
+				if (value < TimeSpan.Zero)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+				
 				_time = value;
 				Title = value.To<string>();
 			}
 		}
 
-		/// <summary>
-		/// To reset the state.
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
 			_posOpenTime.Clear();
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
 			switch (message.Type)
@@ -284,7 +285,7 @@ namespace StockSharp.Algo.Risk
 				case MessageTypes.PositionChange:
 				{
 					var posMsg = (PositionChangeMessage)message;
-					var currValue = (decimal?)posMsg.Changes.TryGetValue(PositionChangeTypes.CurrentValue);
+					var currValue = posMsg.TryGetDecimal(PositionChangeTypes.CurrentValue);
 
 					if (currValue == null)
 						return false;
@@ -297,9 +298,7 @@ namespace StockSharp.Algo.Risk
 						return false;
 					}
 
-					var openTime = _posOpenTime.TryGetValue2(key);
-
-					if (openTime == null)
+					if (!_posOpenTime.TryGetValue(key, out var openTime))
 					{
 						_posOpenTime.Add(key, posMsg.LocalTime);
 						return false;
@@ -331,8 +330,7 @@ namespace StockSharp.Algo.Risk
 						removingPos.Add(pair.Key);
 					}
 
-					if (removingPos != null)
-						removingPos.ForEach(t => _posOpenTime.Remove(t));
+					removingPos?.ForEach(t => _posOpenTime.Remove(t));
 
 					return removingPos != null;
 				}
@@ -341,10 +339,7 @@ namespace StockSharp.Algo.Risk
 			return false;
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -352,10 +347,7 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(Time), Time);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
@@ -381,7 +373,7 @@ namespace StockSharp.Algo.Risk
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public decimal Commission
 		{
-			get { return _commission; }
+			get => _commission;
 			set
 			{
 				_commission = value;
@@ -389,18 +381,18 @@ namespace StockSharp.Algo.Risk
 			}
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
-			if (message.Type != MessageTypes.PortfolioChange)
+			if (message.Type != MessageTypes.PositionChange)
 				return false;
 
-			var pfMsg = (PortfolioChangeMessage)message;
-			var currValue = (decimal?)pfMsg.Changes.TryGetValue(PositionChangeTypes.Commission);
+			var pfMsg = (PositionChangeMessage)message;
+
+			if (!pfMsg.IsMoney())
+				return false;
+
+			var currValue = pfMsg.TryGetDecimal(PositionChangeTypes.Commission);
 
 			if (currValue == null)
 				return false;
@@ -408,10 +400,7 @@ namespace StockSharp.Algo.Risk
 			return currValue >= Commission;
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -419,10 +408,7 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(Commission), Commission);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
@@ -441,14 +427,14 @@ namespace StockSharp.Algo.Risk
 		private decimal _slippage;
 
 		/// <summary>
-		/// Sllippage size.
+		/// Slippage size.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.Str163Key)]
 		[DescriptionLoc(LocalizedStrings.Str871Key)]
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public decimal Slippage
 		{
-			get { return _slippage; }
+			get => _slippage;
 			set
 			{
 				_slippage = value;
@@ -456,11 +442,7 @@ namespace StockSharp.Algo.Risk
 			}
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
 			if (message.Type != MessageTypes.Execution)
@@ -478,10 +460,7 @@ namespace StockSharp.Algo.Risk
 				return currValue < Slippage;
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -489,10 +468,7 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(Slippage), Slippage);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
@@ -518,7 +494,7 @@ namespace StockSharp.Algo.Risk
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public decimal Price
 		{
-			get { return _price; }
+			get => _price;
 			set
 			{
 				_price = value;
@@ -526,11 +502,7 @@ namespace StockSharp.Algo.Risk
 			}
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
 			switch (message.Type)
@@ -552,10 +524,7 @@ namespace StockSharp.Algo.Risk
 			}
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -563,10 +532,7 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(Price), Price);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
@@ -592,19 +558,18 @@ namespace StockSharp.Algo.Risk
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public decimal Volume
 		{
-			get { return _volume; }
+			get => _volume;
 			set
 			{
+				if (value < 0)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+
 				_volume = value;
 				Title = value.To<string>();
 			}
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
 			switch (message.Type)
@@ -626,10 +591,7 @@ namespace StockSharp.Algo.Risk
 			}
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -637,10 +599,7 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(Volume), Volume);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
@@ -659,21 +618,29 @@ namespace StockSharp.Algo.Risk
 		private DateTimeOffset? _endTime;
 		private int _current;
 
+		private void UpdateTitle()
+		{
+			Title = Count + " -> " + Interval;
+		}
+
 		private int _count;
 
 		/// <summary>
 		/// Order count.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.Str878Key)]
-		[DescriptionLoc(LocalizedStrings.Str669Key)]
+		[DescriptionLoc(LocalizedStrings.Str957Key)]
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public int Count
 		{
-			get { return _count; }
+			get => _count;
 			set
 			{
+				if (value < 0)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+
 				_count = value;
-				Title = value.To<string>();
+				UpdateTitle();
 			}
 		}
 
@@ -688,17 +655,18 @@ namespace StockSharp.Algo.Risk
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public TimeSpan Interval
 		{
-			get { return _interval; }
+			get => _interval;
 			set
 			{
+				if (value < TimeSpan.Zero)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+
 				_interval = value;
-				Title = value.To<string>();
+				UpdateTitle();
 			}
 		}
 
-		/// <summary>
-		/// To reset the state.
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
@@ -707,11 +675,7 @@ namespace StockSharp.Algo.Risk
 			_endTime = null;
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
 			switch (message.Type)
@@ -720,29 +684,45 @@ namespace StockSharp.Algo.Risk
 				case MessageTypes.OrderReplace:
 				case MessageTypes.OrderPairReplace:
 				{
-					if (_endTime == null)
+					var time = message.LocalTime;
+
+					if (time.IsDefault())
 					{
-						_endTime = message.LocalTime + Interval;
-						_current = 1;
+						this.AddWarningLog("Time is null. Msg={0}", message);
 						return false;
 					}
 
-					if (message.LocalTime < _endTime)
+					if (_endTime == null)
+					{
+						_endTime = time + Interval;
+						_current = 1;
+
+						this.AddDebugLog("EndTime={0}", _endTime);
+						return false;
+					}
+
+					if (time < _endTime)
 					{
 						_current++;
 
+						this.AddDebugLog("Count={0} Msg={1}", _current, message);
+
 						if (_current >= Count)
 						{
-							_endTime = message.LocalTime + Interval;
-							_current = 0;
+							this.AddInfoLog("Count={0} EndTime={1}", _current, _endTime);
+
+							_endTime = null;
 							return true;
 						}
-
-						return false;
 					}
+					else
+					{
+						_endTime = time + Interval;
+						_current = 1;
 
-					_endTime = message.LocalTime + Interval;
-					_current = 0;
+						this.AddDebugLog("EndTime={0}", _endTime);
+					}
+					
 					return false;
 				}
 			}
@@ -750,10 +730,7 @@ namespace StockSharp.Algo.Risk
 			return false;
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -762,10 +739,7 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(Interval), Interval);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
@@ -792,7 +766,7 @@ namespace StockSharp.Algo.Risk
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public decimal Price
 		{
-			get { return _price; }
+			get => _price;
 			set
 			{
 				_price = value;
@@ -800,11 +774,7 @@ namespace StockSharp.Algo.Risk
 			}
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
 			if (message.Type != MessageTypes.Execution)
@@ -818,10 +788,7 @@ namespace StockSharp.Algo.Risk
 			return execMsg.TradePrice >= Price;
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -829,10 +796,7 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(Price), Price);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
@@ -858,19 +822,18 @@ namespace StockSharp.Algo.Risk
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public decimal Volume
 		{
-			get { return _volume; }
+			get => _volume;
 			set
 			{
+				if (value < 0)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+
 				_volume = value;
 				Title = value.To<string>();
 			}
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
 			if (message.Type != MessageTypes.Execution)
@@ -884,10 +847,7 @@ namespace StockSharp.Algo.Risk
 			return execMsg.TradeVolume >= Volume;
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -895,10 +855,7 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(Volume), Volume);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
@@ -917,6 +874,11 @@ namespace StockSharp.Algo.Risk
 		private DateTimeOffset? _endTime;
 		private int _current;
 
+		private void UpdateTitle()
+		{
+			Title = Count + " -> " + Interval;
+		}
+
 		private int _count;
 
 		/// <summary>
@@ -927,11 +889,14 @@ namespace StockSharp.Algo.Risk
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public int Count
 		{
-			get { return _count; }
+			get => _count;
 			set
 			{
+				if (value < 0)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+
 				_count = value;
-				Title = value.To<string>();
+				UpdateTitle();
 			}
 		}
 
@@ -945,17 +910,18 @@ namespace StockSharp.Algo.Risk
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public TimeSpan Interval
 		{
-			get { return _interval; }
+			get => _interval;
 			set
 			{
+				if (value < TimeSpan.Zero)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+
 				_interval = value;
-				Title = value.To<string>();
+				UpdateTitle();
 			}
 		}
 
-		/// <summary>
-		/// To reset the state.
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
@@ -964,11 +930,7 @@ namespace StockSharp.Algo.Risk
 			_endTime = null;
 		}
 
-		/// <summary>
-		/// To process the trade message.
-		/// </summary>
-		/// <param name="message">The trade message.</param>
-		/// <returns><see langword="true" />, if the rule is activated, otherwise, <see langword="false" />.</returns>
+		/// <inheritdoc />
 		public override bool ProcessMessage(Message message)
 		{
 			if (message.Type != MessageTypes.Execution)
@@ -979,36 +941,49 @@ namespace StockSharp.Algo.Risk
 			if (!execMsg.HasTradeInfo())
 				return false;
 
-			if (_endTime == null)
+			var time = message.LocalTime;
+
+			if (time.IsDefault())
 			{
-				_endTime = message.LocalTime + Interval;
-				_current = 1;
+				this.AddWarningLog("Time is null. Msg={0}", message);
 				return false;
 			}
 
-			if (message.LocalTime < _endTime)
+			if (_endTime == null)
+			{
+				_endTime = time + Interval;
+				_current = 1;
+
+				this.AddDebugLog("EndTime={0}", _endTime);
+				return false;
+			}
+
+			if (time < _endTime)
 			{
 				_current++;
 
+				this.AddDebugLog("Count={0} Msg={1}", _current, message);
+
 				if (_current >= Count)
 				{
-					_endTime = message.LocalTime + Interval;
-					_current = 0;
+					this.AddInfoLog("Count={0} EndTime={1}", _current, _endTime);
+
+					_endTime = null;
 					return true;
 				}
-
-				return false;
 			}
+			else
+			{
+				_endTime = time + Interval;
+				_current = 1;
 
-			_endTime = message.LocalTime + Interval;
-			_current = 0;
+				this.AddDebugLog("EndTime={0}", _endTime);
+			}
+			
 			return false;
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);
@@ -1017,10 +992,7 @@ namespace StockSharp.Algo.Risk
 			storage.SetValue(nameof(Interval), Interval);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);

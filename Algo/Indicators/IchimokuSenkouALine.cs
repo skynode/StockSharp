@@ -30,19 +30,11 @@ namespace StockSharp.Algo.Indicators
 		/// <param name="kijun">Kijun line.</param>
 		public IchimokuSenkouALine(IchimokuLine tenkan, IchimokuLine kijun)
 		{
-			if (tenkan == null)
-				throw new ArgumentNullException(nameof(tenkan));
-
-			if (kijun == null)
-				throw new ArgumentNullException(nameof(kijun));
-
-			Tenkan = tenkan;
-			Kijun = kijun;
+			Tenkan = tenkan ?? throw new ArgumentNullException(nameof(tenkan));
+			Kijun = kijun ?? throw new ArgumentNullException(nameof(kijun));
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => Buffer.Count >= Kijun.Length;
 
 		/// <summary>
@@ -57,11 +49,7 @@ namespace StockSharp.Algo.Indicators
 		[Browsable(false)]
 		public IchimokuLine Kijun { get; }
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			decimal? result = null;

@@ -16,9 +16,8 @@ Copyright 2010 by StockSharp, LLC
 namespace StockSharp.Messages
 {
 	using System;
+	using System.ComponentModel.DataAnnotations;
 	using System.Runtime.Serialization;
-
-	using Ecng.ComponentModel;
 
 	using StockSharp.Localization;
 
@@ -33,112 +32,175 @@ namespace StockSharp.Messages
 		/// Shares.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.StockKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.StockKey)]
 		Stock,
 
 		/// <summary>
 		/// Future contract.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.FutureContractKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.FutureContractKey)]
 		Future,
 
 		/// <summary>
 		/// Options contract.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.OptionsContractKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.OptionsContractKey)]
 		Option,
 
 		/// <summary>
 		/// Index.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.IndexKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.IndexKey)]
 		Index,
 
 		/// <summary>
 		/// Currency.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.CurrencyKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.CurrencyKey)]
 		Currency,
 
 		/// <summary>
 		/// Bond.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.BondKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.BondKey)]
 		Bond,
 
 		/// <summary>
 		/// Warrant.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.WarrantKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.WarrantKey)]
 		Warrant,
 
 		/// <summary>
 		/// Forward.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.ForwardKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.ForwardKey)]
 		Forward,
 
 		/// <summary>
 		/// Swap.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.SwapKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.SwapKey)]
 		Swap,
 
 		/// <summary>
-		/// Product.
+		/// Commodity.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.ProductKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.CommodityKey)]
 		Commodity,
 
 		/// <summary>
 		/// CFD.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayName("CFD")]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.CfdKey)]
 		Cfd,
 
 		/// <summary>
 		/// News.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.Str395Key)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.Str395Key)]
 		News,
 
 		/// <summary>
 		/// Weather.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.WeatherKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.WeatherKey)]
 		Weather,
 
 		/// <summary>
 		/// Mutual funds.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.ShareFundKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.ShareFundKey)]
 		Fund,
 
 		/// <summary>
 		/// American Depositary Receipts.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayName("ADR")]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.AdrKey)]
 		Adr,
 
 		/// <summary>
 		/// Cryptocurrency.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.CryptocurrencyKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.CryptocurrencyKey)]
 		CryptoCurrency,
+
+		/// <summary>
+		/// ETF.
+		/// </summary>
+		[EnumMember]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.EtfKey)]
+		Etf,
+
+		/// <summary>
+		/// Multi leg.
+		/// </summary>
+		[EnumMember]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.LegsKey)]
+		MultiLeg,
+		
+		/// <summary>
+		/// Loan.
+		/// </summary>
+		[EnumMember]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.LoanKey)]
+		Loan,
+		
+		/// <summary>
+		/// Spread.
+		/// </summary>
+		[EnumMember]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.SpreadKey)]
+		Spread,
+		
+		/// <summary>
+		/// Global Depositary Receipts.
+		/// </summary>
+		[EnumMember]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.GdrKey)]
+		Gdr,
+		
+		/// <summary>
+		/// Receipt.
+		/// </summary>
+		[EnumMember]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.ReceiptKey)]
+		Receipt,
+		
+		/// <summary>
+		/// Indicator.
+		/// </summary>
+		[EnumMember]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.Str1981Key)]
+		Indicator,
+		
+		/// <summary>
+		/// Strategy.
+		/// </summary>
+		[EnumMember]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.StrategyKey)]
+		Strategy,
+		
+		/// <summary>
+		/// Volatility.
+		/// </summary>
+		[EnumMember]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.VolatilityKey)]
+		Volatility
 	}
 }

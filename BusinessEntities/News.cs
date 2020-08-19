@@ -17,6 +17,7 @@ namespace StockSharp.BusinessEntities
 {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel.DataAnnotations;
 	using System.Runtime.Serialization;
 	using System.Xml.Serialization;
 
@@ -83,6 +84,8 @@ namespace StockSharp.BusinessEntities
 		[MainCategory]
 		public string Headline { get; set; }
 
+		private string _story;
+
 		/// <summary>
 		/// News text.
 		/// </summary>
@@ -92,11 +95,11 @@ namespace StockSharp.BusinessEntities
 		[MainCategory]
 		public string Story
 		{
-			get { return _story; }
+			get => _story;
 			set
 			{
 				_story = value;
-				NotifyChanged(nameof(Story));
+				NotifyChanged();
 			}
 		}
 
@@ -125,29 +128,60 @@ namespace StockSharp.BusinessEntities
 		[DisplayNameLoc(LocalizedStrings.Str221Key)]
 		[DescriptionLoc(LocalizedStrings.Str222Key)]
 		[MainCategory]
-		[Url]
-		public Uri Url { get; set; }
-
-		[field: NonSerialized]
-		private IDictionary<object, object> _extensionInfo;
-
-		private string _story;
+		//[Url]
+		public string Url { get; set; }
 
 		/// <summary>
-		/// Extended information.
+		/// News priority.
 		/// </summary>
-		/// <remarks>
-		/// Required when extra information is stored in the program.
-		/// </remarks>
+		[DataMember]
+		[Display(
+			ResourceType = typeof(LocalizedStrings),
+			Name = LocalizedStrings.PriorityKey,
+			Description = LocalizedStrings.NewsPriorityKey,
+			GroupName = LocalizedStrings.GeneralKey)]
+		[Nullable]
+		public NewsPriorities? Priority { get; set; }
+
+		[field: NonSerialized]
+		private IDictionary<string, object> _extensionInfo;
+
+		/// <inheritdoc />
 		[Ignore]
 		[XmlIgnore]
 		[DisplayNameLoc(LocalizedStrings.ExtendedInfoKey)]
 		[DescriptionLoc(LocalizedStrings.Str427Key)]
 		[MainCategory]
-		public IDictionary<object, object> ExtensionInfo
+		[Obsolete]
+		public IDictionary<string, object> ExtensionInfo
 		{
-			get { return _extensionInfo; }
-			set { _extensionInfo = value; }
+			get => _extensionInfo;
+			set => _extensionInfo = value;
+		}
+
+		/// <summary>
+		/// Language.
+		/// </summary>
+		[DataMember]
+		public string Language { get; set; }
+
+		/// <summary>
+		/// Expiration date.
+		/// </summary>
+		[DataMember]
+		public DateTimeOffset? ExpiryDate { get; set; }
+
+		/// <summary>
+		/// Sequence number.
+		/// </summary>
+		/// <remarks>Zero means no information.</remarks>
+		[DataMember]
+		public long SeqNum { get; set; }
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return $"{ServerTime} {Headline} {Story} {Source}";
 		}
 	}
 }

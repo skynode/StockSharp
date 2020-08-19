@@ -45,43 +45,35 @@ namespace StockSharp.Algo.Indicators
 		private int _sqrtPeriod;
 
 		/// <summary>
-		/// Peiod of resulting average. If equal to 0, period of resulting average is equal to the square root of HMA period. By default equal to 0.
+		/// Period of resulting average. If equal to 0, period of resulting average is equal to the square root of HMA period. By default equal to 0.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.Str787Key)]
 		[DescriptionLoc(LocalizedStrings.Str788Key)]
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public int SqrtPeriod
 		{
-			get { return _sqrtPeriod; }
+			get => _sqrtPeriod;
 			set
 			{
 				_sqrtPeriod = value;
-				_wmaResult.Length = value == 0 ? (int)(Math.Sqrt(Length)) : value;
+				_wmaResult.Length = value == 0 ? (int)Math.Sqrt(Length) : value;
 			}
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _wmaResult.IsFormed;
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
 
 			_wmaSlow.Length = Length;
 			_wmaFast.Length = Length / 2;
-			_wmaResult.Length = SqrtPeriod == 0 ? (int)(Math.Sqrt(Length)) : SqrtPeriod;
+			_wmaResult.Length = SqrtPeriod == 0 ? (int)Math.Sqrt(Length) : SqrtPeriod;
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			_wmaSlow.Process(input);
@@ -96,24 +88,18 @@ namespace StockSharp.Algo.Indicators
 			return new DecimalIndicatorValue(this, _wmaResult.GetCurrentValue());
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Load(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Load(SettingsStorage storage)
 		{
-			base.Load(settings);
-			SqrtPeriod = settings.GetValue<int>(nameof(SqrtPeriod));
+			base.Load(storage);
+			SqrtPeriod = storage.GetValue<int>(nameof(SqrtPeriod));
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Save(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Save(SettingsStorage storage)
 		{
-			base.Save(settings);
-			settings.SetValue(nameof(SqrtPeriod), SqrtPeriod);
+			base.Save(storage);
+			storage.SetValue(nameof(SqrtPeriod), SqrtPeriod);
 		}
 	}
 }

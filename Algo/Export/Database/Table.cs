@@ -19,25 +19,39 @@ namespace StockSharp.Algo.Export.Database
 	using System.Collections.Generic;
 	using System.Linq;
 
-	abstract class Table
+	using Ecng.Common;
+
+	/// <summary>
+	/// Table.
+	/// </summary>
+	public abstract class Table
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Table"/>.
+		/// </summary>
+		/// <param name="name">Name.</param>
+		/// <param name="columns">Columns.</param>
 		protected Table(string name, IEnumerable<ColumnDescription> columns)
 		{
-			Columns = columns.ToArray();
+			if (name.IsEmpty())
+				throw new ArgumentNullException(nameof(name));
+
+			if (columns == null)
+				throw new ArgumentNullException(nameof(columns));
+
 			Name = name;
+			Columns = columns.ToArray();
 		}
 
-		public string Name
-		{
-			get;
-			private set;
-		}
+		/// <summary>
+		/// Name.
+		/// </summary>
+		public string Name { get; }
 
-		public IEnumerable<ColumnDescription> Columns
-		{
-			get;
-			private set;
-		}
+		/// <summary>
+		/// Columns.
+		/// </summary>
+		public IEnumerable<ColumnDescription> Columns { get; }
 	}
 
 	abstract class Table<T> : Table
@@ -53,85 +67,91 @@ namespace StockSharp.Algo.Export.Database
 		}
 
 		protected virtual IDictionary<string, object> ConvertToParameters(T value)
-		{
-			throw new NotSupportedException();
-		}
+			=> throw new NotSupportedException();
 	}
 
-	class ColumnDescription
+	/// <summary>
+	/// Column.
+	/// </summary>
+	public class ColumnDescription
 	{
-		public ColumnDescription() { }
-
-		public ColumnDescription(String name)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ColumnDescription"/>.
+		/// </summary>
+		/// <param name="name">Name.</param>
+		public ColumnDescription(string name)
 		{
 			Name = name;
 		}
 
-		public String Name
-		{
-			get;
-			set;
-		}
+		/// <summary>
+		/// Name.
+		/// </summary>
+		public string Name { get; set; }
 
-		public bool IsPrimaryKey
-		{
-			get;
-			set;
-		}
+		/// <summary>
+		/// Identifier.
+		/// </summary>
+		public bool IsPrimaryKey { get; set; }
 
-		public Type DbType
-		{
-			get;
-			set;
-		}
+		/// <summary>
+		/// Type.
+		/// </summary>
+		public Type DbType { get; set; }
 
-		public object ValueRestriction
-		{
-			get;
-			set;
-		}
+		/// <summary>
+		/// Restriction.
+		/// </summary>
+		public object ValueRestriction { get; set; }
 	}
 
-	class StringRestriction
+	/// <summary>
+	/// <see cref="string"/> restriction.
+	/// </summary>
+	public class StringRestriction
 	{
-		public StringRestriction() { }
-
+		/// <summary>
+		/// Initializes a new instance of the <see cref="StringRestriction"/>.
+		/// </summary>
+		/// <param name="maxLength"></param>
 		public StringRestriction(int maxLength)
 		{
 			MaxLength = maxLength;
 		}
 
-		public int MaxLength
-		{
-			get;
-			set;
-		}
+		/// <summary>
+		/// Max length.
+		/// </summary>
+		public int MaxLength { get; set; }
 
-		public bool IsFixedSize
-		{
-			get;
-			set;
-		}
+		/// <summary>
+		/// Fixed size.
+		/// </summary>
+		public bool IsFixedSize { get; set; }
 	}
 
-	class DecimalRestriction
+	/// <summary>
+	/// <see cref="decimal"/> restriction.
+	/// </summary>
+	public class DecimalRestriction
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DecimalRestriction"/>.
+		/// </summary>
 		public DecimalRestriction()
 		{
 			Precision = 15;
 			Scale = 5;
 		}
 
-		public int Precision
-		{
-			get;
-			set;
-		}
+		/// <summary>
+		/// Precision.
+		/// </summary>
+		public int Precision { get; set; }
 
-		public int Scale
-		{
-			get;
-			set;
-		}
+		/// <summary>
+		/// Scale.
+		/// </summary>
+		public int Scale { get; set; }
 	}
 }

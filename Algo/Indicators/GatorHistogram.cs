@@ -17,6 +17,7 @@ namespace StockSharp.Algo.Indicators
 {
 	using System;
 
+	using Ecng.Common;
 	using Ecng.Serialization;
 
 	/// <summary>
@@ -30,28 +31,24 @@ namespace StockSharp.Algo.Indicators
 
 		internal GatorHistogram(AlligatorLine line1, AlligatorLine line2, bool isNegative)
 		{
-			if (line1 == null)
-				throw new ArgumentNullException(nameof(line1));
-
-			if (line2 == null)
-				throw new ArgumentNullException(nameof(line2));
-
-			_line1 = line1;
-			_line2 = line2;
+			_line1 = line1 ?? throw new ArgumentNullException(nameof(line1));
+			_line2 = line2 ?? throw new ArgumentNullException(nameof(line2));
 			_isNegative = isNegative;
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			if (input.IsFinal)
 				IsFormed = true;
 
-			return new DecimalIndicatorValue(this, (_isNegative ? -1 : 1) * Math.Abs(_line1.GetCurrentValue() - _line2.GetCurrentValue()));
+			var line1Curr = _line1.GetNullableCurrentValue();
+			var line2Curr = _line2.GetNullableCurrentValue();
+
+			if (line1Curr == null || line2Curr == null)
+				return new DecimalIndicatorValue(this);
+
+			return new DecimalIndicatorValue(this, (_isNegative ? -1 : 1) * Math.Abs(line1Curr.Value - line2Curr.Value));
 		}
 
 		/// <summary>
@@ -60,31 +57,25 @@ namespace StockSharp.Algo.Indicators
 		/// <returns>Copy.</returns>
 		public override IIndicator Clone()
 		{
-			return new GatorHistogram((AlligatorLine)_line1.Clone(), (AlligatorLine)_line2.Clone(), _isNegative) { Name = Name };
+			return new GatorHistogram(_line1.TypedClone(), _line2.TypedClone(), _isNegative) { Name = Name };
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Load(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Load(SettingsStorage storage)
 		{
-			base.Load(settings);
+			base.Load(storage);
 
-			_line1.LoadNotNull(settings, "line1");
-			_line2.LoadNotNull(settings, "line2");
+			_line1.LoadNotNull(storage, "line1");
+			_line2.LoadNotNull(storage, "line2");
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Save(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Save(SettingsStorage storage)
 		{
-			base.Save(settings);
+			base.Save(storage);
 
-			settings.SetValue("line1", _line1.Save());
-			settings.SetValue("line2", _line2.Save());
+			storage.SetValue("line1", _line1.Save());
+			storage.SetValue("line2", _line2.Save());
 		}
 	}
 }

@@ -23,6 +23,7 @@ namespace StockSharp.Algo.Indicators
 	/// <remarks>
 	/// http://www2.wealth-lab.com/WL5Wiki/QStick.ashx.
 	/// </remarks>
+	[IndicatorIn(typeof(CandleIndicatorValue))]
 	public class QStick : LengthIndicator<IIndicatorValue>
 	{
 		private readonly SimpleMovingAverage _sma;
@@ -36,25 +37,17 @@ namespace StockSharp.Algo.Indicators
 			Length = 15;
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _sma.IsFormed;
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			_sma.Length = Length;
 			base.Reset();
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var candle = input.GetValue<Candle>();

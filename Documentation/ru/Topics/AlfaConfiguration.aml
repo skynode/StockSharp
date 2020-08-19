@@ -3,8 +3,22 @@
   <developerWalkthroughDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 
     <introduction>
+    		  <para>
+			  Механизм взаимодействия показан на данном рисунке:
+		  </para>
+		  <para>
+			  <mediaLink>
+				  <image placement="center" xlink:href="AlfaTrader" />
+			  </mediaLink>
+		  </para>
+		  <para>
+			  Как видно из рисунка, <codeEntityReference>T:StockSharp.AlfaDirect.AlfaDirectMessageAdapter</codeEntityReference> взаимодействует с брокером 
+			  через терминал <token>alfa_external</token>. Связь между <codeEntityReference>T:StockSharp.AlfaDirect.AlfaDirectMessageAdapter</codeEntityReference> и 
+			  <token>alfa_external</token> осуществляется по технологии <token>com</token> посредством открытого интерфейса терминала. <token>alfaapi</token>
+			  позволяет получать в режиме реального времени всю доступную в терминале табличную информацию и подавать торговые поручения.
+		  </para>
 		<para>
-			Для корректной работый с <codeEntityReference>T:StockSharp.AlfaDirect.AlfaTrader</codeEntityReference> необходимо предварительно 
+			Для корректной работой с <codeEntityReference>T:StockSharp.AlfaDirect.AlfaDirectMessageAdapter</codeEntityReference> необходимо предварительно 
 			настроить торговый терминал <token>alfa</token>.
 		</para>
     </introduction>
@@ -14,7 +28,7 @@
       <steps class="ordered">
         <step>
           <content>
-            <para>Для удобства, cоздайте новую вкладку (Правый клик мыши на вкладках снизу терминала -> 
+            <para>Для удобства, создайте новую вкладку (Правый клик мыши на вкладках снизу терминала -> 
             Добавить). Добавьте окна "Сделки" и "Очередь заявок" для интересующего вас инструмента - меню 
             "Информация -> Сделки" и "Информация -> Очередь заявок" соответственно.</para>
           </content>
@@ -34,7 +48,7 @@
 		    <alert class="note">
 			  <para>
 			  	Если у Вас не отображается инструмент в списке позиций, необходимо вручную 
-			  	выставить любую заявку по данному инструменту - например, лимитный ордер на 
+			  	выставить любую заявку по данному инструменту - например, лимитная заявка на 
 			  	покупку по цене выше текущей и затем отменить его.
 			  </para>
 			</alert>
@@ -83,7 +97,6 @@
 
     <relatedTopics>
       <link xlink:href="bc7a69cf-35f2-413d-a041-de705543f23c">Пример использования</link>
-      <link xlink:href="c0f3f55c-3832-46ed-90da-30129019c8f3">Стоп-заявки</link>
       <link xlink:href="9619f1db-064f-421f-967e-4c15a5b0aa71">Отладка</link>
     </relatedTopics>
   </developerWalkthroughDocument>

@@ -100,9 +100,7 @@ namespace StockSharp.Logging
 						{
 							while (true)
 							{
-								Tuple<string, string> m;
-
-								if (!_queue.TryDequeue(out m))
+								if (!_queue.TryDequeue(out var m))
 									break;
 
 								email.Send(From, To, m.Item1, m.Item2);
@@ -120,19 +118,13 @@ namespace StockSharp.Logging
 			}
 		}
 
-		/// <summary>
-		/// To record a message.
-		/// </summary>
-		/// <param name="message">A debug message.</param>
+		/// <inheritdoc />
 		protected override void OnWriteMessage(LogMessage message)
 		{
 			EnqueueMessage(message);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="storage">Settings storage.</param>
+		/// <inheritdoc />
 		public override void Load(SettingsStorage storage)
 		{
 			base.Load(storage);
@@ -141,10 +133,7 @@ namespace StockSharp.Logging
 			To = storage.GetValue<string>(nameof(To));
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="storage">Settings storage.</param>
+		/// <inheritdoc />
 		public override void Save(SettingsStorage storage)
 		{
 			base.Save(storage);

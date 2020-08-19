@@ -15,8 +15,6 @@ Copyright 2010 by StockSharp, LLC
 #endregion S# License
 namespace StockSharp.Algo.Storages
 {
-	using System.Collections.Generic;
-
 	using Ecng.Collections;
 	using Ecng.Serialization;
 
@@ -44,13 +42,11 @@ namespace StockSharp.Algo.Storages
 		/// <summary>
 		/// The time delayed action.
 		/// </summary>
-		DelayAction DelayAction { get; set; }
+		DelayAction DelayAction { get; }
 
 		/// <summary>
-		/// To load last created data.
+		/// Wait flush.
 		/// </summary>
-		/// <param name="count">The amount of requested data.</param>
-		/// <returns>The data range.</returns>
-		IEnumerable<T> ReadLasts(int count);
+		void WaitFlush();
 	}
 }

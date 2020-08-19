@@ -15,6 +15,7 @@ Copyright 2010 by StockSharp, LLC
 #endregion S# License
 namespace StockSharp.Logging
 {
+	using System.ComponentModel.DataAnnotations;
 	using System.Runtime.Serialization;
 
 	using StockSharp.Localization;
@@ -28,43 +29,50 @@ namespace StockSharp.Logging
 		/// <summary>
 		/// To use the logging level of the container.
 		/// </summary>
-		[EnumDisplayNameLoc(LocalizedStrings.InheritedKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.InheritedKey)]
 		[EnumMember]
 		Inherit,
+
+		/// <summary>
+		/// Verbose message, debug message, information, warnings and errors.
+		/// </summary>
+		[EnumMember]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.VerboseKey)]
+		Verbose,
 
 		/// <summary>
 		/// Debug message, information, warnings and errors.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.Str12Key)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.Str12Key)]
 		Debug,
 		
 		/// <summary>
 		/// Information, warnings and errors.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.InfoKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.InfoKey)]
 		Info,
 
 		/// <summary>
 		/// Warnings and errors.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.WarningsKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.WarningsKey)]
 		Warning,
 		
 		/// <summary>
 		/// Errors only.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.ErrorsKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.ErrorsKey)]
 		Error,
 
 		/// <summary>
 		/// Logs off.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.OffKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.OffKey)]
 		Off,
 	}
 }

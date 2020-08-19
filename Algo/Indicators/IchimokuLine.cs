@@ -16,6 +16,7 @@ Copyright 2010 by StockSharp, LLC
 namespace StockSharp.Algo.Indicators
 {
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using System.Linq;
 
 	using MoreLinq;
@@ -25,6 +26,8 @@ namespace StockSharp.Algo.Indicators
 	/// <summary>
 	/// The implementation of the lines of Ishimoku KInko Khayo indicator (Tenkan, Kijun, Senkou Span B).
 	/// </summary>
+	[IndicatorIn(typeof(CandleIndicatorValue))]
+	[Browsable(false)]
 	public class IchimokuLine : LengthIndicator<decimal>
 	{
 		private readonly List<Candle> _buffer = new List<Candle>();
@@ -45,16 +48,10 @@ namespace StockSharp.Algo.Indicators
 			_buffer.Clear();
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _buffer.Count >= Length;
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var candle = input.GetValue<Candle>();

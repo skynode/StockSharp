@@ -17,22 +17,47 @@ namespace StockSharp.Algo.Strategies.Analytics
 {
 	using System;
 	using System.ComponentModel;
-	using System.Globalization;
+	using System.ComponentModel.DataAnnotations;
 
-	using Ecng.Xaml.Charting.Visuals;
 	using Ecng.Common;
-	using Ecng.Xaml.Grids;
 
 	using StockSharp.Algo.Storages;
-	using StockSharp.Logging;
+	using StockSharp.BusinessEntities;
 	using StockSharp.Localization;
 
-	using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
+	/// <summary>
+	/// Types of result.
+	/// </summary>
+	public enum AnalyticsResultTypes
+	{
+		/// <summary>
+		/// Table.
+		/// </summary>
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.Str3280Key)]
+		Grid,
+
+		/// <summary>
+		/// Bubble chart.
+		/// </summary>
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.Str1977Key)]
+		Bubble,
+
+		/// <summary>
+		/// Histogram.
+		/// </summary>
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.Str1976Key)]
+		Histogram,
+
+		/// <summary>
+		/// Heatmap.
+		/// </summary>
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.HeatmapKey)]
+		Heatmap,
+	}
 
 	/// <summary>
 	/// The base analytic strategy.
 	/// </summary>
-	[CategoryOrderLoc(LocalizedStrings.Str1221Key, 0)]
 	public abstract class BaseAnalyticsStrategy : Strategy
 	{
 		private readonly StrategyParam<DateTime> _from;
@@ -40,14 +65,17 @@ namespace StockSharp.Algo.Strategies.Analytics
 		/// <summary>
 		/// Start date.
 		/// </summary>
-		[DisplayNameLoc(LocalizedStrings.Str343Key)]
-		[DescriptionLoc(LocalizedStrings.Str1222Key)]
-		[CategoryLoc(LocalizedStrings.Str1221Key)]
-		[PropertyOrder(0)]
+		[Display(
+			ResourceType = typeof(LocalizedStrings),
+			Name = LocalizedStrings.Str343Key,
+			Description = LocalizedStrings.Str1222Key,
+			GroupName = LocalizedStrings.AnalyticsKey,
+			Order = 0)]
+		[Browsable(false)]
 		public DateTime From
 		{
-			get { return _from.Value; }
-			set { _from.Value = value; }
+			get => _from.Value;
+			set => _from.Value = value;
 		}
 
 		private readonly StrategyParam<DateTime> _to;
@@ -55,21 +83,114 @@ namespace StockSharp.Algo.Strategies.Analytics
 		/// <summary>
 		/// End date.
 		/// </summary>
-		[DisplayNameLoc(LocalizedStrings.Str345Key)]
-		[DescriptionLoc(LocalizedStrings.Str418Key, true)]
-		[CategoryLoc(LocalizedStrings.Str1221Key)]
-		[PropertyOrder(1)]
+		[Display(
+			ResourceType = typeof(LocalizedStrings),
+			Name = LocalizedStrings.Str345Key,
+			Description = LocalizedStrings.Str345Key + LocalizedStrings.Dot,
+			GroupName = LocalizedStrings.AnalyticsKey,
+			Order = 1)]
+		[Browsable(false)]
 		public DateTime To
 		{
-			get { return _to.Value; }
-			set { _to.Value = value; }
+			get => _to.Value;
+			set => _to.Value = value;
+		}
+
+		private readonly StrategyParam<AnalyticsResultTypes> _resultType;
+
+		/// <summary>
+		/// Result type.
+		/// </summary>
+		[Display(
+			ResourceType = typeof(LocalizedStrings),
+			Name = LocalizedStrings.Str1738Key,
+			Description = LocalizedStrings.ResultTypeKey + LocalizedStrings.Dot,
+			GroupName = LocalizedStrings.AnalyticsKey,
+			Order = 2)]
+		[Browsable(false)]
+		public AnalyticsResultTypes ResultType
+		{
+			get => _resultType.Value;
+			set => _resultType.Value = value;
 		}
 
 		/// <summary>
 		/// Market-data storage.
 		/// </summary>
 		[Browsable(false)]
-		public IStorageRegistry StorateRegistry { get; private set; }
+		public IStorageRegistry StorateRegistry { get; set; }
+
+		/// <inheritdoc />
+		[Browsable(false)]
+		public override Portfolio Portfolio
+		{
+			get => base.Portfolio;
+			set => base.Portfolio = value;
+		}
+
+		/// <inheritdoc />
+		[Browsable(false)]
+		public override decimal Volume
+		{
+			get => base.Volume;
+			set => base.Volume = value;
+		}
+
+		/// <inheritdoc />
+		[Browsable(false)]
+		public override StrategyCommentModes CommentMode
+		{
+			get => base.CommentMode;
+			set => base.CommentMode = value;
+		}
+
+		/// <inheritdoc />
+		[Browsable(false)]
+		public override bool AllowTrading
+		{
+			get => base.AllowTrading;
+			set => base.AllowTrading = value;
+		}
+
+		/// <inheritdoc />
+		[Browsable(false)]
+		public override bool UnsubscribeOnStop
+		{
+			get => base.UnsubscribeOnStop;
+			set => base.UnsubscribeOnStop = value;
+		}
+
+		/// <inheritdoc />
+		[Browsable(false)]
+		public override int MaxOrderRegisterErrorCount
+		{
+			get => base.MaxOrderRegisterErrorCount;
+			set => base.MaxOrderRegisterErrorCount = value;
+		}
+
+		/// <inheritdoc />
+		[Browsable(false)]
+		public override bool WaitRulesOnStop
+		{
+			get => base.WaitRulesOnStop;
+			set => base.WaitRulesOnStop = value;
+		}
+
+		/// <inheritdoc />
+		[Browsable(false)]
+		public override int MaxRegisterCount
+		{
+			get => base.MaxRegisterCount;
+			set => base.MaxRegisterCount = value;
+		}
+
+		/// <inheritdoc />
+		[Browsable(false)]
+		public override TimeSpan RegisterInterval
+		{
+			get => base.RegisterInterval;
+			set => base.RegisterInterval = value;
+		}
 
 		/// <summary>
 		/// Initialize <see cref="BaseAnalyticsStrategy"/>.
@@ -78,65 +199,33 @@ namespace StockSharp.Algo.Strategies.Analytics
 		{
 			_from = this.Param<DateTime>(nameof(From));
 			_to = this.Param(nameof(To), DateTime.MaxValue);
+			_resultType = this.Param(nameof(ResultType), AnalyticsResultTypes.Bubble);
 		}
 
-		/// <summary>
-		/// To cancel all active orders (to stop and regular).
-		/// </summary>
+		/// <inheritdoc />
 		protected override void ProcessCancelActiveOrders()
 		{
 		}
 
-		/// <summary>
-		/// Current time, which will be passed to the <see cref="LogMessage.Time"/>.
-		/// </summary>
+		/// <inheritdoc />
 		public override DateTimeOffset CurrentTime => TimeHelper.NowWithOffset;
 
 		/// <summary>
-		/// Chart.
+		/// Result panel.
 		/// </summary>
-		[CLSCompliant(false)]
-		protected UltrachartSurface Chart => Environment.GetValue<UltrachartSurface>(nameof(Chart));
-
-		/// <summary>
-		/// Table.
-		/// </summary>
-		protected UniversalGrid Grid => Environment.GetValue<UniversalGrid>(nameof(Grid));
+		protected IAnalyticsPanel Panel => Environment.GetValue<IAnalyticsPanel>(nameof(Panel));
 
 		/// <summary>
 		/// Data format.
 		/// </summary>
 		protected StorageFormats StorageFormat => Environment.GetValue<StorageFormats>(nameof(StorageFormat));
 
-		/// <summary>
-		/// The method is called when the <see cref="Strategy.Start"/> method has been called and the <see cref="Strategy.ProcessState"/> state has been taken the <see cref="ProcessStates.Started"/> value.
-		/// </summary>
+		/// <inheritdoc />
 		protected override void OnStarted()
 		{
-			var storateRegistry = new StorageRegistry();
+			InitStartValues();
 
-			var drive = Environment.GetValue<IMarketDataDrive>("Drive");
-			if (drive != null)
-				storateRegistry.DefaultDrive = drive;
-
-			StorateRegistry = storateRegistry;
-
-			ThreadingHelper
-				.Thread(() =>
-				{
-					try
-					{
-						OnAnalyze();
-					}
-					catch (Exception ex)
-					{
-						this.AddErrorLog(ex);
-						ex.LogError();
-					}
-				})
-				.Name("{0} analyze thread.".Put(Name))
-				.Culture(CultureInfo.InvariantCulture)
-				.Launch();
+			OnAnalyze();
 		}
 
 		/// <summary>

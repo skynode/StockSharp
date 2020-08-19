@@ -26,6 +26,7 @@ namespace StockSharp.Algo.Derivatives
 
 	using MathNet.Numerics.Distributions;
 
+	using StockSharp.Algo.Storages;
 	using StockSharp.BusinessEntities;
 	using StockSharp.Messages;
 	using StockSharp.Localization;
@@ -333,7 +334,10 @@ namespace StockSharp.Algo.Derivatives
 
 			return assetPrice == null
 				? null
-				: allStrikes.OrderBy(s => Math.Abs((decimal)(s.Strike - assetPrice))).FirstOrDefault();
+				: allStrikes
+					.Where(s => s.Strike != null)
+					.OrderBy(s => Math.Abs((decimal)(s.Strike.Value - assetPrice)))
+					.FirstOrDefault();
 		}
 
 		/// <summary>
@@ -348,6 +352,7 @@ namespace StockSharp.Algo.Derivatives
 			var group = underlyingAsset
 				.GetDerivatives(provider, expirationDate)
 				.Filter(OptionTypes.Call)
+				.Where(s => s.Strike != null)
 				.GroupBy(s => s.ExpiryDate)
 				.FirstOrDefault();
 
@@ -355,7 +360,7 @@ namespace StockSharp.Algo.Derivatives
 				throw new InvalidOperationException(LocalizedStrings.Str708);
 
 			var orderedStrikes = group.OrderBy(s => s.Strike).Take(2).ToArray();
-			return (decimal)(orderedStrikes[1].Strike - orderedStrikes[0].Strike);
+			return orderedStrikes[1].Strike.Value - orderedStrikes[0].Strike.Value;
 		}
 
 		/// <summary>
@@ -382,9 +387,14 @@ namespace StockSharp.Algo.Derivatives
 			if (underlyingAsset == null)
 				throw new ArgumentNullException(nameof(underlyingAsset));
 
+			allStrikes = allStrikes.ToArray();
+
 			var cs = underlyingAsset.GetCentralStrike(provider, allStrikes);
 
-			return allStrikes.Where(s => s.OptionType == OptionTypes.Call ? s.Strike < cs.Strike : s.Strike > cs.Strike);
+			if (cs == null)
+				return Enumerable.Empty<Security>();
+
+			return allStrikes.Where(s => s.Strike != null && s.OptionType == OptionTypes.Call ? s.Strike > cs.Strike : s.Strike < cs.Strike);
 		}
 
 		/// <summary>
@@ -411,9 +421,14 @@ namespace StockSharp.Algo.Derivatives
 			if (underlyingAsset == null)
 				throw new ArgumentNullException(nameof(underlyingAsset));
 
+			allStrikes = allStrikes.ToArray();
+
 			var cs = underlyingAsset.GetCentralStrike(provider, allStrikes);
 
-			return allStrikes.Where(s => s.OptionType == OptionTypes.Call ? s.Strike > cs.Strike : s.Strike < cs.Strike);
+			if (cs == null)
+				return Enumerable.Empty<Security>();
+
+			return allStrikes.Where(s => s.Strike != null && s.OptionType == OptionTypes.Call ? s.Strike < cs.Strike : s.Strike > cs.Strike);
 		}
 
 		/// <summary>
@@ -439,6 +454,8 @@ namespace StockSharp.Algo.Derivatives
 		{
 			if (underlyingAsset == null)
 				throw new ArgumentNullException(nameof(underlyingAsset));
+
+			allStrikes = allStrikes.ToArray();
 
 			var centralStrikes = new List<Security>();
 
@@ -469,12 +486,15 @@ namespace StockSharp.Algo.Derivatives
 			
 			option.CheckOption();
 
+			if (option.Strike == null)
+				return null;
+
 			var assetPrice = option.GetUnderlyingAsset(securityProvider).GetCurrentPrice(dataProvider);
 
 			if (assetPrice == null)
 				return null;
 
-			return ((decimal)((option.OptionType == OptionTypes.Call) ? assetPrice - option.Strike : option.Strike - assetPrice)).Max(0);
+			return ((decimal)(option.OptionType == OptionTypes.Call ? assetPrice - option.Strike : option.Strike - assetPrice)).Max(0);
 		}
 
 		/// <summary>
@@ -500,15 +520,24 @@ namespace StockSharp.Algo.Derivatives
 			return (decimal)(price - intrinsic);
 		}
 
-		internal static DateTimeOffset GetExpirationTime(this Security security)
+		internal static DateTimeOffset GetExpirationTime(this Security security, IExchangeInfoProvider provider)
 		{
+			if (security == null)
+				throw new ArgumentNullException(nameof(security));
+
+			if (provider == null)
+				throw new ArgumentNullException(nameof(provider));
+
 			if (security.ExpiryDate == null)
 				throw new ArgumentException(LocalizedStrings.Str709Params.Put(security.Id), nameof(security));
 
 			var expDate = security.ExpiryDate.Value;
 
 			if (expDate.TimeOfDay == TimeSpan.Zero)
-				expDate += security.CheckExchangeBoard().ExpiryTime;
+			{
+				var board = provider.GetOrCreateBoard(security.ToSecurityId().BoardCode);
+				expDate += board.ExpiryTime;
+			}
 
 			return expDate;
 		}
@@ -517,11 +546,12 @@ namespace StockSharp.Algo.Derivatives
 		/// To check whether the instrument has finished the action.
 		/// </summary>
 		/// <param name="security">Security.</param>
+		/// <param name="exchangeInfoProvider">Exchanges and trading boards provider.</param>
 		/// <param name="currentTime">The current time.</param>
 		/// <returns><see langword="true" /> if the instrument has finished its action.</returns>
-		public static bool IsExpired(this Security security, DateTimeOffset currentTime)
+		public static bool IsExpired(this Security security, IExchangeInfoProvider exchangeInfoProvider, DateTimeOffset currentTime)
 		{
-			return security.GetExpirationTime() <= currentTime;
+			return security.GetExpirationTime(exchangeInfoProvider) <= currentTime;
 		}
 
 		/// <summary>
@@ -610,16 +640,17 @@ namespace StockSharp.Algo.Derivatives
 		/// <param name="depth">The order book quotes of which will be changed to volatility quotes.</param>
 		/// <param name="securityProvider">The provider of information about instruments.</param>
 		/// <param name="dataProvider">The market data provider.</param>
+		/// <param name="exchangeInfoProvider">Exchanges and trading boards provider.</param>
 		/// <param name="currentTime">The current time.</param>
 		/// <param name="riskFree">The risk free interest rate.</param>
 		/// <param name="dividend">The dividend amount on shares.</param>
 		/// <returns>The order book volatility.</returns>
-		public static MarketDepth ImpliedVolatility(this MarketDepth depth, ISecurityProvider securityProvider, IMarketDataProvider dataProvider, DateTimeOffset currentTime, decimal riskFree = 0, decimal dividend = 0)
+		public static MarketDepth ImpliedVolatility(this MarketDepth depth, ISecurityProvider securityProvider, IMarketDataProvider dataProvider, IExchangeInfoProvider exchangeInfoProvider, DateTimeOffset currentTime, decimal riskFree = 0, decimal dividend = 0)
 		{
 			if (depth == null)
 				throw new ArgumentNullException(nameof(depth));
 
-			return depth.ImpliedVolatility(new BlackScholes(depth.Security, securityProvider, dataProvider) { RiskFree = riskFree, Dividend = dividend }, currentTime);
+			return depth.ImpliedVolatility(new BlackScholes(depth.Security, securityProvider, dataProvider, exchangeInfoProvider) { RiskFree = riskFree, Dividend = dividend }, currentTime);
 		}
 
 		/// <summary>
@@ -637,14 +668,13 @@ namespace StockSharp.Algo.Derivatives
 			if (model == null)
 				throw new ArgumentNullException(nameof(model));
 
-			Func<Quote, Quote> convert = quote =>
+			QuoteChange Convert(QuoteChange quote)
 			{
-				quote = quote.Clone();
 				quote.Price = model.ImpliedVolatility(currentTime, quote.Price) ?? 0;
 				return quote;
-			};
+			}
 
-			return new MarketDepth(depth.Security).Update(depth.Bids.Select(convert), depth.Asks.Select(convert), true, depth.LastChangeTime);
+			return new MarketDepth(depth.Security).Update(depth.Bids2.Select(Convert).ToArray(), depth.Asks2.Select(Convert).ToArray(), depth.LastChangeTime);
 		}
 
 		/// <summary>
@@ -710,7 +740,7 @@ namespace StockSharp.Algo.Derivatives
 			if (deviation < 0)
 				throw new ArgumentOutOfRangeException(nameof(deviation), deviation, LocalizedStrings.Str711);
 
-			return (((double)assetPrice / (double)strike).Log() +
+			return ((double)(assetPrice / strike).Log() +
 				(double)(riskFree - dividend + deviation * deviation / 2.0m) * timeToExp) / ((double)deviation * timeToExp.Sqrt());
 		}
 
@@ -881,6 +911,24 @@ namespace StockSharp.Algo.Derivatives
 		private static double NormalDistr(double x)
 		{
 			return _normalDistribution.CumulativeDistribution(x);
+		}
+
+		internal static void CheckOption(this Security option)
+		{
+			if (option == null)
+				throw new ArgumentNullException(nameof(option));
+
+			if (option.Type != SecurityTypes.Option)
+				throw new ArgumentException(LocalizedStrings.Str900Params.Put(option.Type), nameof(option));
+
+			if (option.OptionType == null)
+				throw new ArgumentException(LocalizedStrings.Str703Params.Put(option), nameof(option));
+
+			if (option.ExpiryDate == null)
+				throw new ArgumentException(LocalizedStrings.Str901Params.Put(option), nameof(option));
+
+			if (option.UnderlyingSecurityId == null)
+				throw new ArgumentException(LocalizedStrings.Str902Params.Put(option), nameof(option));
 		}
 	}
 }

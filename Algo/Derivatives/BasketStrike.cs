@@ -37,18 +37,9 @@ namespace StockSharp.Algo.Derivatives
 		/// <param name="dataProvider">The market data provider.</param>
 		protected BasketStrike(Security underlyingAsset, ISecurityProvider securityProvider, IMarketDataProvider dataProvider)
 		{
-			if (underlyingAsset == null)
-				throw new ArgumentNullException(nameof(underlyingAsset));
-
-			if (securityProvider == null)
-				throw new ArgumentNullException(nameof(securityProvider));
-
-			if (dataProvider == null)
-				throw new ArgumentNullException(nameof(dataProvider));
-
-			UnderlyingAsset = underlyingAsset;
-			SecurityProvider = securityProvider;
-			DataProvider = dataProvider;
+			UnderlyingAsset = underlyingAsset ?? throw new ArgumentNullException(nameof(underlyingAsset));
+			SecurityProvider = securityProvider ?? throw new ArgumentNullException(nameof(securityProvider));
+			DataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
 		}
 
 		/// <summary>
@@ -66,10 +57,8 @@ namespace StockSharp.Algo.Derivatives
 		/// </summary>
 		public Security UnderlyingAsset { get; }
 
-		/// <summary>
-		/// Instruments, from which this basket is created.
-		/// </summary>
-		public override IEnumerable<Security> InnerSecurities
+		/// <inheritdoc />
+		public override IEnumerable<SecurityId> InnerSecurityIds
 		{
 			get
 			{
@@ -80,7 +69,7 @@ namespace StockSharp.Algo.Derivatives
 				if (type != null)
 					derivatives = derivatives.Filter((OptionTypes)type);
 
-				return FilterStrikes(derivatives);
+				return FilterStrikes(derivatives).Select(s => s.ToSecurityId());
 			}
 		}
 
@@ -97,7 +86,7 @@ namespace StockSharp.Algo.Derivatives
 	/// </summary>
 	public class OffsetBasketStrike : BasketStrike
 	{
-		private readonly Range<int> _strikeOffset;
+		private Range<int> _strikeOffset;
 		private decimal _strikeStep;
 
 		/// <summary>
@@ -110,21 +99,16 @@ namespace StockSharp.Algo.Derivatives
 		public OffsetBasketStrike(Security underlyingSecurity, ISecurityProvider securityProvider, IMarketDataProvider dataProvider, Range<int> strikeOffset)
 			: base(underlyingSecurity, securityProvider, dataProvider)
 		{
-			if (strikeOffset == null)
-				throw new ArgumentNullException(nameof(strikeOffset));
-
-			_strikeOffset = strikeOffset;
+			_strikeOffset = strikeOffset ?? throw new ArgumentNullException(nameof(strikeOffset));
 		}
 
-		/// <summary>
-		/// To get filtered strikes.
-		/// </summary>
-		/// <param name="allStrikes">All strikes.</param>
-		/// <returns>Filtered strikes.</returns>
+		/// <inheritdoc />
 		protected override IEnumerable<Security> FilterStrikes(IEnumerable<Security> allStrikes)
 		{
 			if (_strikeStep == 0)
 				_strikeStep = UnderlyingAsset.GetStrikeStep(SecurityProvider, ExpiryDate);
+
+			allStrikes = allStrikes.ToArray();
 
 			var centralStrike = UnderlyingAsset.GetCentralStrike(DataProvider, allStrikes);
 
@@ -141,6 +125,18 @@ namespace StockSharp.Algo.Derivatives
 						)
 						.OrderBy(s => s.Strike);
 		}
+
+		/// <inheritdoc />
+		protected override string ToSerializedString()
+		{
+			return _strikeOffset.ToString();
+		}
+
+		/// <inheritdoc />
+		protected override void FromSerializedString(string text)
+		{
+			_strikeOffset = Range<int>.Parse(text);
+		}
 	}
 
 	/// <summary>
@@ -148,7 +144,7 @@ namespace StockSharp.Algo.Derivatives
 	/// </summary>
 	public class VolatilityBasketStrike : BasketStrike
 	{
-		private readonly Range<decimal> _volatilityRange;
+		private Range<decimal> _volatilityRange;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="VolatilityBasketStrike"/>.
@@ -160,17 +156,10 @@ namespace StockSharp.Algo.Derivatives
 		public VolatilityBasketStrike(Security underlyingAsset, ISecurityProvider securityProvider, IMarketDataProvider dataProvider, Range<decimal> volatilityRange)
 			: base(underlyingAsset, securityProvider, dataProvider)
 		{
-			if (volatilityRange == null)
-				throw new ArgumentNullException(nameof(volatilityRange));
-
-			_volatilityRange = volatilityRange;
+			_volatilityRange = volatilityRange ?? throw new ArgumentNullException(nameof(volatilityRange));
 		}
 
-		/// <summary>
-		/// To get filtered strikes.
-		/// </summary>
-		/// <param name="allStrikes">All strikes.</param>
-		/// <returns>Filtered strikes.</returns>
+		/// <inheritdoc />
 		protected override IEnumerable<Security> FilterStrikes(IEnumerable<Security> allStrikes)
 		{
 			return allStrikes.Where(s =>
@@ -178,6 +167,18 @@ namespace StockSharp.Algo.Derivatives
 				var iv = (decimal?)DataProvider.GetSecurityValue(s, Level1Fields.ImpliedVolatility);
 				return iv != null && _volatilityRange.Contains(iv.Value);
 			});
+		}
+
+		/// <inheritdoc />
+		protected override string ToSerializedString()
+		{
+			return _volatilityRange.ToString();
+		}
+
+		/// <inheritdoc />
+		protected override void FromSerializedString(string text)
+		{
+			_volatilityRange = Range<decimal>.Parse(text);
 		}
 	}
 }

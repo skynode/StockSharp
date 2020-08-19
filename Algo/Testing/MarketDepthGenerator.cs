@@ -19,6 +19,7 @@ namespace StockSharp.Algo.Testing
 	using System.Collections.Generic;
 
 	using Ecng.Collections;
+	using Ecng.Common;
 
 	using StockSharp.Messages;
 	using StockSharp.Localization;
@@ -35,18 +36,10 @@ namespace StockSharp.Algo.Testing
 		protected MarketDepthGenerator(SecurityId securityId)
 			: base(securityId)
 		{
-			UseTradeVolume = true;
-			MinSpreadStepCount = 1;
-			MaxSpreadStepCount = int.MaxValue;
-			MaxBidsDepth = 10;
-			MaxAsksDepth = 10;
-			MaxGenerations = 20;
 		}
 
-		/// <summary>
-		/// Market data type.
-		/// </summary>
-		public override MarketDataTypes DataType => MarketDataTypes.MarketDepth;
+		/// <inheritdoc />
+		public override DataType DataType => DataType.MarketDepth;
 
 		/// <summary>
 		/// To use to generate best quotes in the order book volume of history trades.
@@ -54,9 +47,9 @@ namespace StockSharp.Algo.Testing
 		/// <remarks>
 		/// The default value is <see langword="true" />.
 		/// </remarks>
-		public bool UseTradeVolume { get; set; } // TODO
+		public bool UseTradeVolume { get; set; } = true; // TODO
 
-		private int _minSpreadStepCount;
+		private int _minSpreadStepCount = 1;
 
 		/// <summary>
 		/// The minimal value of spread between the best quotes in units of price increments number. The spread value will be selected randomly between <see cref="MarketDepthGenerator.MinSpreadStepCount"/> and <see cref="MarketDepthGenerator.MaxSpreadStepCount"/>.
@@ -66,7 +59,7 @@ namespace StockSharp.Algo.Testing
 		/// </remarks>
 		public int MinSpreadStepCount
 		{
-			get { return _minSpreadStepCount; }
+			get => _minSpreadStepCount;
 			set
 			{
 				if (value < 1)
@@ -76,17 +69,17 @@ namespace StockSharp.Algo.Testing
 			}
 		}
 
-		private int _maxSpreadStepCount;
+		private int _maxSpreadStepCount = int.MaxValue;
 
 		/// <summary>
 		/// The maximal value of spread between the best quotes in units of price increments number. The spread value will be selected randomly between <see cref="MarketDepthGenerator.MinSpreadStepCount"/> and <see cref="MarketDepthGenerator.MaxSpreadStepCount"/>.
 		/// </summary>
 		/// <remarks>
-		/// The default value is <see cref="Int32.MaxValue"/>.
+		/// The default value is <see cref="int.MaxValue"/>.
 		/// </remarks>
 		public int MaxSpreadStepCount
 		{
-			get { return _maxSpreadStepCount; }
+			get => _maxSpreadStepCount;
 			set
 			{
 				if (value < 1)
@@ -96,40 +89,40 @@ namespace StockSharp.Algo.Testing
 			}
 		}
 
-		private int _maxBidsDepth;
+		private int _maxBidsDepth = 10;
 
 		/// <summary>
 		/// The maximal depth of bids.
 		/// </summary>
 		/// <remarks>
-		/// The default value is 1.
+		/// The default value is 10.
 		/// </remarks>
 		public int MaxBidsDepth
 		{
-			get { return _maxBidsDepth; }
+			get => _maxBidsDepth;
 			set
 			{
-				if (value < 0)
+				if (value <= 0)
 					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1139);
 
 				_maxBidsDepth = value;
 			}
 		}
 
-		private int _maxAsksDepth;
+		private int _maxAsksDepth = 10;
 
 		/// <summary>
 		/// The maximal depth of offers.
 		/// </summary>
 		/// <remarks>
-		/// The default value is 1.
+		/// The default value is 10.
 		/// </remarks>
 		public int MaxAsksDepth
 		{
-			get { return _maxAsksDepth; }
+			get => _maxAsksDepth;
 			set
 			{
-				if (value < 0)
+				if (value <= 0)
 					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1140);
 
 				_maxAsksDepth = value;
@@ -141,7 +134,12 @@ namespace StockSharp.Algo.Testing
 		/// </summary>
 		public bool GenerateDepthOnEachTrade { get; set; }
 
-		private int _maxGenerations;
+		/// <summary>
+		/// Generate <see cref="QuoteChange.OrdersCount"/>.
+		/// </summary>
+		public bool GenerateOrdersCount { get; set; }
+
+		private int _maxGenerations = 20;
 
 		/// <summary>
 		/// The maximal number of generations after last occurrence of source data for the order book.
@@ -151,7 +149,7 @@ namespace StockSharp.Algo.Testing
 		/// </remarks>
 		public int MaxGenerations
 		{
-			get { return _maxGenerations; }
+			get => _maxGenerations;
 			set
 			{
 				if (value < 1)
@@ -176,7 +174,28 @@ namespace StockSharp.Algo.Testing
 			if (price <= 0)
 				price = priceStep;
 
-			return new QuoteChange(side, price, Volumes.Next());
+			int? ordersCount = null;
+
+			if (GenerateOrdersCount && RandomGen.GetBool())
+				ordersCount = Volumes.Next();
+
+			return new QuoteChange(price, Volumes.Next(), ordersCount);
+		}
+
+		/// <summary>
+		/// Copy the message into the <paramref name="destination" />.
+		/// </summary>
+		/// <param name="destination">The object, to which copied information.</param>
+		protected void CopyTo(MarketDepthGenerator destination)
+		{
+			base.CopyTo(destination);
+
+			destination.UseTradeVolume = UseTradeVolume;
+			destination.MinSpreadStepCount = MinSpreadStepCount;
+			destination.MaxSpreadStepCount = MaxSpreadStepCount;
+			destination.MaxBidsDepth = MaxBidsDepth;
+			destination.MaxAsksDepth = MaxAsksDepth;
+			destination.MaxGenerations = MaxGenerations;
 		}
 	}
 
@@ -204,12 +223,9 @@ namespace StockSharp.Algo.Testing
 		public TrendMarketDepthGenerator(SecurityId securityId)
 			: base(securityId)
 		{
-			Interval = TimeSpan.FromMilliseconds(50);
 		}
 
-		/// <summary>
-		/// To initialize the generator state.
-		/// </summary>
+		/// <inheritdoc />
 		public override void Init()
 		{
 			base.Init();
@@ -225,11 +241,7 @@ namespace StockSharp.Algo.Testing
 			_boardDefinition = null;
 		}
 
-		/// <summary>
-		/// Process message.
-		/// </summary>
-		/// <param name="message">Message.</param>
-		/// <returns>The result of processing. If <see langword="null" /> is returned, then generator has no sufficient data to generate new message.</returns>
+		/// <inheritdoc />
 		protected override Message OnProcess(Message message)
 		{
 			if (_boardDefinition == null)
@@ -248,20 +260,20 @@ namespace StockSharp.Algo.Testing
 				{
 					var l1Msg = (Level1ChangeMessage)message;
 
-					var value = l1Msg.Changes.TryGetValue(Level1Fields.LastTradePrice);
+					var value = l1Msg.TryGetDecimal(Level1Fields.LastTradePrice);
 
 					if (value != null)
-						_lastTradePrice = (decimal)value;
+						_lastTradePrice = value.Value;
 
-					value = l1Msg.Changes.TryGetValue(Level1Fields.BestBidPrice);
-
-					if (value != null)
-						_bestBidPrice = (decimal)value;
-
-					value = l1Msg.Changes.TryGetValue(Level1Fields.BestAskPrice);
+					value = l1Msg.TryGetDecimal(Level1Fields.BestBidPrice);
 
 					if (value != null)
-						_bestAskPrice = (decimal)value;
+						_bestBidPrice = value.Value;
+
+					value = l1Msg.TryGetDecimal(Level1Fields.BestAskPrice);
+
+					if (value != null)
+						_bestAskPrice = value.Value;
 
 					time = l1Msg.ServerTime;
 
@@ -389,12 +401,12 @@ namespace StockSharp.Algo.Testing
 					bidPrice = askPrice - maxStread;
 			}
 
-			var bids = new List<QuoteChange>
-			{
-				new QuoteChange(Sides.Buy, bidPrice.Value, Volumes.Next())
-			};
+			var bids = new List<QuoteChange>();
+			//{
+			//	new QuoteChange(Sides.Buy, bidPrice.Value, Volumes.Next())
+			//};
 
-			var count = MaxBidsDepth - bids.Count;
+			var count = MaxBidsDepth/* - bids.Count*/;
 
 			for (var i = 0; i < count; i++)
 			{
@@ -407,12 +419,12 @@ namespace StockSharp.Algo.Testing
 				bidPrice = quote.Price;
 			}
 
-			var asks = new List<QuoteChange>
-			{
-				new QuoteChange(Sides.Sell, askPrice.Value, Volumes.Next())
-			};
+			var asks = new List<QuoteChange>();
+			//{
+			//	new QuoteChange(Sides.Sell, askPrice.Value, Volumes.Next())
+			//};
 
-			count = MaxAsksDepth - asks.Count;
+			count = MaxAsksDepth/* - asks.Count*/;
 
 			for (var i = 0; i < count; i++)
 			{
@@ -425,8 +437,8 @@ namespace StockSharp.Algo.Testing
 				askPrice = quote.Price;
 			}
 
-			depth.Bids = bids;
-			depth.Asks = asks;
+			depth.Bids = bids.ToArray();
+			depth.Asks = asks.ToArray();
 
 			_newTrades = false;
 
@@ -451,22 +463,9 @@ namespace StockSharp.Algo.Testing
 		/// <returns>Copy.</returns>
 		public override MarketDataGenerator Clone()
 		{
-			return new TrendMarketDepthGenerator(SecurityId)
-			{
-				MaxVolume = MaxVolume,
-				MinVolume = MinVolume,
-				MaxPriceStepCount = MaxPriceStepCount,
-				Interval = Interval,
-				Volumes = Volumes,
-				Steps = Steps,
-
-				UseTradeVolume = UseTradeVolume,
-				MinSpreadStepCount = MinSpreadStepCount,
-				MaxSpreadStepCount = MaxSpreadStepCount,
-				MaxBidsDepth = MaxBidsDepth,
-				MaxAsksDepth = MaxAsksDepth,
-				MaxGenerations = MaxGenerations,
-			};
+			var clone = new TrendMarketDepthGenerator(SecurityId);
+			CopyTo(clone);
+			return clone;
 		}
 	}
 }

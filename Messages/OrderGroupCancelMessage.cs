@@ -53,13 +53,10 @@ namespace StockSharp.Messages
 		{
 		}
 
-		/// <summary>
-		/// Returns a string that represents the current object.
-		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
+		/// <inheritdoc />
 		public override string ToString()
 		{
-			return base.ToString() + $",IsStop={IsStop},Side={Side},SecType={SecurityType}";
+			return base.ToString() + $",IsStop={IsStop},Side={Side}";
 		}
 
 		/// <summary>
@@ -68,23 +65,23 @@ namespace StockSharp.Messages
 		/// <returns>Copy.</returns>
 		public override Message Clone()
 		{
-			var clone = new OrderGroupCancelMessage
-			{
-				LocalTime = LocalTime,
-				SecurityId = SecurityId,
-				IsStop = IsStop,
-				OrderType = OrderType,
-				PortfolioName = PortfolioName,
-				//SecurityType = SecurityType,
-				Side = Side,
-				TransactionId = TransactionId,
-				ClientCode = ClientCode,
-				BrokerCode = BrokerCode,
-			};
+			var clone = new OrderGroupCancelMessage();
 
 			CopyTo(clone);
 
 			return clone;
+		}
+
+		/// <summary>
+		/// Copy the message into the <paramref name="destination" />.
+		/// </summary>
+		/// <param name="destination">The object, to which copied information.</param>
+		public void CopyTo(OrderGroupCancelMessage destination)
+		{
+			base.CopyTo(destination);
+
+			destination.IsStop = IsStop;
+			destination.Side = Side;
 		}
 	}
 }

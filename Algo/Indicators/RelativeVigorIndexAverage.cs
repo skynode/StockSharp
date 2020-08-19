@@ -16,12 +16,15 @@ Copyright 2010 by StockSharp, LLC
 namespace StockSharp.Algo.Indicators
 {
 	using System.Collections.Generic;
+	using System.ComponentModel;
 
 	using StockSharp.Algo.Candles;
 
 	/// <summary>
 	/// The weight-average part of indicator <see cref="RelativeVigorIndex"/>.
 	/// </summary>
+	[IndicatorIn(typeof(CandleIndicatorValue))]
+	[Browsable(false)]
 	public class RelativeVigorIndexAverage : LengthIndicator<decimal>
 	{
 		private readonly List<Candle> _buffer = new List<Candle>();
@@ -34,9 +37,7 @@ namespace StockSharp.Algo.Indicators
 			Length = 4;
 		}
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
@@ -45,11 +46,7 @@ namespace StockSharp.Algo.Indicators
 			Buffer.Clear();
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var newValue = input.GetValue<Candle>();
@@ -99,9 +96,7 @@ namespace StockSharp.Algo.Indicators
 			return new DecimalIndicatorValue(this);
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _buffer.Count >= Length;
 	}
 }

@@ -35,6 +35,7 @@ namespace StockSharp.BusinessEntities
 	[DisplayNameLoc(LocalizedStrings.Str273Key)]
 	[DescriptionLoc(LocalizedStrings.Str274Key)]
 	[TypeConverter(typeof(ExpandableObjectConverter))]
+	[Obsolete("Use QuoteChange type.")]
 	public class Quote : Cloneable<Quote>, IExtendableEntity
 	{
 		/// <summary>
@@ -50,16 +51,18 @@ namespace StockSharp.BusinessEntities
 		/// <param name="security">The instrument by which the quote is received.</param>
 		/// <param name="price">Quote price.</param>
 		/// <param name="volume">Quote volume.</param>
-		/// <param name="direction">Direction (buy or sell).</param>
-		public Quote(Security security, decimal price, decimal volume, Sides direction)
+		/// <param name="side">Direction (buy or sell).</param>
+		/// <param name="ordersCount">Orders count.</param>
+		/// <param name="condition">Condition.</param>
+		public Quote(Security security, decimal price, decimal volume, Sides side, int? ordersCount = null, QuoteConditions condition = default)
 		{
-			_security = security;
-			_price = price;
-			_volume = volume;
-			_direction = direction;
+			Security = security;
+			Price = price;
+			Volume = volume;
+			OrderDirection = side;
+			OrdersCount = ordersCount;
+			Condition = condition;
 		}
-
-		private Security _security;
 
 		/// <summary>
 		/// The instrument by which the quote is received.
@@ -67,13 +70,7 @@ namespace StockSharp.BusinessEntities
 		[Ignore]
 		[XmlIgnore]
 		[Browsable(false)]
-		public Security Security
-		{
-			get { return _security; }  
-			set { _security = value; }
-		}
-
-		private decimal _price;
+		public Security Security { get; set; }
 
 		/// <summary>
 		/// Quote price.
@@ -82,13 +79,7 @@ namespace StockSharp.BusinessEntities
 		[DisplayNameLoc(LocalizedStrings.PriceKey)]
 		[DescriptionLoc(LocalizedStrings.Str275Key)]
 		[MainCategory]
-		public decimal Price
-		{
-			get { return _price; }
-			set { _price = value; }
-		}
-
-		private decimal _volume;
+		public decimal Price { get; set; }
 
 		/// <summary>
 		/// Quote volume.
@@ -97,13 +88,7 @@ namespace StockSharp.BusinessEntities
 		[DisplayNameLoc(LocalizedStrings.VolumeKey)]
 		[DescriptionLoc(LocalizedStrings.Str276Key)]
 		[MainCategory]
-		public decimal Volume
-		{
-			get { return _volume; }
-			set { _volume = value; }
-		}
-
-		private Sides _direction;
+		public decimal Volume { get; set; }
 
 		/// <summary>
 		/// Direction (buy or sell).
@@ -112,31 +97,36 @@ namespace StockSharp.BusinessEntities
 		[DisplayNameLoc(LocalizedStrings.Str128Key)]
 		[DescriptionLoc(LocalizedStrings.Str277Key)]
 		[MainCategory]
-		public Sides OrderDirection
-		{
-			get { return _direction; }
-			set { _direction = value; }
-		}
+		public Sides OrderDirection { get; set; }
 
 		[field: NonSerialized]
-		private IDictionary<object, object> _extensionInfo;
+		private IDictionary<string, object> _extensionInfo;
 
-		/// <summary>
-		/// Extended quote info.
-		/// </summary>
-		/// <remarks>
-		/// Uses in case of keep additional information associated with the quotation. For example, the number of contracts in its own order book, the amount of the best buying and selling.
-		/// </remarks>
+		/// <inheritdoc />
 		[Ignore]
 		[XmlIgnore]
 		[DisplayNameLoc(LocalizedStrings.ExtendedInfoKey)]
 		[DescriptionLoc(LocalizedStrings.Str427Key)]
 		[MainCategory]
-		public IDictionary<object, object> ExtensionInfo
+		[Obsolete]
+		public IDictionary<string, object> ExtensionInfo
 		{
-			get { return _extensionInfo; }
-			set { _extensionInfo = value; }
+			get => _extensionInfo;
+			set => _extensionInfo = value;
 		}
+
+		/// <summary>
+		/// Orders count.
+		/// </summary>
+		[DataMember]
+		[Nullable]
+		public int? OrdersCount { get; set; }
+
+		/// <summary>
+		/// Quote condition.
+		/// </summary>
+		[DataMember]
+		public QuoteConditions Condition { get; set; }
 
 		/// <summary>
 		/// Create a copy of <see cref="Quote"/>.
@@ -144,19 +134,16 @@ namespace StockSharp.BusinessEntities
 		/// <returns>Copy.</returns>
 		public override Quote Clone()
 		{
-			return new Quote(_security, _price, _volume, _direction)
-			{
-				ExtensionInfo = ExtensionInfo,
-			};
+			var clone = new Quote(Security, Price, Volume, OrderDirection, OrdersCount, Condition);
+			this.CopyExtensionInfo(clone);
+			return clone;
 		}
 
-		/// <summary>
-		/// Returns a string that represents the current object.
-		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
+		/// <inheritdoc />
 		public override string ToString()
 		{
-			return "{0} {1} {2}".Put(OrderDirection == Sides.Buy ? LocalizedStrings.Bid : LocalizedStrings.Ask, Price, Volume);
+			var type = OrderDirection == Sides.Buy ? LocalizedStrings.Bid : LocalizedStrings.Ask;
+			return $"{type} {Price} {Volume}";
 		}
 	}
 }

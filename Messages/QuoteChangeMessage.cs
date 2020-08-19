@@ -16,31 +16,62 @@ Copyright 2010 by StockSharp, LLC
 namespace StockSharp.Messages
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
+	using System.ComponentModel;
 	using System.Runtime.Serialization;
 
-	using Ecng.Serialization;
+	using Ecng.Common;
 
 	using StockSharp.Localization;
 
 	/// <summary>
-	/// Messages containing quotes.
+	/// Order book states.
 	/// </summary>
-	[System.Runtime.Serialization.DataContract]
+	[DataContract]
 	[Serializable]
-	public sealed class QuoteChangeMessage : Message
+	public enum QuoteChangeStates
 	{
 		/// <summary>
-		/// Security ID.
+		/// Snapshot started.
 		/// </summary>
+		[EnumMember]
+		SnapshotStarted,
+
+		/// <summary>
+		/// Snapshot building.
+		/// </summary>
+		[EnumMember]
+		SnapshotBuilding,
+
+		/// <summary>
+		/// Snapshot complete.
+		/// </summary>
+		[EnumMember]
+		SnapshotComplete,
+
+		/// <summary>
+		/// Incremental.
+		/// </summary>
+		[EnumMember]
+		Increment,
+	}
+
+	/// <summary>
+	/// Messages containing quotes.
+	/// </summary>
+	[DataContract]
+	[Serializable]
+	public sealed class QuoteChangeMessage : BaseSubscriptionIdMessage<QuoteChangeMessage>,
+		IServerTimeMessage, ISecurityIdMessage, IGeneratedMessage, ISeqNumMessage
+	{
+		/// <inheritdoc />
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.SecurityIdKey)]
 		[DescriptionLoc(LocalizedStrings.SecurityIdKey, true)]
 		[MainCategory]
 		public SecurityId SecurityId { get; set; }
 
-		private IEnumerable<QuoteChange> _bids = Enumerable.Empty<QuoteChange>();
+		private QuoteChange[] _bids = ArrayHelper.Empty<QuoteChange>();
 
 		/// <summary>
 		/// Quotes to buy.
@@ -49,19 +80,13 @@ namespace StockSharp.Messages
 		[DisplayNameLoc(LocalizedStrings.Str281Key)]
 		[DescriptionLoc(LocalizedStrings.Str282Key)]
 		[MainCategory]
-		public IEnumerable<QuoteChange> Bids
+		public QuoteChange[] Bids
 		{
-			get { return _bids; }
-			set
-			{
-				if (value == null)
-					throw new ArgumentNullException(nameof(value));
-
-				_bids = value;
-			}
+			get => _bids;
+			set => _bids = value ?? throw new ArgumentNullException(nameof(value));
 		}
 
-		private IEnumerable<QuoteChange> _asks = Enumerable.Empty<QuoteChange>();
+		private QuoteChange[] _asks = ArrayHelper.Empty<QuoteChange>();
 
 		/// <summary>
 		/// Quotes to sell.
@@ -70,21 +95,13 @@ namespace StockSharp.Messages
 		[DisplayNameLoc(LocalizedStrings.Str283Key)]
 		[DescriptionLoc(LocalizedStrings.Str284Key)]
 		[MainCategory]
-		public IEnumerable<QuoteChange> Asks
+		public QuoteChange[] Asks
 		{
-			get { return _asks; }
-			set
-			{
-				if (value == null)
-					throw new ArgumentNullException(nameof(value));
-
-				_asks = value;
-			}
+			get => _asks;
+			set => _asks = value ?? throw new ArgumentNullException(nameof(value));
 		}
 
-		/// <summary>
-		/// Change server time.
-		/// </summary>
+		/// <inheritdoc />
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.ServerTimeKey)]
 		[DescriptionLoc(LocalizedStrings.Str168Key)]
@@ -92,13 +109,23 @@ namespace StockSharp.Messages
 		public DateTimeOffset ServerTime { get; set; }
 
 		/// <summary>
-		/// Flag sorted by price quotes (<see cref="QuoteChangeMessage.Bids"/> by descending, <see cref="QuoteChangeMessage.Asks"/> by ascending).
+		/// Flag sorted by price quotes (<see cref="Bids"/> by descending, <see cref="Asks"/> by ascending).
 		/// </summary>
 		[DataMember]
 		[DisplayNameLoc(LocalizedStrings.Str285Key)]
 		[DescriptionLoc(LocalizedStrings.Str285Key, true)]
 		[MainCategory]
-		public bool IsSorted { get; set; }
+		public bool IsSorted { get; set; } = true;
+
+		/// <inheritdoc />
+		[DataMember]
+		public DataType BuildFrom { get; set; }
+
+		/// <summary>
+		/// The quote change contains filtered quotes.
+		/// </summary>
+		[Browsable(false)]
+		public bool IsFiltered { get; set; }
 
 		/// <summary>
 		/// Trading security currency.
@@ -107,8 +134,27 @@ namespace StockSharp.Messages
 		[DisplayNameLoc(LocalizedStrings.CurrencyKey)]
 		[DescriptionLoc(LocalizedStrings.Str382Key)]
 		[MainCategory]
-		[Nullable]
+		[Ecng.Serialization.Nullable]
 		public CurrencyTypes? Currency { get; set; }
+
+		/// <summary>
+		/// Order book state.
+		/// </summary>
+		[DataMember]
+		public QuoteChangeStates? State { get; set; }
+
+		/// <summary>
+		/// Determines a <see cref="QuoteChange.StartPosition"/> initialized.
+		/// </summary>
+		[DataMember]
+		public bool HasPositions { get; set; }
+
+		/// <inheritdoc />
+		[DataMember]
+		public long SeqNum { get; set; }
+
+		/// <inheritdoc />
+		public override DataType DataType => DataType.MarketDepth;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="QuoteChangeMessage"/>.
@@ -118,35 +164,36 @@ namespace StockSharp.Messages
 		{
 		}
 
-		/// <summary>
-		/// Create a copy of <see cref="QuoteChangeMessage"/>.
-		/// </summary>
-		/// <returns>Copy.</returns>
-		public override Message Clone()
+		/// <inheritdoc />
+		public override void CopyTo(QuoteChangeMessage destination)
 		{
-			var clone = new QuoteChangeMessage
-			{
-				LocalTime = LocalTime,
-				SecurityId = SecurityId,
-				Bids = Bids.Select(q => q.Clone()).ToArray(),
-				Asks = Asks.Select(q => q.Clone()).ToArray(),
-				ServerTime = ServerTime,
-				IsSorted = IsSorted,
-				Currency = Currency,
-			};
+			base.CopyTo(destination);
 
-			this.CopyExtensionInfo(clone);
-
-			return clone;
+			destination.SecurityId = SecurityId;
+			destination.Bids = Bids.ToArray();
+			destination.Asks = Asks.ToArray();
+			destination.ServerTime = ServerTime;
+			destination.IsSorted = IsSorted;
+			destination.Currency = Currency;
+			destination.BuildFrom = BuildFrom;
+			destination.IsFiltered = IsFiltered;
+			destination.State = State;
+			destination.HasPositions = HasPositions;
+			destination.SeqNum = SeqNum;
 		}
 
-		/// <summary>
-		/// Returns a string that represents the current object.
-		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
+		/// <inheritdoc />
 		public override string ToString()
 		{
-			return base.ToString() + $",T(S)={ServerTime:yyyy/MM/dd HH:mm:ss.fff}";
+			var str = base.ToString() + $",Sec={SecurityId},T(S)={ServerTime:yyyy/MM/dd HH:mm:ss.fff},B={Bids.Length},A={Asks.Length}";
+
+			if (State != default)
+				str += $",State={State.Value}";
+
+			if (SeqNum != default)
+				str += $",SQ={SeqNum}";
+
+			return str;
 		}
 	}
 }

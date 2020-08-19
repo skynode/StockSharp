@@ -18,6 +18,7 @@ namespace StockSharp.Algo.Indicators
 	using System;
 	using System.ComponentModel;
 
+	using Ecng.Common;
 	using Ecng.Serialization;
 
 	using StockSharp.Localization;
@@ -40,11 +41,12 @@ namespace StockSharp.Algo.Indicators
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Envelope"/>.
 		/// </summary>
+		/// <param name="ma">Middle line.</param>
 		public Envelope(LengthIndicator<decimal> ma)
 		{
 			InnerIndicators.Add(Middle = ma);
-			InnerIndicators.Add(Upper = (LengthIndicator<decimal>)ma.Clone());
-			InnerIndicators.Add(Lower = (LengthIndicator<decimal>)ma.Clone());
+			InnerIndicators.Add(Upper = ma.TypedClone());
+			InnerIndicators.Add(Lower = ma.TypedClone());
 
 			Upper.Name = "Upper";
 			Lower.Name = "Lower";
@@ -76,7 +78,7 @@ namespace StockSharp.Algo.Indicators
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public virtual int Length
 		{
-			get { return Middle.Length; }
+			get => Middle.Length;
 			set
 			{
 				Middle.Length = Upper.Length = Lower.Length = value;
@@ -84,17 +86,17 @@ namespace StockSharp.Algo.Indicators
 			}
 		}
 
-		private decimal _shift = 0.25m;
+		private decimal _shift = 0.01m;
 
 		/// <summary>
-		/// The shift width. Specified as percentage from 0 to 1. The default equals to 0.25.
+		/// The shift width. Specified as percentage from 0 to 1. The default equals to 0.01.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.Str783Key)]
 		[DescriptionLoc(LocalizedStrings.Str784Key)]
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public decimal Shift
 		{
-			get { return _shift; }
+			get => _shift;
 			set
 			{
 				if (value < 0)
@@ -105,47 +107,35 @@ namespace StockSharp.Algo.Indicators
 			}
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => Middle.IsFormed;
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var value = (ComplexIndicatorValue)base.OnProcess(input);
 
 			var upper = value.InnerValues[Upper];
-			value.InnerValues[Upper] = upper.SetValue(this, upper.GetValue<decimal>() * (1 + Shift));
+			value.InnerValues[Upper] = upper.SetValue(Upper, upper.GetValue<decimal>() * (1 + Shift));
 
 			var lower = value.InnerValues[Lower];
-			value.InnerValues[Lower] = lower.SetValue(this, lower.GetValue<decimal>() * (1 - Shift));
+			value.InnerValues[Lower] = lower.SetValue(Lower, lower.GetValue<decimal>() * (1 - Shift));
 
 			return value;
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Load(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Load(SettingsStorage storage)
 		{
-			base.Load(settings);
-			Shift = settings.GetValue<decimal>(nameof(Shift));
+			base.Load(storage);
+			Shift = storage.GetValue<decimal>(nameof(Shift));
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Save(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Save(SettingsStorage storage)
 		{
-			base.Save(settings);
-			settings.SetValue(nameof(Shift), Shift);
+			base.Save(storage);
+			storage.SetValue(nameof(Shift), Shift);
 		}
 	}
 }

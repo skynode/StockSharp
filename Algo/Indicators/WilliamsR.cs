@@ -24,10 +24,13 @@ namespace StockSharp.Algo.Indicators
 	/// Williams Percent Range.
 	/// </summary>
 	/// <remarks>
-	/// %R = (Highest High - Close)/(Highest High - Lowest Low) * -100 http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:williams_r http://www2.wealth-lab.com/WL5Wiki/WilliamsR.ashx.
+	/// %R = (Highest High - Close)/(Highest High - Lowest Low) * -100
+	/// http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:williams_r
+	/// http://www2.wealth-lab.com/WL5Wiki/WilliamsR.ashx.
 	/// </remarks>
 	[DisplayName("%R")]
 	[DescriptionLoc(LocalizedStrings.Str854Key)]
+	[IndicatorIn(typeof(CandleIndicatorValue))]
 	public class WilliamsR : LengthIndicator<decimal>
 	{
 		// Текущее значение минимума
@@ -45,25 +48,17 @@ namespace StockSharp.Algo.Indicators
 			_high = new Highest();
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _low.IsFormed;
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			_high.Length = _low.Length = Length;
 			base.Reset();
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var candle = input.GetValue<Candle>();

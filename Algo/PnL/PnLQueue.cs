@@ -21,6 +21,7 @@ namespace StockSharp.Algo.PnL
 	using Ecng.Collections;
 	using Ecng.Common;
 
+	using StockSharp.Localization;
 	using StockSharp.Messages;
 
 	/// <summary>
@@ -39,52 +40,84 @@ namespace StockSharp.Algo.PnL
 		public PnLQueue(SecurityId securityId)
 		{
 			SecurityId = securityId;
-			PriceStep = 1;
-			StepPrice = 1;
+			UpdateMultiplier();
 		}
 
 		/// <summary>
 		/// Security ID.
 		/// </summary>
-		public SecurityId SecurityId { get; private set; }
+		public SecurityId SecurityId { get; }
 
-		private decimal _priceStep;
+		private decimal _priceStep = 1;
 
 		/// <summary>
 		/// Price step.
 		/// </summary>
 		public decimal PriceStep
 		{
-			get { return _priceStep; }
+			get => _priceStep;
 			private set
 			{
+				if (value <= 0)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+
 				_priceStep = value;
 				UpdateMultiplier();
 			}
 		}
 
-		private decimal _stepPrice;
+		private decimal? _stepPrice;
 
 		/// <summary>
 		/// Step price.
 		/// </summary>
-		public decimal StepPrice
+		public decimal? StepPrice
 		{
-			get { return _stepPrice; }
+			get => _stepPrice;
 			private set
 			{
+				if (value <= 0)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+
 				_stepPrice = value;
 				UpdateMultiplier();
 			}
 		}
 
+		private decimal _leverage = 1;
+
 		/// <summary>
-		/// Multiplier.
+		/// Leverage.
 		/// </summary>
-		public decimal Multiplier
+		public decimal Leverage
 		{
-			get { return _multiplier; }
-			set { _multiplier = value; }
+			get => _leverage;
+			set
+			{
+				if (value <= 0)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+
+				_leverage = value;
+				UpdateMultiplier();
+			}
+		}
+
+		private decimal _lotMultiplier = 1;
+
+		/// <summary>
+		/// Lot multiplier.
+		/// </summary>
+		public decimal LotMultiplier
+		{
+			get => _lotMultiplier;
+			set
+			{
+				if (value <= 0)
+					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.Str1219);
+
+				_lotMultiplier = value;
+				UpdateMultiplier();
+			}
 		}
 
 		/// <summary>
@@ -156,6 +189,8 @@ namespace StockSharp.Algo.PnL
 
 			_unrealizedPnL = null;
 
+			decimal tradePnL;
+
 			lock (_openedTrades.SyncRoot)
 			{
 				if (_openedTrades.Count > 0)
@@ -195,10 +230,11 @@ namespace StockSharp.Algo.PnL
 					_openedTrades.Push(RefTuple.Create(price, volume));
 				}
 
-				RealizedPnL += _multiplier * pnl;
+				tradePnL = _multiplier * pnl;
+				RealizedPnL += tradePnL;
 			}
 
-			return new PnLInfo(trade, closedVolume, pnl);
+			return new PnLInfo(trade, closedVolume, tradePnL);
 		}
 
 		/// <summary>
@@ -207,35 +243,42 @@ namespace StockSharp.Algo.PnL
 		/// <param name="levelMsg">The message, containing market data.</param>
 		public void ProcessLevel1(Level1ChangeMessage levelMsg)
 		{
-			var priceStep = levelMsg.Changes.TryGetValue(Level1Fields.PriceStep);
+			var priceStep = levelMsg.TryGetDecimal(Level1Fields.PriceStep);
 			if (priceStep != null)
 			{
 				PriceStep = (decimal)priceStep;
 				_recalcUnrealizedPnL = true;
 			}
 
-			var stepPrice = levelMsg.Changes.TryGetValue(Level1Fields.StepPrice);
+			var stepPrice = levelMsg.TryGetDecimal(Level1Fields.StepPrice);
 			if (stepPrice != null)
 			{
 				StepPrice = (decimal)stepPrice;
 				_recalcUnrealizedPnL = true;
 			}
 
-			var tradePrice = levelMsg.Changes.TryGetValue(Level1Fields.LastTradePrice);
+			var lotMultiplier = levelMsg.TryGetDecimal(Level1Fields.Multiplier);
+			if (lotMultiplier != null)
+			{
+				LotMultiplier = (decimal)lotMultiplier;
+				_recalcUnrealizedPnL = true;
+			}
+
+			var tradePrice = levelMsg.TryGetDecimal(Level1Fields.LastTradePrice);
 			if (tradePrice != null)
 			{
 				TradePrice = (decimal)tradePrice;
 				_recalcUnrealizedPnL = true;
 			}
 
-			var bidPrice = levelMsg.Changes.TryGetValue(Level1Fields.BestBidPrice);
+			var bidPrice = levelMsg.TryGetDecimal(Level1Fields.BestBidPrice);
 			if (bidPrice != null)
 			{
 				BidPrice = (decimal)bidPrice;
 				_recalcUnrealizedPnL = true;
 			}
 
-			var askPrice = levelMsg.Changes.TryGetValue(Level1Fields.BestAskPrice);
+			var askPrice = levelMsg.TryGetDecimal(Level1Fields.BestAskPrice);
 			if (askPrice != null)
 			{
 				AskPrice = (decimal)askPrice;
@@ -271,9 +314,9 @@ namespace StockSharp.Algo.PnL
 
 		private void UpdateMultiplier()
 		{
-			_multiplier = StepPrice == 0 || PriceStep == 0 
-				? 1 
-				: StepPrice / PriceStep;
+			var stepPrice = StepPrice;
+
+			_multiplier = (stepPrice == null ? 1 : stepPrice.Value / PriceStep) * Leverage * LotMultiplier;
 		}
 
 		private static decimal GetPnL(decimal price, decimal volume, Sides side, decimal marketPrice)

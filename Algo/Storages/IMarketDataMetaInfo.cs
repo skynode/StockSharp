@@ -58,7 +58,7 @@ namespace StockSharp.Algo.Storages
 		/// <summary>
 		/// Last record identifier.
 		/// </summary>
-		object LastId { get; }
+		object LastId { get; set; }
 
 		/// <summary>
 		/// To save meta-information parameters to stream.
@@ -71,6 +71,11 @@ namespace StockSharp.Algo.Storages
 		/// </summary>
 		/// <param name="stream">Data stream.</param>
 		void Read(Stream stream);
+
+		/// <summary>
+		/// Is override all data.
+		/// </summary>
+		bool IsOverride { get; }
 	}
 
 	abstract class MetaInfo : IMarketDataMetaInfo
@@ -83,29 +88,24 @@ namespace StockSharp.Algo.Storages
 		public DateTime Date { get; }
 		public int Count { get; set; }
 
-		public decimal PriceStep { get; set; }
-		public decimal VolumeStep { get; set; }
+		public decimal PriceStep { get; set; } = 0.01m;
+		public decimal VolumeStep { get; set; } = 1m;
+
+		//public decimal FirstPriceStep { get; set; }
+		public decimal LastPriceStep { get; set; }
 
 		public DateTime FirstTime { get; set; }
 		public DateTime LastTime { get; set; }
 
-		public abstract object LastId { get; }
+		public abstract object LastId { get; set; }
 
-		/// <summary>
-		/// To save meta-information parameters to stream.
-		/// </summary>
-		/// <param name="stream">Data stream.</param>
+		/// <inheritdoc />
 		public abstract void Write(Stream stream);
 
-		/// <summary>
-		/// To load meta-information parameters from the stream.
-		/// </summary>
-		/// <param name="stream">Data stream.</param>
+		/// <inheritdoc />
 		public abstract void Read(Stream stream);
 
-		//public static TMetaInfo CreateMetaInfo(DateTime date)
-		//{
-		//	return typeof(TMetaInfo).CreateInstance<TMetaInfo>(date);
-		//}
+		/// <inheritdoc />
+		public virtual bool IsOverride => false;
 	}
 }

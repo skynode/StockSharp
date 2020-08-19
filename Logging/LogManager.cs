@@ -46,7 +46,7 @@ namespace StockSharp.Logging
 		{
 			public ApplicationReceiver()
 			{
-				Name = TypeHelper.ApplicationName;
+				Name = ConfigManager.TryGet("appName", TypeHelper.ApplicationName);
 				LogLevel = LogLevels.Info;
 			}
 		}
@@ -57,10 +57,7 @@ namespace StockSharp.Logging
 
 			public LogSourceList(LogManager parent)
 			{
-				if (parent == null)
-					throw new ArgumentNullException(nameof(parent));
-
-				_parent = parent;
+				_parent = parent ?? throw new ArgumentNullException(nameof(parent));
 			}
 
 			protected override bool OnAdding(ILogSource item)
@@ -111,11 +108,26 @@ namespace StockSharp.Logging
 		private readonly List<LogMessage> _pendingMessages = new List<LogMessage>();
 		private readonly Timer _flushTimer;
 		private bool _isFlusing;
+		private readonly bool _asyncMode;
+
+		/// <summary>
+		/// Instance.
+		/// </summary>
+		public static LogManager Instance => ConfigManager.TryGetService<LogManager>();
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="LogManager"/>.
 		/// </summary>
 		public LogManager()
+			: this(true)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="LogManager"/>.
+		/// </summary>
+		/// <param name="asyncMode">Asynchronous mode.</param>
+		public LogManager(bool asyncMode)
 		{
 			ConfigManager.TryRegisterService(this);
 
@@ -124,6 +136,11 @@ namespace StockSharp.Logging
 				Application,
 				new UnhandledExceptionSource()
 			};
+
+			_asyncMode = asyncMode;
+
+			if (!_asyncMode)
+				return;
 
 			_flushTimer = ThreadingHelper.Timer(Flush);
 
@@ -205,7 +222,7 @@ namespace StockSharp.Logging
 		/// </summary>
 		public ILogReceiver Application
 		{
-			get { return _application; }
+			get => _application;
 			set
 			{
 				if (value == null)
@@ -223,7 +240,7 @@ namespace StockSharp.Logging
 		private readonly CachedSynchronizedSet<ILogListener> _listeners = new CachedSynchronizedSet<ILogListener>();
 
 		/// <summary>
-		/// Messages loggers arriving from <see cref="LogManager.Sources"/>.
+		/// Messages loggers arriving from <see cref="Sources"/>.
 		/// </summary>
 		public IList<ILogListener> Listeners => _listeners;
 
@@ -233,38 +250,22 @@ namespace StockSharp.Logging
 		public IList<ILogSource> Sources { get; }
 
 		/// <summary>
-		/// Sending interval of messages collected from <see cref="LogManager.Sources"/> to the <see cref="LogManager.Listeners"/>. The default is 500 ms.
+		/// Sending interval of messages collected from <see cref="Sources"/> to the <see cref="Listeners"/>. The default is 500 ms.
 		/// </summary>
 		public TimeSpan FlushInterval
 		{
-			get { return _flushTimer.Interval(); }
+			get => _flushTimer?.Interval() ?? TimeSpan.MaxValue;
 			set
 			{
+				if (!_asyncMode)
+					return;
+
 				if (value < TimeSpan.FromMilliseconds(1))
 					throw new ArgumentOutOfRangeException(nameof(value), value, LocalizedStrings.IntervalMustBePositive);
 
 				_flushTimer.Interval(value);
 			}
 		}
-
-		//private int _maxMessageCount = 1000;
-
-		///// <summary>
-		///// Максимальное количество накопленных от <see cref="Sources"/> сообщений, прежде чем они будут отправлены в <see cref="Listeners"/>.
-		///// По умолчанию равно 1000.
-		///// </summary>
-		///// <remarks>Значение 0 означает бесконечный размер буфера. Значение -1 означает отсутствие буферизации.</remarks>
-		//public int MaxMessageCount
-		//{
-		//	get { return _maxMessageCount; }
-		//	set
-		//	{
-		//		if (value < -1) 
-		//			throw new ArgumentOutOfRangeException("value", value, "Количество не может быть отрицательным.");
-
-		//		_maxMessageCount = value;
-		//	}
-		//}
 
 		private void SourceLog(LogMessage message)
 		{
@@ -273,23 +274,19 @@ namespace StockSharp.Logging
 
 			_logMsgStat.Add(message);
 
-			//bool needFlush;
-
 			lock (_syncRoot)
 			{
 				_pendingMessages.Add(message);
-				//needFlush = MaxMessageCount > 0 && _pendingMessages.Count > MaxMessageCount || MaxMessageCount == -1;
 
-				// mika: если накопилось слишком много сообщений, то нужно принудительно вызвать таймер
-				if (_pendingMessages.Count > 1000000)
-					ImmediateFlush();
+				if (!_asyncMode)
+					Flush();
+				else
+				{
+					// mika: force flush in case too many messages
+					if (_pendingMessages.Count > 1000000)
+						ImmediateFlush();
+				}
 			}
-
-			// mika: сбрасывание логов необходимо делать только в одном потоке, чтобы избежать
-			// усложнения логики в Listener-ах
-
-			//if (needFlush)
-			//	Flush();
 		}
 
 		private void ImmediateFlush()
@@ -298,24 +295,34 @@ namespace StockSharp.Logging
 		}
 
 		/// <summary>
+		/// Clear pending messages on dispose.
+		/// </summary>
+		public bool ClearPendingOnDispose { get; set; } = true;
+
+		/// <summary>
 		/// Release resources.
 		/// </summary>
 		protected override void DisposeManaged()
 		{
-			// сначала удаляем поставщиков логов
 			Sources.Clear();
 
-			lock (_syncRoot)
+			if (_asyncMode)
 			{
-				_pendingMessages.Clear();
-				_pendingMessages.Add(_disposeMessage);
+				lock (_syncRoot)
+				{
+					if (ClearPendingOnDispose)
+						_pendingMessages.Clear();
+
+					_pendingMessages.Add(_disposeMessage);
+				}
+			
+				// flushing accumulated messages and closing the timer
+
+				ImmediateFlush();
+
+				_disposeMessage.Wait();
+				_flushTimer.Dispose();
 			}
-
-			// сбрасываем в логи то, что еще не сбросилось и выключаем таймер
-			ImmediateFlush();
-
-			_disposeMessage.Wait();
-			_flushTimer.Dispose();
 
 			base.DisposeManaged();
 		}
@@ -332,6 +339,9 @@ namespace StockSharp.Logging
 
 			if (storage.Contains(nameof(LocalTimeZone)))
 				LocalTimeZone = storage.GetValue<TimeZoneInfo>(nameof(LocalTimeZone));
+
+			if (storage.Contains(nameof(Application)) && Application is IPersistable appPers)
+				appPers.Load(storage.GetValue<SettingsStorage>(nameof(Application)));
 		}
 
 		/// <summary>
@@ -346,6 +356,9 @@ namespace StockSharp.Logging
 
 			if (LocalTimeZone != null)
 				storage.SetValue(nameof(LocalTimeZone), LocalTimeZone);
+
+			if (Application is IPersistable appPers)
+				storage.SetValue(nameof(Application), appPers.Save());
 		}
 	}
 }

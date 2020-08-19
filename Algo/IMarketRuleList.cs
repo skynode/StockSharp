@@ -23,13 +23,12 @@ namespace StockSharp.Algo
 	using Ecng.Common;
 
 	using StockSharp.Logging;
-
 	using StockSharp.Localization;
 
 	/// <summary>
 	/// The interface, describing the rules list.
 	/// </summary>
-	public interface IMarketRuleList : ISynchronizedCollection<IMarketRule>
+	public interface IMarketRuleList : INotifyList<IMarketRule>
 	{
 		/// <summary>
 		/// To get all active tokens of rules.
@@ -65,10 +64,7 @@ namespace StockSharp.Algo
 		/// <param name="container">The rules container.</param>
 		public MarketRuleList(IMarketRuleContainer container)
 		{
-			if (container == null)
-				throw new ArgumentNullException(nameof(container));
-
-			_container = container;
+			_container = container ?? throw new ArgumentNullException(nameof(container));
 		}
 
 		/// <summary>
@@ -92,7 +88,7 @@ namespace StockSharp.Algo
 		protected override bool OnRemoving(IMarketRule item)
 		{
 			if (!Contains(item))
-				throw new InvalidOperationException(LocalizedStrings.Str906Params.Put(item.Name, _container.Name));
+				throw new InvalidOperationException(LocalizedStrings.Str906Params.Put(item, _container.Name));
 
 			return base.OnRemoving(item);
 		}
@@ -151,7 +147,7 @@ namespace StockSharp.Algo
 			{
 				var set = _rulesByToken.TryGetValue(token);
 
-				return set == null ? Enumerable.Empty<IMarketRule>() : set.ToArray();
+				return set?.ToArray() ?? Enumerable.Empty<IMarketRule>();
 			}
 		}
 

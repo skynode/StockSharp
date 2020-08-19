@@ -17,6 +17,7 @@ namespace StockSharp.Messages
 {
 	using System;
 	using System.Globalization;
+	using System.Threading;
 
 	using Ecng.Common;
 
@@ -26,7 +27,7 @@ namespace StockSharp.Messages
 	/// <summary>
 	/// Message channel, based on the queue and operate within a single process.
 	/// </summary>
-	public class InMemoryMessageChannel : Cloneable<IMessageChannel>, IMessageChannel
+	public class InMemoryMessageChannel : IMessageChannel
 	{
 		private static readonly MemoryStatisticsValue<Message> _msgStat = new MemoryStatisticsValue<Message>(LocalizedStrings.Messages);
 
@@ -35,26 +36,30 @@ namespace StockSharp.Messages
 			MemoryStatistics.Instance.Values.Add(_msgStat);
 		}
 
+		private readonly IMessageQueue _queue;
 		private readonly Action<Exception> _errorHandler;
-		private readonly MessagePriorityQueue _messageQueue = new MessagePriorityQueue();
+
+		private readonly SyncObject _suspendLock = new SyncObject();
+
+		private int _version;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="InMemoryMessageChannel"/>.
 		/// </summary>
+		/// <param name="queue">Message queue.</param>
 		/// <param name="name">Channel name.</param>
 		/// <param name="errorHandler">Error handler.</param>
-		public InMemoryMessageChannel(string name, Action<Exception> errorHandler)
+		public InMemoryMessageChannel(IMessageQueue queue, string name, Action<Exception> errorHandler)
 		{
 			if (name.IsEmpty())
 				throw new ArgumentNullException(nameof(name));
 
-			if (errorHandler == null)
-				throw new ArgumentNullException(nameof(errorHandler));
-
 			Name = name;
 
-			_errorHandler = errorHandler;
-			_messageQueue.Close();
+			_queue = queue ?? throw new ArgumentNullException(nameof(queue));
+			_errorHandler = errorHandler ?? throw new ArgumentNullException(nameof(errorHandler));
+			
+			_queue.Close();
 		}
 
 		/// <summary>
@@ -65,7 +70,7 @@ namespace StockSharp.Messages
 		/// <summary>
 		/// Message queue count.
 		/// </summary>
-		public int MessageCount => _messageQueue.Count;
+		public int MessageCount => _queue.Count;
 
 		/// <summary>
 		/// Max message queue count.
@@ -75,43 +80,99 @@ namespace StockSharp.Messages
 		/// </remarks>
 		public int MaxMessageCount
 		{
-			get { return _messageQueue.MaxSize; }
-			set { _messageQueue.MaxSize = value; }
+			get => _queue.MaxSize;
+			set => _queue.MaxSize = value;
+		}
+
+		private int _suspendMaxCount = 10000;
+
+		/// <summary>
+		/// Suspend on <see cref="SuspendTimeout"/> if message queue is more than the specified count.
+		/// </summary>
+		public int SuspendMaxCount
+		{
+			get => _suspendMaxCount;
+			set
+			{
+				if (value < 0)
+					throw new ArgumentOutOfRangeException(nameof(value));
+
+				_suspendMaxCount = value;
+			}
+		}
+
+		private TimeSpan _suspendTimeout = TimeSpan.FromSeconds(1);
+
+		/// <summary>
+		/// <see cref="SuspendMaxCount"/>.
+		/// </summary>
+		public TimeSpan SuspendTimeout
+		{
+			get => _suspendTimeout;
+			set
+			{
+				if (value < TimeSpan.Zero)
+					throw new ArgumentOutOfRangeException(nameof(value));
+
+				_suspendTimeout = value;
+			}
 		}
 
 		/// <summary>
-		/// Channel closing event.
+		/// The channel cannot be opened.
 		/// </summary>
-		public event Action Closed;
+		public bool Disabled { get; set; }
 
-		/// <summary>
-		/// Is channel opened.
-		/// </summary>
-		public bool IsOpened => !_messageQueue.IsClosed;
+		private ChannelStates _state = ChannelStates.Stopped;
 
-		/// <summary>
-		/// Open channel.
-		/// </summary>
+		/// <inheritdoc />
+		public ChannelStates State
+		{
+			get => _state;
+			private set
+			{
+				if (_state == value)
+					return;
+
+				_state = value;
+				StateChanged?.Invoke();
+			}
+		}
+
+		/// <inheritdoc />
+		public event Action StateChanged;
+
+		/// <inheritdoc />
 		public void Open()
 		{
-			_messageQueue.Open();
+			if (Disabled)
+				return;
+
+			State = ChannelStates.Started;
+			_queue.Open();
+
+			var version = Interlocked.Increment(ref _version);
 
 			ThreadingHelper
 				.Thread(() => CultureInfo.InvariantCulture.DoInCulture(() =>
 				{
-					while (!_messageQueue.IsClosed)
+					while (this.IsOpened())
 					{
 						try
 						{
-							Message message;
-
-							if (!_messageQueue.TryDequeue(out message))
-							{
+							if (!_queue.TryDequeue(out var message))
 								break;
+
+							if (State == ChannelStates.Suspended)
+							{
+								_suspendLock.Wait();
+
+								if (!this.IsOpened())
+									break;
 							}
 
-							//if (!(message is TimeMessage) && message.GetType().Name != "BasketMessage")
-							//	Console.WriteLine("<< ({0}) {1}", System.Threading.Thread.CurrentThread.Name, message);
+							if (_version != version)
+								break;
 
 							_msgStat.Remove(message);
 							NewOutMessage?.Invoke(message);
@@ -122,54 +183,86 @@ namespace StockSharp.Messages
 						}
 					}
 
-					Closed?.Invoke();
+					State = ChannelStates.Stopped;
 				}))
 				.Name($"{Name} channel thread.")
 				//.Culture(CultureInfo.InvariantCulture)
 				.Launch();
 		}
 
-		/// <summary>
-		/// Close channel.
-		/// </summary>
+		/// <inheritdoc />
 		public void Close()
 		{
-			_messageQueue.Close();
+			State = ChannelStates.Stopping;
+
+			_queue.Close();
+			_queue.Clear();
+
+			_suspendLock.Pulse();
 		}
 
-		/// <summary>
-		/// Send message.
-		/// </summary>
-		/// <param name="message">Message.</param>
-		public void SendInMessage(Message message)
+		void IMessageChannel.Suspend()
 		{
-			if (!IsOpened)
-				throw new InvalidOperationException();
+			State = ChannelStates.Suspended;
+		}
 
-			//if (!(message is TimeMessage) && message.GetType().Name != "BasketMessage")
-			//	Console.WriteLine(">> ({0}) {1}", System.Threading.Thread.CurrentThread.Name, message);
+		void IMessageChannel.Resume()
+		{
+			State = ChannelStates.Started;
+			_suspendLock.PulseAll();
+		}
+
+		void IMessageChannel.Clear()
+		{
+			_queue.Clear();
+		}
+
+		/// <inheritdoc />
+		public bool SendInMessage(Message message)
+		{
+			if (!this.IsOpened())
+			{
+				//throw new InvalidOperationException();
+				return false;
+			}
+
+			if (State == ChannelStates.Suspended)
+			{
+				_suspendLock.Wait();
+
+				if (!this.IsOpened())
+					return false;
+			}
 
 			_msgStat.Add(message);
-			_messageQueue.Enqueue(message);
+			_queue.Enqueue(message);
+
+			if (_queue.Count > SuspendMaxCount)
+				SuspendTimeout.Sleep();
+
+			return true;
 		}
 
-		/// <summary>
-		/// New message event.
-		/// </summary>
+		/// <inheritdoc />
 		public event Action<Message> NewOutMessage;
-
-		void IDisposable.Dispose()
-		{
-			Close();
-		}
 
 		/// <summary>
 		/// Create a copy of <see cref="InMemoryMessageChannel"/>.
 		/// </summary>
 		/// <returns>Copy.</returns>
-		public override IMessageChannel Clone()
+		public virtual IMessageChannel Clone()
 		{
-			return new InMemoryMessageChannel(Name, _errorHandler) { MaxMessageCount = MaxMessageCount };
+			return new InMemoryMessageChannel(_queue, Name, _errorHandler) { MaxMessageCount = MaxMessageCount };
+		}
+
+		object ICloneable.Clone()
+		{
+			return Clone();
+		}
+
+		void IDisposable.Dispose()
+		{
+			Close();
 		}
 	}
 }

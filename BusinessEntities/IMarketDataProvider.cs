@@ -35,6 +35,7 @@ namespace StockSharp.BusinessEntities
 		/// </summary>
 		/// <param name="security">The instrument by which an order book should be got.</param>
 		/// <returns>Order book.</returns>
+		[Obsolete("Use MarketDepthReceived event.")]
 		MarketDepth GetMarketDepth(Security security);
 
 		/// <summary>
@@ -51,5 +52,142 @@ namespace StockSharp.BusinessEntities
 		/// <param name="security">Security.</param>
 		/// <returns>Possible fields.</returns>
 		IEnumerable<Level1Fields> GetLevel1Fields(Security security);
+
+		/// <summary>
+		/// Tick trade received.
+		/// </summary>
+		[Obsolete("Use TickTradeReceived event.")]
+		event Action<Trade> NewTrade;
+
+		/// <summary>
+		/// Security received.
+		/// </summary>
+		[Obsolete("Use SecurityReceived event.")]
+		event Action<Security> NewSecurity;
+
+		/// <summary>
+		/// Security changed.
+		/// </summary>
+		[Obsolete("Use SecurityReceived event.")]
+		event Action<Security> SecurityChanged;
+
+		/// <summary>
+		/// Order book received.
+		/// </summary>
+		[Obsolete("Use OrderBookReceived event.")]
+		event Action<MarketDepth> NewMarketDepth;
+
+		/// <summary>
+		/// Order book changed.
+		/// </summary>
+		[Obsolete("Use OrderBookReceived event.")]
+		event Action<MarketDepth> MarketDepthChanged;
+
+		/// <summary>
+		/// Order book changed.
+		/// </summary>
+		[Obsolete("Use MarketDepthReceived event.")]
+		event Action<MarketDepth> FilteredMarketDepthChanged;
+
+		/// <summary>
+		/// Order log received.
+		/// </summary>
+		[Obsolete("Use OrderLogItemReceived event.")]
+		event Action<OrderLogItem> NewOrderLogItem;
+
+		/// <summary>
+		/// News received.
+		/// </summary>
+		[Obsolete("Use NewsReceived event.")]
+		event Action<News> NewNews;
+
+		/// <summary>
+		/// News updated (news body received <see cref="News.Story"/>).
+		/// </summary>
+		[Obsolete("Use NewsReceived event.")]
+		event Action<News> NewsChanged;
+
+		/// <summary>
+		/// Lookup result <see cref="SecurityLookupMessage"/> received.
+		/// </summary>
+		event Action<SecurityLookupMessage, IEnumerable<Security>, Exception> LookupSecuritiesResult;
+
+		/// <summary>
+		/// Lookup result <see cref="SecurityLookupMessage"/> received.
+		/// </summary>
+		event Action<SecurityLookupMessage, IEnumerable<Security>, IEnumerable<Security>, Exception> LookupSecuritiesResult2;
+
+		/// <summary>
+		/// Lookup result <see cref="BoardLookupMessage"/> received.
+		/// </summary>
+		event Action<BoardLookupMessage, IEnumerable<ExchangeBoard>, Exception> LookupBoardsResult;
+
+		/// <summary>
+		/// Lookup result <see cref="BoardLookupMessage"/> received.
+		/// </summary>
+		event Action<BoardLookupMessage, IEnumerable<ExchangeBoard>, IEnumerable<ExchangeBoard>, Exception> LookupBoardsResult2;
+
+		/// <summary>
+		/// Lookup result <see cref="TimeFrameLookupMessage"/> received.
+		/// </summary>
+		event Action<TimeFrameLookupMessage, IEnumerable<TimeSpan>, Exception> LookupTimeFramesResult;
+
+		/// <summary>
+		/// Lookup result <see cref="TimeFrameLookupMessage"/> received.
+		/// </summary>
+		event Action<TimeFrameLookupMessage, IEnumerable<TimeSpan>, IEnumerable<TimeSpan>, Exception> LookupTimeFramesResult2;
+
+		/// <summary>
+		/// Successful subscription market-data.
+		/// </summary>
+		event Action<Security, MarketDataMessage> MarketDataSubscriptionSucceeded;
+
+		/// <summary>
+		/// Error subscription market-data.
+		/// </summary>
+		event Action<Security, MarketDataMessage, Exception> MarketDataSubscriptionFailed;
+
+		/// <summary>
+		/// Error subscription market-data.
+		/// </summary>
+		event Action<Security, MarketDataMessage, SubscriptionResponseMessage> MarketDataSubscriptionFailed2;
+
+		/// <summary>
+		/// Successful unsubscription market-data.
+		/// </summary>
+		event Action<Security, MarketDataMessage> MarketDataUnSubscriptionSucceeded;
+
+		/// <summary>
+		/// Error unsubscription market-data.
+		/// </summary>
+		event Action<Security, MarketDataMessage, Exception> MarketDataUnSubscriptionFailed;
+
+		/// <summary>
+		/// Error unsubscription market-data.
+		/// </summary>
+		event Action<Security, MarketDataMessage, SubscriptionResponseMessage> MarketDataUnSubscriptionFailed2;
+
+		/// <summary>
+		/// Subscription market-data finished.
+		/// </summary>
+		event Action<Security, SubscriptionFinishedMessage> MarketDataSubscriptionFinished;
+
+		/// <summary>
+		/// Market-data subscription unexpected cancelled.
+		/// </summary>
+		event Action<Security, MarketDataMessage, Exception> MarketDataUnexpectedCancelled;
+
+		/// <summary>
+		/// Subscription is online.
+		/// </summary>
+		event Action<Security, MarketDataMessage> MarketDataSubscriptionOnline;
+
+		/// <summary>
+		/// Get filtered order book.
+		/// </summary>
+		/// <param name="security">The instrument by which an order book should be got.</param>
+		/// <returns>Filtered order book.</returns>
+		[Obsolete("Use MarketDepthReceived event.")]
+		MarketDepth GetFilteredMarketDepth(Security security);
 	}
 }

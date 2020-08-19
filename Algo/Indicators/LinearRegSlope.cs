@@ -38,11 +38,7 @@ namespace StockSharp.Algo.Indicators
 			Length = 11;
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var newValue = input.GetValue<decimal>();
@@ -70,7 +66,7 @@ namespace StockSharp.Algo.Indicators
 			var sumXy = 0m; //сумма x*y
 			var sumX2 = 0m; //сумма x^2
 
-			for (int i = 0; i < buff.Count; i++)
+			for (var i = 0; i < buff.Count; i++)
 			{
 				sumX += i;
 				sumY += buff.ElementAt(i);
@@ -79,7 +75,7 @@ namespace StockSharp.Algo.Indicators
 			}
 
 			//коэффициент при независимой переменной
-			var divisor = (Length * sumX2 - sumX * sumX);
+			var divisor = Length * sumX2 - sumX * sumX;
 			if (divisor == 0) 
 				return new DecimalIndicatorValue(this);
 

@@ -18,6 +18,7 @@ namespace StockSharp.Algo.Storages.Binary
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
 
@@ -26,6 +27,7 @@ namespace StockSharp.Algo.Storages.Binary
 	using Ecng.Reflection;
 	using Ecng.Serialization;
 
+	using StockSharp.Localization;
 	using StockSharp.Messages;
 
 	static class MarketDataVersions
@@ -34,6 +36,7 @@ namespace StockSharp.Algo.Storages.Binary
 		public static readonly Version Version31 = new Version(3, 1);
 		public static readonly Version Version33 = new Version(3, 3);
 		public static readonly Version Version34 = new Version(3, 4);
+		public static readonly Version Version35 = new Version(3, 5);
 		public static readonly Version Version40 = new Version(4, 0);
 		public static readonly Version Version41 = new Version(4, 1);
 		public static readonly Version Version42 = new Version(4, 2);
@@ -53,18 +56,26 @@ namespace StockSharp.Algo.Storages.Binary
 		public static readonly Version Version56 = new Version(5, 6);
 		public static readonly Version Version57 = new Version(5, 7);
 		public static readonly Version Version58 = new Version(5, 8);
+		public static readonly Version Version59 = new Version(5, 9);
+		public static readonly Version Version60 = new Version(6, 0);
+		public static readonly Version Version61 = new Version(6, 1);
+		public static readonly Version Version62 = new Version(6, 2);
+		public static readonly Version Version63 = new Version(6, 3);
+		public static readonly Version Version64 = new Version(6, 4);
+		public static readonly Version Version65 = new Version(6, 5);
+		public static readonly Version Version66 = new Version(6, 6);
+		public static readonly Version Version67 = new Version(6, 7);
+		public static readonly Version Version68 = new Version(6, 8);
 	}
 
-	abstract class BinaryMetaInfo<TMetaInfo> : MetaInfo
-		where TMetaInfo : BinaryMetaInfo<TMetaInfo>
+	abstract class BinaryMetaInfo : MetaInfo
 	{
 		protected BinaryMetaInfo(DateTime date)
 			: base(date)
 		{
 			LocalOffset = DateTimeOffset.Now.Offset;
 
-			FirstLocalTime = date;
-			LastLocalTime = date;
+			FirstLocalTime = LastLocalTime = DateTime.UtcNow;
 		}
 
 		public Version Version { get; set; }
@@ -75,9 +86,9 @@ namespace StockSharp.Algo.Storages.Binary
 		// сериализация и десериализация их полей сделана в дочерних классах
 		public decimal FirstPrice { get; set; }
 		public decimal LastPrice { get; set; }
-		public decimal FirstNonSystemPrice { get; set; }
-		public decimal LastNonSystemPrice { get; set; }
-
+		public decimal FirstFractionalPrice { get; set; }
+		public decimal LastFractionalPrice { get; set; }
+		
 		public decimal FirstFractionalVolume { get; set; }
 		public decimal LastFractionalVolume { get; set; }
 
@@ -90,7 +101,19 @@ namespace StockSharp.Algo.Storages.Binary
 		public TimeSpan FirstServerOffset { get; set; }
 		public TimeSpan LastServerOffset { get; set; }
 
-		public override object LastId => LastTime;
+		public TimeSpan FirstItemLocalOffset { get; set; }
+		public TimeSpan LastItemLocalOffset { get; set; }
+		public DateTime FirstItemLocalTime { get; set; }
+		public DateTime LastItemLocalTime { get; set; }
+
+		public long FirstSeqNum { get; set; }
+		public long PrevSeqNum { get; set; }
+
+		public override object LastId
+		{
+			get => LastTime;
+			set { }
+		}
 
 		public bool IsEmpty()
 		{
@@ -101,23 +124,23 @@ namespace StockSharp.Algo.Storages.Binary
 		{
 			stream.WriteByte((byte)Version.Major);
 			stream.WriteByte((byte)Version.Minor);
-			stream.Write(Count);
-			stream.Write(PriceStep);
+			stream.WriteEx(Count);
+			stream.WriteEx(PriceStep);
 
 			if (Version < MarketDataVersions.Version40)
-				stream.Write(0m); // ранее был StepPrice
+				stream.WriteEx(0m); // ранее был StepPrice
 
-			stream.Write(FirstTime);
-			stream.Write(LastTime);
+			stream.WriteEx(FirstTime);
+			stream.WriteEx(LastTime);
 
 			if (Version < MarketDataVersions.Version40)
 				return;
 
-			stream.Write(LocalOffset);
+			stream.WriteEx(LocalOffset);
 
 			// размер под дополнительную информацию.
 			// пока этой информации нет.
-			stream.Write((short)0);
+			stream.WriteEx((short)0);
 		}
 
 		public override void Read(Stream stream)
@@ -126,11 +149,13 @@ namespace StockSharp.Algo.Storages.Binary
 			Count = stream.Read<int>();
 			PriceStep = stream.Read<decimal>();
 
+			/*FirstPriceStep = */LastPriceStep = PriceStep;
+
 			if (Version < MarketDataVersions.Version40)
 				stream.Read<decimal>(); // ранее был StepPrice
 
-			FirstTime = stream.Read<DateTime>().ChangeKind(DateTimeKind.Utc);
-			LastTime = stream.Read<DateTime>().ChangeKind(DateTimeKind.Utc);
+			FirstTime = stream.Read<DateTime>().UtcKind();
+			LastTime = stream.Read<DateTime>().UtcKind();
 
 			if (Version < MarketDataVersions.Version40)
 				return;
@@ -145,22 +170,38 @@ namespace StockSharp.Algo.Storages.Binary
 			stream.Position += extInfoSize;
 		}
 
-		protected void WriteNonSystemPrice(Stream stream)
+		protected void WriteFractionalPrice(Stream stream)
 		{
 			if (Version < MarketDataVersions.Version43)
 				return;
 
-			stream.Write(FirstNonSystemPrice);
-			stream.Write(LastNonSystemPrice);
+			stream.WriteEx(FirstFractionalPrice);
+			stream.WriteEx(LastFractionalPrice);
 		}
 
-		protected void ReadNonSystemPrice(Stream stream)
+		protected void ReadFractionalPrice(Stream stream)
 		{
 			if (Version < MarketDataVersions.Version43)
 				return;
 
-			FirstNonSystemPrice = stream.Read<decimal>();
-			LastNonSystemPrice = stream.Read<decimal>();
+			FirstFractionalPrice = stream.Read<decimal>();
+			LastFractionalPrice = stream.Read<decimal>();
+		}
+
+		protected void WritePriceStep(Stream stream)
+		{
+			WriteFractionalPrice(stream);
+
+			stream.WriteEx(/*FirstPriceStep*/0m);
+			stream.WriteEx(LastPriceStep);
+		}
+
+		protected void ReadPriceStep(Stream stream)
+		{
+			ReadFractionalPrice(stream);
+
+			/*FirstPriceStep = */stream.Read<decimal>();
+			LastPriceStep = stream.Read<decimal>();
 		}
 
 		protected void WriteFractionalVolume(Stream stream)
@@ -168,9 +209,9 @@ namespace StockSharp.Algo.Storages.Binary
 			if (Version < MarketDataVersions.Version44)
 				return;
 
-			stream.Write(VolumeStep);
-			stream.Write(FirstFractionalVolume);
-			stream.Write(LastFractionalVolume);
+			stream.WriteEx(VolumeStep);
+			stream.WriteEx(FirstFractionalVolume);
+			stream.WriteEx(LastFractionalVolume);
 		}
 
 		protected void ReadFractionalVolume(Stream stream)
@@ -188,8 +229,8 @@ namespace StockSharp.Algo.Storages.Binary
 			if (Version < minVersion)
 				return;
 
-			stream.Write(FirstLocalTime);
-			stream.Write(LastLocalTime);
+			stream.WriteEx(FirstLocalTime);
+			stream.WriteEx(LastLocalTime);
 		}
 
 		protected void ReadLocalTime(Stream stream, Version minVersion)
@@ -203,11 +244,11 @@ namespace StockSharp.Algo.Storages.Binary
 
 		protected void WriteOffsets(Stream stream)
 		{
-			stream.Write(FirstLocalOffset);
-			stream.Write(LastLocalOffset);
+			stream.WriteEx(FirstLocalOffset);
+			stream.WriteEx(LastLocalOffset);
 
-			stream.Write(FirstServerOffset);
-			stream.Write(LastServerOffset);
+			stream.WriteEx(FirstServerOffset);
+			stream.WriteEx(LastServerOffset);
 		}
 
 		protected void ReadOffsets(Stream stream)
@@ -219,6 +260,54 @@ namespace StockSharp.Algo.Storages.Binary
 			LastServerOffset = stream.Read<TimeSpan>();
 		}
 
+		protected void WriteSeqNums(Stream stream)
+		{
+			stream.WriteEx(FirstSeqNum);
+			stream.WriteEx(PrevSeqNum);
+		}
+
+		protected void ReadSeqNums(Stream stream)
+		{
+			FirstSeqNum = stream.Read<long>();
+			PrevSeqNum = stream.Read<long>();
+		}
+
+		protected void WriteItemLocalOffset(Stream stream, Version minVersion)
+		{
+			if (Version < minVersion)
+				return;
+
+			stream.WriteEx(FirstItemLocalOffset);
+			stream.WriteEx(LastItemLocalOffset);
+		}
+
+		protected void ReadItemLocalOffset(Stream stream, Version minVersion)
+		{
+			if (Version < minVersion)
+				return;
+
+			FirstItemLocalOffset = stream.Read<TimeSpan>();
+			LastItemLocalOffset = stream.Read<TimeSpan>();
+		}
+
+		protected void WriteItemLocalTime(Stream stream, Version minVersion)
+		{
+			if (Version < minVersion)
+				return;
+
+			stream.WriteEx(FirstItemLocalTime);
+			stream.WriteEx(LastItemLocalTime);
+		}
+
+		protected void ReadItemLocalTime(Stream stream, Version minVersion)
+		{
+			if (Version < minVersion)
+				return;
+
+			FirstItemLocalTime = stream.Read<DateTime>();
+			LastItemLocalTime = stream.Read<DateTime>();
+		}
+
 		//public override TMetaInfo Clone()
 		//{
 		//	var copy = typeof(TMetaInfo).CreateInstance<TMetaInfo>(Date);
@@ -226,7 +315,7 @@ namespace StockSharp.Algo.Storages.Binary
 		//	return copy;
 		//}
 
-		public virtual void CopyFrom(TMetaInfo src)
+		public virtual void CopyFrom(BinaryMetaInfo src)
 		{
 			Version = src.Version;
 			Count = src.Count;
@@ -236,8 +325,8 @@ namespace StockSharp.Algo.Storages.Binary
 			LastTime = src.LastTime;
 			LocalOffset = src.LocalOffset;
 			ServerOffset = src.ServerOffset;
-			FirstNonSystemPrice = src.FirstNonSystemPrice;
-			LastNonSystemPrice = src.LastNonSystemPrice;
+			FirstFractionalPrice = src.FirstFractionalPrice;
+			LastFractionalPrice = src.LastFractionalPrice;
 			VolumeStep = src.VolumeStep;
 			FirstFractionalVolume = src.FirstFractionalVolume;
 			LastFractionalVolume = src.LastFractionalVolume;
@@ -247,11 +336,22 @@ namespace StockSharp.Algo.Storages.Binary
 			LastLocalOffset = src.LastLocalOffset;
 			FirstServerOffset = src.FirstServerOffset;
 			LastServerOffset = src.LastServerOffset;
+			FirstItemLocalTime = src.FirstItemLocalTime;
+			LastItemLocalTime = src.LastItemLocalTime;
+			FirstItemLocalOffset = src.FirstItemLocalOffset;
+			LastItemLocalOffset = src.LastItemLocalOffset;
+			//FirstPriceStep = src.FirstPriceStep;
+			LastPriceStep = src.LastPriceStep;
+			FirstPrice = src.FirstPrice;
+			LastPrice = src.LastPrice;
+
+			FirstSeqNum = src.FirstSeqNum;
+			PrevSeqNum = src.PrevSeqNum;
 		}
 	}
 
 	abstract class BinaryMarketDataSerializer<TData, TMetaInfo> : IMarketDataSerializer<TData>
-		where TMetaInfo : BinaryMetaInfo<TMetaInfo>
+		where TMetaInfo : BinaryMetaInfo
 	{
 		public class MarketDataEnumerator : SimpleEnumerator<TData>
 		{
@@ -259,20 +359,11 @@ namespace StockSharp.Algo.Storages.Binary
 
 			public MarketDataEnumerator(BinaryMarketDataSerializer<TData, TMetaInfo> serializer, BitArrayReader reader, TMetaInfo metaInfo)
 			{
-				if (serializer == null)
-					throw new ArgumentNullException(nameof(serializer));
-
-				if (reader == null)
-					throw new ArgumentNullException(nameof(reader));
-
-				if (metaInfo == null)
-					throw new ArgumentNullException(nameof(metaInfo));
-
-				Serializer = serializer;
+				Serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
 				Index = -1;
-				Reader = reader;
+				Reader = reader ?? throw new ArgumentNullException(nameof(reader));
 
-				_originalMetaInfo = metaInfo;
+				_originalMetaInfo = metaInfo ?? throw new ArgumentNullException(nameof(metaInfo));
 			}
 
 			public BitArrayReader Reader { get; }
@@ -326,7 +417,7 @@ namespace StockSharp.Algo.Storages.Binary
 			{
 				Index = -1;
 				MetaInfo = null;
-				Previous = Current = default(TData);
+				Previous = Current = default;
 				PartSize = 0;
 
 				if (Reader != null)
@@ -334,20 +425,28 @@ namespace StockSharp.Algo.Storages.Binary
 			}
 		}
 
-		protected BinaryMarketDataSerializer(SecurityId securityId, int dataSize, Version version)
+		protected BinaryMarketDataSerializer(SecurityId securityId, object arg, int dataSize, Version version, IExchangeInfoProvider exchangeInfoProvider)
 		{
 			if (securityId == null)
 				throw new ArgumentNullException(nameof(securityId));
 
+			Arg = arg;
 			SecurityId = securityId;
 			DataSize = dataSize;
 
 			Version = version;
+			ExchangeInfoProvider = exchangeInfoProvider ?? throw new ArgumentNullException(nameof(exchangeInfoProvider));
 		}
 
-		protected SecurityId SecurityId { get; private set; }
-		protected int DataSize { get; private set; }
+		protected object Arg { get; }
+		protected SecurityId SecurityId { get; }
+		protected int DataSize { get; }
 		protected Version Version { get; set; }
+		protected IExchangeInfoProvider ExchangeInfoProvider { get; }
+
+		public TimeSpan TimePrecision { get; } = TimeSpan.FromTicks(1);
+
+		public StorageFormats Format => StorageFormats.Binary;
 
 		IMarketDataMetaInfo IMarketDataSerializer.CreateMetaInfo(DateTime date)
 		{
@@ -366,26 +465,59 @@ namespace StockSharp.Algo.Storages.Binary
 			return Deserialize(stream, metaInfo);
 		}
 
+		private void CheckVersion(TMetaInfo metaInfo, string operation)
+		{
+			if (metaInfo.Version <= Version)
+				return;
+
+			var name = $"{SecurityId}/{typeof(TData)}/{Arg}";
+			Debug.WriteLine($"Storage ({operation}) !! DISABLED !!: {name}");
+
+			throw new InvalidOperationException(LocalizedStrings.StorageVersionNewerKey.Put(name, metaInfo.Version, Version));
+		}
+
 		public void Serialize(Stream stream, IEnumerable<TData> data, IMarketDataMetaInfo metaInfo)
 		{
+			var typedInfo = (TMetaInfo)metaInfo;
+			CheckVersion(typedInfo, "Save");
 			//var temp = new MemoryStream { Capacity = DataSize * data.Count() * 2 };
 
 			using (var writer = new BitArrayWriter(stream))
-				OnSave(writer, data, (TMetaInfo)metaInfo);
+				OnSave(writer, data, typedInfo);
 
 			//return stream.To<byte[]>();
 		}
 
 		public IEnumerable<TData> Deserialize(Stream stream, IMarketDataMetaInfo metaInfo)
 		{
+			var typedInfo = (TMetaInfo)metaInfo;
+			CheckVersion(typedInfo, "Load");
+
 			var data = new MemoryStream();
 			stream.CopyTo(data);
 			stream.Dispose();
 
-			return new SimpleEnumerable<TData>(() => new MarketDataEnumerator(this, new BitArrayReader(data), (TMetaInfo)metaInfo));
+			return new SimpleEnumerable<TData>(() => new MarketDataEnumerator(this, new BitArrayReader(data), typedInfo));
 		}
 
 		protected abstract void OnSave(BitArrayWriter writer, IEnumerable<TData> data, TMetaInfo metaInfo);
 		public abstract TData MoveNext(MarketDataEnumerator enumerator);
+
+		protected void WriteItemLocalTime(BitArrayWriter writer, TMetaInfo metaInfo, Message message, bool isTickPrecision)
+		{
+			var lastLocalOffset = metaInfo.LastItemLocalOffset;
+			metaInfo.LastItemLocalTime = writer.WriteTime(message.LocalTime, metaInfo.LastItemLocalTime, "local time", true, true, metaInfo.LocalOffset, true, isTickPrecision, ref lastLocalOffset, true);
+			metaInfo.LastItemLocalOffset = lastLocalOffset;
+		}
+
+		protected DateTimeOffset ReadItemLocalTime(BitArrayReader reader, TMetaInfo metaInfo, bool isTickPrecision)
+		{
+			var prevTsTime = metaInfo.FirstItemLocalTime;
+			var lastOffset = metaInfo.FirstItemLocalOffset;
+			var retVal = reader.ReadTime(ref prevTsTime, true, true, lastOffset, true, isTickPrecision, ref lastOffset);
+			metaInfo.FirstItemLocalTime = prevTsTime;
+			metaInfo.FirstItemLocalOffset = lastOffset;
+			return retVal;
+		}
 	}
 }

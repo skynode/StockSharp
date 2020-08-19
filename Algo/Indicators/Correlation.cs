@@ -28,6 +28,7 @@ namespace StockSharp.Algo.Indicators
 	/// </remarks>
 	[DisplayName("COR")]
 	[DescriptionLoc(LocalizedStrings.CorrelationKey, true)]
+	[IndicatorIn(typeof(PairIndicatorValue<decimal>))]
 	public class Correlation : Covariance
 	{
 		private readonly StandardDeviation _source;
@@ -44,9 +45,7 @@ namespace StockSharp.Algo.Indicators
 			Length = 20;
 		}
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
@@ -58,11 +57,7 @@ namespace StockSharp.Algo.Indicators
 				_other.Length = Length;
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var cov = base.OnProcess(input);
@@ -72,7 +67,12 @@ namespace StockSharp.Algo.Indicators
 			var sourceDev = _source.Process(value.Item1);
 			var otherDev = _other.Process(value.Item2);
 
-			return new DecimalIndicatorValue(this, cov.GetValue<decimal>() / (sourceDev.GetValue<decimal>() * otherDev.GetValue<decimal>()));
+			var v = sourceDev.GetValue<decimal>() * otherDev.GetValue<decimal>();
+
+			if (v != 0)
+				v = cov.GetValue<decimal>() / v;
+
+			return new DecimalIndicatorValue(this, v);
 		}
 	}
 }

@@ -37,18 +37,9 @@ namespace StockSharp.BusinessEntities
 		/// <param name="security">Security.</param>
 		/// <param name="bid">Bid.</param>
 		/// <param name="ask">Ask.</param>
-		public MarketDepthPair(Security security, Quote bid, Quote ask)
+		public MarketDepthPair(Security security, QuoteChange? bid, QuoteChange? ask)
 		{
-			if (security == null)
-				throw new ArgumentNullException(nameof(security));
-
-			if (bid != null && bid.OrderDirection != Sides.Buy)
-				throw new ArgumentException(LocalizedStrings.Str492);
-
-			if (ask != null && ask.OrderDirection != Sides.Sell)
-				throw new ArgumentException(LocalizedStrings.Str493);
-
-			Security = security;
+			Security = security ?? throw new ArgumentNullException(nameof(security));
 			Bid = bid;
 			Ask = ask;
 
@@ -58,52 +49,49 @@ namespace StockSharp.BusinessEntities
 		/// <summary>
 		/// Security.
 		/// </summary>
-		public Security Security { get; private set; }
+		public Security Security { get; }
 
 		/// <summary>
 		/// Bid.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.BidKey)]
 		[DescriptionLoc(LocalizedStrings.Str494Key)]
-		public Quote Bid { get; }
+		public QuoteChange? Bid { get; }
 
 		/// <summary>
 		/// Ask.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.AskKey)]
 		[DescriptionLoc(LocalizedStrings.Str495Key)]
-		public Quote Ask { get; }
+		public QuoteChange? Ask { get; }
 
 		/// <summary>
 		/// Spread by price. Is <see langword="null" />, if one of the quotes is empty.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.Str496Key)]
 		[DescriptionLoc(LocalizedStrings.Str497Key)]
-		public decimal? SpreadPrice => _isFull ? Ask.Security.ShrinkPrice(Ask.Price - Bid.Price) : (decimal?)null;
+		public decimal? SpreadPrice => _isFull ? (Ask.Value.Price - Bid.Value.Price) : (decimal?)null;
 
 		/// <summary>
 		/// Spread by volume. If negative, it best ask has a greater volume than the best bid. Is <see langword="null" />, if one of the quotes is empty.
 		/// </summary>
 		[DisplayNameLoc(LocalizedStrings.Str498Key)]
 		[DescriptionLoc(LocalizedStrings.Str499Key)]
-		public decimal? SpreadVolume => _isFull ? (Ask.Volume - Bid.Volume).Abs() : (decimal?)null;
+		public decimal? SpreadVolume => _isFull ? (Ask.Value.Volume - Bid.Value.Volume).Abs() : (decimal?)null;
 
 		/// <summary>
-		/// The middle of spread. Is <see langword="null" />, if one of the quotes is empty.
+		/// The middle of spread. Is <see langword="null" />, if quotes are empty.
 		/// </summary>
-		[DisplayNameLoc(LocalizedStrings.Str500Key)]
-		[DescriptionLoc(LocalizedStrings.Str501Key)]
-		public decimal? MiddlePrice => _isFull ? (Bid.Price + SpreadPrice / 2) : null;
+		[DisplayNameLoc(LocalizedStrings.SpreadKey)]
+		[DescriptionLoc(LocalizedStrings.SpreadMiddleKey, true)]
+		public decimal? MiddlePrice => (Bid?.Price).GetSpreadMiddle(Ask?.Price);
 
 		/// <summary>
-		/// Quotes pair has <see cref="MarketDepthPair.Bid"/> and <see cref="MarketDepthPair.Ask"/>.
+		/// Quotes pair has <see cref="Bid"/> and <see cref="Ask"/>.
 		/// </summary>
 		public bool IsFull => _isFull;
 
-		/// <summary>
-		/// Returns a string that represents the current object.
-		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
+		/// <inheritdoc />
 		public override string ToString()
 		{
 			return "{{{0}}} {{{1}}}".Put(Bid, Ask);

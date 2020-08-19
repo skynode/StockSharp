@@ -38,10 +38,8 @@ namespace StockSharp.Algo.Testing
 			IdGenerator = new IncrementalIdGenerator();
 		}
 
-		/// <summary>
-		/// Market data type.
-		/// </summary>
-		public override MarketDataTypes DataType => MarketDataTypes.Trades;
+		/// <inheritdoc />
+		public override DataType DataType => DataType.Ticks;
 
 		private IdGenerator _idGenerator;
 
@@ -50,14 +48,8 @@ namespace StockSharp.Algo.Testing
 		/// </summary>
 		public IdGenerator IdGenerator
 		{
-			get { return _idGenerator; }
-			set
-			{
-				if (value == null)
-					throw new ArgumentNullException(nameof(value));
-
-				_idGenerator = value;
-			}
+			get => _idGenerator;
+			set => _idGenerator = value ?? throw new ArgumentNullException(nameof(value));
 		}
 	}
 
@@ -75,7 +67,14 @@ namespace StockSharp.Algo.Testing
 		public RandomWalkTradeGenerator(SecurityId securityId)
 			: base(securityId)
 		{
-			Interval = TimeSpan.FromMilliseconds(50);
+		}
+
+		/// <inheritdoc />
+		public override void Init()
+		{
+			base.Init();
+
+			_lastTradePrice = default;
 		}
 
 		/// <summary>
@@ -83,11 +82,7 @@ namespace StockSharp.Algo.Testing
 		/// </summary>
 		public bool GenerateOriginSide { get; set; }
 
-		/// <summary>
-		/// Process message.
-		/// </summary>
-		/// <param name="message">Message.</param>
-		/// <returns>The result of processing. If <see langword="null" /> is returned, then generator has no sufficient data to generate new message.</returns>
+		/// <inheritdoc />
 		protected override Message OnProcess(Message message)
 		{
 			DateTimeOffset time;
@@ -100,10 +95,10 @@ namespace StockSharp.Algo.Testing
 				{
 					var l1Msg = (Level1ChangeMessage)message;
 
-					var value = l1Msg.Changes.TryGetValue(Level1Fields.LastTradePrice);
+					var value = l1Msg.TryGetDecimal(Level1Fields.LastTradePrice);
 
 					if (value != null)
-						_lastTradePrice = (decimal)value;
+						_lastTradePrice = value.Value;
 
 					time = l1Msg.ServerTime;
 
@@ -170,20 +165,15 @@ namespace StockSharp.Algo.Testing
 		/// <returns>Copy.</returns>
 		public override MarketDataGenerator Clone()
 		{
-			return new RandomWalkTradeGenerator(SecurityId)
+			var clone = new RandomWalkTradeGenerator(SecurityId)
 			{
-				_lastTradePrice = _lastTradePrice,
-
-				MaxVolume = MaxVolume,
-				MinVolume = MinVolume,
-				MaxPriceStepCount = MaxPriceStepCount,
-				Interval = Interval,
-				Volumes = Volumes,
-				Steps = Steps,
-
 				GenerateOriginSide = GenerateOriginSide,
 				IdGenerator = IdGenerator
 			};
+
+			CopyTo(clone);
+
+			return clone;
 		}
 	}
 }

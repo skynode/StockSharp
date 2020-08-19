@@ -2,9 +2,10 @@
 <topic id="059d6abd-2ef6-459f-bc1a-69c72213689b" revisionNumber="1">
   <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
     <introduction>
-     <para><codeEntityReference>T:StockSharp.Xaml.PortfolioPickerWindow</codeEntityReference> - окно для выбора портфеля. В окне отображается список портфелей
+     <para><codeEntityReference>T:StockSharp.Xaml.PortfolioPickerWindow</codeEntityReference> - окно для выбора портфеля. 
+     В окне отображается список портфелей
      и информация о денежных позициях портфелей.</para>
-
+      <mediaLink><image placement="left" xlink:href="GUI_PortfolioPickerWindow" /></mediaLink>
 	<para>
 		<legacyBold>Основные свойства</legacyBold>
 	</para>
@@ -19,10 +20,10 @@
 	</list>
       
      	  <para>
-	  Ниже показаны внеший вид компонента, а также фрагмент кода с его использованием.
+Ниже показан внеший вид компонента, а также фрагмент кода с его использованием.
       </para>
       
-      <mediaLink><image placement="left" xlink:href="GUI_PortfolioPickerWindow" /></mediaLink>
+
       
               <code title="C#" language="C#">
               		<![CDATA[

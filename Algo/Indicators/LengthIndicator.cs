@@ -26,6 +26,7 @@ namespace StockSharp.Algo.Indicators
 	/// <summary>
 	/// The base class for indicators with one resulting value and based on the period.
 	/// </summary>
+	/// <typeparam name="TResult">Result values type.</typeparam>
 	public abstract class LengthIndicator<TResult> : BaseIndicator
 	{
 		/// <summary>
@@ -36,9 +37,7 @@ namespace StockSharp.Algo.Indicators
 			Buffer = new List<TResult>();
 		}
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			Buffer.Clear();
@@ -55,7 +54,7 @@ namespace StockSharp.Algo.Indicators
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public int Length
 		{
-			get { return _length; }
+			get => _length;
 			set
 			{
 				if (value < 1)
@@ -67,9 +66,7 @@ namespace StockSharp.Algo.Indicators
 			}
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => Buffer.Count >= Length;
 
 		/// <summary>
@@ -78,33 +75,21 @@ namespace StockSharp.Algo.Indicators
 		[Browsable(false)]
 		protected IList<TResult> Buffer { get; }
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Load(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Load(SettingsStorage storage)
 		{
-			base.Load(settings);
-			Length = settings.GetValue<int>(nameof(Length));
+			base.Load(storage);
+			Length = storage.GetValue<int>(nameof(Length));
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Save(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Save(SettingsStorage storage)
 		{
-			base.Save(settings);
-			settings.SetValue(nameof(Length), Length);
+			base.Save(storage);
+			storage.SetValue(nameof(Length), Length);
 		}
 
-		/// <summary>
-		/// Returns a string that represents the current object.
-		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
-		public override string ToString()
-		{
-			return base.ToString() + " " + Length;
-		}
+		/// <inheritdoc />
+		public override string ToString() => base.ToString() + " " + Length;
 	}
 }

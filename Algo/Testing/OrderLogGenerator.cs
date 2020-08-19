@@ -48,19 +48,14 @@ namespace StockSharp.Algo.Testing
 		public OrderLogGenerator(SecurityId securityId, TradeGenerator tradeGenerator)
 			: base(securityId)
 		{
-			if (tradeGenerator == null)
-				throw new ArgumentNullException(nameof(tradeGenerator));
-
 			//_lastOrderPrice = startPrice;
 
-			TradeGenerator = tradeGenerator;
+			TradeGenerator = tradeGenerator ?? throw new ArgumentNullException(nameof(tradeGenerator));
 			IdGenerator = new IncrementalIdGenerator();
 		}
 
-		/// <summary>
-		/// Market data type.
-		/// </summary>
-		public override MarketDataTypes DataType => MarketDataTypes.OrderLog;
+		/// <inheritdoc />
+		public override DataType DataType => DataType.OrderLog;
 
 		/// <summary>
 		/// Tick trades generator using random method.
@@ -74,14 +69,8 @@ namespace StockSharp.Algo.Testing
 		/// </summary>
 		public IdGenerator IdGenerator
 		{
-			get { return _idGenerator; }
-			set
-			{
-				if (value == null)
-					throw new ArgumentNullException(nameof(value));
-
-				_idGenerator = value;
-			}
+			get => _idGenerator;
+			set => _idGenerator = value ?? throw new ArgumentNullException(nameof(value));
 		}
 
 		/// <summary>
@@ -89,15 +78,13 @@ namespace StockSharp.Algo.Testing
 		/// </summary>
 		public override void Init()
 		{
-			TradeGenerator.Init();
 			base.Init();
+		
+			_lastOrderPrice = default;
+			TradeGenerator.Init();
 		}
 
-		/// <summary>
-		/// Process message.
-		/// </summary>
-		/// <param name="message">Message.</param>
-		/// <returns>The result of processing. If <see langword="null" /> is returned, then generator has no sufficient data to generate new message.</returns>
+		/// <inheritdoc />
 		public override Message Process(Message message)
 		{
 			if (message.Type == MessageTypes.Security)
@@ -106,11 +93,7 @@ namespace StockSharp.Algo.Testing
 			return base.Process(message);
 		}
 
-		/// <summary>
-		/// Process message.
-		/// </summary>
-		/// <param name="message">Message.</param>
-		/// <returns>The result of processing. If <see langword="null" /> is returned, then generator has no sufficient data to generate new message.</returns>
+		/// <inheritdoc />
 		protected override Message OnProcess(Message message)
 		{
 			DateTimeOffset time;
@@ -121,10 +104,10 @@ namespace StockSharp.Algo.Testing
 				{
 					var l1Msg = (Level1ChangeMessage)message;
 
-					var value = l1Msg.Changes.TryGetValue(Level1Fields.LastTradePrice);
+					var value = l1Msg.TryGetDecimal(Level1Fields.LastTradePrice);
 
 					if (value != null)
-						_lastOrderPrice = (decimal)value;
+						_lastOrderPrice = value.Value;
 
 					TradeGenerator.Process(message);
 
@@ -194,13 +177,13 @@ namespace StockSharp.Algo.Testing
 					ExecutionType = ExecutionTypes.OrderLog,
 				};
 
-				_activeOrders.Enqueue((ExecutionMessage)item.Clone());
+				_activeOrders.Enqueue(item.TypedClone());
 			}
 			else
 			{
 				var activeOrder = _activeOrders.Peek();
 
-				item = (ExecutionMessage)activeOrder.Clone();
+				item = activeOrder.TypedClone();
 				item.ServerTime = time;
 
 				var isMatched = action == 5;
@@ -240,7 +223,6 @@ namespace StockSharp.Algo.Testing
 				else
 				{
 					item.OrderState = OrderStates.Done;
-					item.IsCancelled = true;
 					_activeOrders.Dequeue();
 				}
 			}
@@ -256,11 +238,15 @@ namespace StockSharp.Algo.Testing
 		/// <returns>Copy.</returns>
 		public override MarketDataGenerator Clone()
 		{
-			return new OrderLogGenerator(SecurityId, (TradeGenerator)TradeGenerator.Clone())
+			var clone = new OrderLogGenerator(SecurityId, TradeGenerator.TypedClone())
 			{
 				_lastOrderPrice = _lastOrderPrice,
 				IdGenerator = IdGenerator
 			};
+
+			CopyTo(clone);
+
+			return clone;
 		}
 	}
 }

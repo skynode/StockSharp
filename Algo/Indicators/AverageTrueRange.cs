@@ -44,14 +44,8 @@ namespace StockSharp.Algo.Indicators
 		/// <param name="trueRange">True range.</param>
 		public AverageTrueRange(LengthIndicator<decimal> movingAverage, TrueRange trueRange)
 		{
-			if (movingAverage == null)
-				throw new ArgumentNullException(nameof(movingAverage));
-
-			if (trueRange == null)
-				throw new ArgumentNullException(nameof(trueRange));
-
-			MovingAverage = movingAverage;
-			TrueRange = trueRange;
+			MovingAverage = movingAverage ?? throw new ArgumentNullException(nameof(movingAverage));
+			TrueRange = trueRange ?? throw new ArgumentNullException(nameof(trueRange));
 		}
 
 		/// <summary>
@@ -66,14 +60,10 @@ namespace StockSharp.Algo.Indicators
 		[Browsable(false)]
 		public TrueRange TrueRange { get; }
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _isFormed;
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
@@ -84,11 +74,7 @@ namespace StockSharp.Algo.Indicators
 			TrueRange.Reset();
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			// используем дополнительную переменную IsFormed, 

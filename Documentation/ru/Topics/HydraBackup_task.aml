@@ -8,7 +8,7 @@
 		<steps class="ordered">
 			<step>
 				<content>
-					<para>Для создания задачи необходимо щелкнуть по кнопке <legacyBold>Добавить задачи...</legacyBold>, в окрывшемся окне
+					<para>Для создания задачи необходимо щелкнуть по кнопке <legacyBold>Добавить задачи...</legacyBold>, в открывшемся окне
 					отметить пункт <legacyBold>Резервный</legacyBold> и нажать кнопку <legacyBold>ОК</legacyBold>.</para>
 			<mediaLink>
         		<image placement="left" xlink:href="hydra_tasks_backup_add" />
@@ -34,7 +34,7 @@
           					<legacyBold>Адрес</legacyBold> - адрес региона. Адрес региона, указанного в настройках бакета. См. <externalLink>
 							<linkText>Regions and Endpoints</linkText>
 								<linkAlternateText>Optional alternate text</linkAlternateText>
-								<linkUri>http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region</linkUri>
+								<linkUri>https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region</linkUri>
 								<linkTarget>_blank</linkTarget>
 							</externalLink>.
  						</listItem>
@@ -76,7 +76,7 @@
           					<legacyBold>Формат</legacyBold> - формат данных: BIN/CSV.
 						</listItem>
 						<listItem>
-          					<legacyBold>Макс. ошибок</legacyBold> - максимальное количество ошибок по достижению которого задача будет остановлена. По умолчанию 0 - количество ошибок игнорируются.
+          					<legacyBold>Макс. ошибок</legacyBold> - максимальное количество ошибок, по достижению которого задача будет остановлена. По умолчанию 0 - количество ошибок игнорируется.
 						</listItem>
 						<listItem>
           					<legacyBold>Зависимость</legacyBold> - задача, которая должна быть выполнена перед запуском текущей.

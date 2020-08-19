@@ -135,171 +135,67 @@ namespace StockSharp.Algo
 		{
 		}
 
-		/// <summary>
-		/// To create the instrument by the identifier.
-		/// </summary>
-		/// <param name="id">Security ID.</param>
-		/// <returns>Created instrument.</returns>
-		public virtual Security CreateSecurity(string id)
+		/// <inheritdoc />
+		public virtual Security CreateSecurity(string id) => new Security { Id = id };
+
+		/// <inheritdoc />
+		public virtual Portfolio CreatePortfolio(string name) => new Portfolio { Name = name };
+
+		/// <inheritdoc />
+		public virtual Position CreatePosition(Portfolio portfolio, Security security) => new Position
 		{
-			return new Security { Id = id };
-		}
+			Portfolio = portfolio ?? throw new ArgumentNullException(nameof(portfolio)),
+			Security = security ?? throw new ArgumentNullException(nameof(security)),
+		};
 
-		/// <summary>
-		/// To create the portfolio by the account number.
-		/// </summary>
-		/// <param name="name">Account number.</param>
-		/// <returns>Created portfolio.</returns>
-		public virtual Portfolio CreatePortfolio(string name)
-		{
-			return new Portfolio { Name = name };
-		}
-
-		/// <summary>
-		/// Create position.
-		/// </summary>
-		/// <param name="portfolio">Portfolio.</param>
-		/// <param name="security">Security.</param>
-		/// <returns>Created position.</returns>
-		public virtual Position CreatePosition(Portfolio portfolio, Security security)
-		{
-			if (portfolio == null)
-				throw new ArgumentNullException(nameof(portfolio));
-
-			if (security == null)
-				throw new ArgumentNullException(nameof(security));
-
-			return new Position
-			{
-				Portfolio = portfolio,
-				Security = security,
-			};
-		}
-
-		/// <summary>
-		/// To create the tick trade by its identifier.
-		/// </summary>
-		/// <param name="security">Security.</param>
-		/// <param name="id">The trade identifier (equals <see langword="null" />, if string identifier is used).</param>
-		/// <param name="stringId">Trade ID (as string, if electronic board does not use numeric order ID representation).</param>
-		/// <returns>Created trade.</returns>
+		/// <inheritdoc />
 		public virtual Trade CreateTrade(Security security, long? id, string stringId)
-		{
-			return new Trade { Security = security, Id = id ?? 0, StringId = stringId };
-		}
+			=> new Trade { Security = security, Id = id ?? 0, StringId = stringId };
 
-		/// <summary>
-		/// To create the order by the transaction identifier.
-		/// </summary>
-		/// <param name="security">Security.</param>
-		/// <param name="type">Order type.</param>
-		/// <param name="transactionId">The identifier of the order registration transaction.</param>
-		/// <returns>Created order.</returns>
+		/// <inheritdoc />
 		public virtual Order CreateOrder(Security security, OrderTypes? type, long transactionId)
-		{
-			return new Order
+			=> new Order
 			{
 				Security = security,
 				TransactionId = transactionId,
 				Type = type,
 			};
-		}
 
-		/// <summary>
-		/// To create the error description for the order.
-		/// </summary>
-		/// <param name="order">Order.</param>
-		/// <param name="error">The system description of error.</param>
-		/// <returns>Created error description.</returns>
+		/// <inheritdoc />
 		public virtual OrderFail CreateOrderFail(Order order, Exception error)
-		{
-			return new OrderFail { Order = order, Error = error };
-		}
+			=> new OrderFail { Order = order, Error = error };
 
-		/// <summary>
-		/// To create own trade.
-		/// </summary>
-		/// <param name="order">Order.</param>
-		/// <param name="trade">Tick trade.</param>
-		/// <returns>Created own trade.</returns>
-		public virtual MyTrade CreateMyTrade(Order order, Trade trade)
+		/// <inheritdoc />
+		public virtual MyTrade CreateMyTrade(Order order, Trade trade) => new MyTrade
 		{
-			return new MyTrade
-			{
-				Order = order,
-				Trade = trade,
-			};
-		}
+			Order = order,
+			Trade = trade,
+		};
 
-		/// <summary>
-		/// To create the order book for the instrument.
-		/// </summary>
-		/// <param name="security">Security.</param>
-		/// <returns>Created order book.</returns>
-		public virtual MarketDepth CreateMarketDepth(Security security)
-		{
-			return new MarketDepth(security);
-		}
+		/// <inheritdoc />
+		public virtual MarketDepth CreateMarketDepth(Security security) => new MarketDepth(security);
 
-		/// <summary>
-		/// To create the string of orders log.
-		/// </summary>
-		/// <param name="order">Order.</param>
-		/// <param name="trade">Tick trade.</param>
-		/// <returns>Order log item.</returns>
-		public virtual OrderLogItem CreateOrderLogItem(Order order, Trade trade)
+		/// <inheritdoc />
+		public virtual OrderLogItem CreateOrderLogItem(Order order, Trade trade) => new OrderLogItem
 		{
-			return new OrderLogItem
-			{
-				Order = order,
-				Trade = trade,
-			};
-		}
+			Order = order,
+			Trade = trade,
+		};
 
-		/// <summary>
-		/// To create news.
-		/// </summary>
-		/// <returns>News.</returns>
-		public virtual News CreateNews()
-		{
-			return new News();
-		}
+		/// <inheritdoc />
+		public virtual News CreateNews() => new News();
 
-		/// <summary>
-		/// To create exchange.
-		/// </summary>
-		/// <param name="code"><see cref="Exchange.Name"/> value.</param>
-		/// <returns>Exchange.</returns>
-		public Exchange CreateExchange(string code)
-		{
-			return new Exchange { Name = code };
-		}
+		/// <inheritdoc />
+		public Exchange CreateExchange(string code) => new Exchange { Name = code };
 
-		/// <summary>
-		/// To create exchange.
-		/// </summary>
-		/// <param name="code"><see cref="ExchangeBoard.Code"/> value.</param>
-		/// <param name="exchange"><see cref="ExchangeBoard.Exchange"/> value.</param>
-		/// <returns>Exchange.</returns>
-		public ExchangeBoard CreateBoard(string code, Exchange exchange)
-		{
-			return new ExchangeBoard { Code = code, Exchange = exchange };
-		}
+		/// <inheritdoc />
+		public ExchangeBoard CreateBoard(string code, Exchange exchange) => new ExchangeBoard { Code = code, Exchange = exchange };
 
-		long IStorage.GetCount<TEntity>()
-		{
-			throw new NotSupportedException();
-		}
+		long IStorage.GetCount<TEntity>() => throw new NotSupportedException();
 
-		TEntity IStorage.Add<TEntity>(TEntity entity)
-		{
-			return entity;
-		}
+		TEntity IStorage.Add<TEntity>(TEntity entity) => entity;
 
-		TEntity IStorage.GetBy<TEntity>(SerializationItemCollection @by)
-		{
-			throw new NotSupportedException();
-		}
+		TEntity IStorage.GetBy<TEntity>(SerializationItemCollection by) => throw new NotSupportedException();
 
 		TEntity IStorage.GetById<TEntity>(object id)
 		{
@@ -312,14 +208,9 @@ namespace StockSharp.Algo
 		}
 
 		IEnumerable<TEntity> IStorage.GetGroup<TEntity>(long startIndex, long count, Field orderBy, ListSortDirection direction)
-		{
-			throw new NotSupportedException();
-		}
+			=> throw new NotSupportedException();
 
-		TEntity IStorage.Update<TEntity>(TEntity entity)
-		{
-			return entity;
-		}
+		TEntity IStorage.Update<TEntity>(TEntity entity) => entity;
 
 		void IStorage.Remove<TEntity>(TEntity entity)
 		{
@@ -329,42 +220,30 @@ namespace StockSharp.Algo
 		{
 		}
 
-		void IStorage.ClearCache()
-		{
-			throw new NotSupportedException();
-		}
+		void IStorage.ClearCache() => throw new NotSupportedException();
 
-		BatchContext IStorage.BeginBatch()
-		{
-			throw new NotSupportedException();
-		}
+		IBatchContext IStorage.BeginBatch() => throw new NotSupportedException();
 
-		void IStorage.CommitBatch()
-		{
-			throw new NotSupportedException();
-		}
+		void IStorage.CommitBatch() => throw new NotSupportedException();
 
-		void IStorage.EndBatch()
-		{
-			throw new NotSupportedException();
-		}
+		void IStorage.EndBatch() => throw new NotSupportedException();
 
 		event Action<object> IStorage.Added
 		{
-			add { throw new NotSupportedException(); }
-			remove { throw new NotSupportedException(); }
+			add => throw new NotSupportedException();
+			remove => throw new NotSupportedException();
 		}
 
 		event Action<object> IStorage.Updated
 		{
-			add { throw new NotSupportedException(); }
-			remove { throw new NotSupportedException(); }
+			add => throw new NotSupportedException();
+			remove => throw new NotSupportedException();
 		}
 
 		event Action<object> IStorage.Removed
 		{
-			add { throw new NotSupportedException(); }
-			remove { throw new NotSupportedException(); }
+			add => throw new NotSupportedException();
+			remove => throw new NotSupportedException();
 		}
 	}
 }

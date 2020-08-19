@@ -23,7 +23,7 @@ namespace StockSharp.Algo.Indicators
 	/// Momentum.
 	/// </summary>
 	/// <remarks>
-	/// Momentum Simple = C - C-n Where C- closing price of previous period. Where �-n � closing price N periods ago.
+	/// Momentum Simple = C - C-n Where C- closing price of previous period. Where C-n - closing price N periods ago.
 	/// </remarks>
 	[DisplayName("Momentum")]
 	[DescriptionLoc(LocalizedStrings.Str769Key)]
@@ -37,16 +37,10 @@ namespace StockSharp.Algo.Indicators
 			Length = 5;
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => Buffer.Count > Length;
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var newValue = input.GetValue<decimal>();

@@ -3,9 +3,9 @@
   <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
     <introduction>
       <para>Компонент <codeEntityReference>T:StockSharp.Xaml.SecurityGrid</codeEntityReference> предназначен для отображения финансовой
-      информации (поля level1) и ее изменения, относящейся к инструментам, в табличном виде. Этот компонент является потомком "<link xlink:href="88a40124-43a6-4be9-b04b-a245000fca70">универсальной таблицы</link>" 
-      и наследует ее функциональность. Компонент позволяет выбирать один или несколько инструментов.
+      информации (поля level1) и ее изменения, относящейся к инструментам, в табличном виде. Компонент позволяет выбирать один или несколько инструментов.
       </para>
+       <mediaLink><image placement="left" xlink:href="GUI_SecurityPicker2" /></mediaLink>
       <para>
       <legacyBold>Основные свойства</legacyBold>
       </para>
@@ -35,7 +35,7 @@
  <sections>
  	<section address="SubSection1">
      	<content>
-              <mediaLink><image placement="left" xlink:href="GUI_SecurityPicker2" /></mediaLink>
+             
      	<para>
               На рисунке компонент <codeEntityReference>T:StockSharp.Xaml.SecurityGrid</codeEntityReference> показан в составе
               графического компонента <link xlink:href="f4e84944-41ad-42f2-9d2a-2854a8665152">SecurityPicker</link>.
@@ -55,7 +55,7 @@
               </code>
               <code title="C#" language="C#">
 
-Connector _connector = new QuikTrader();
+private readonly Connector _connector = new Connector();
 
 // Назначаем провайдер рыночных данных
 SecurityGrid.MarketDataProvider = _connector;
@@ -63,9 +63,9 @@ SecurityGrid.MarketDataProvider = _connector;
 ..........................
 
 // Добавляем в сетку инструменты
-_connector.NewSecurities += securities =>
+_connector.NewSecurity += security =>
 {
-	SecurityGrid.Securities.AddRange(securities);
+	SecurityGrid.Securities.Add(security);
 };
 
 ..........................
@@ -74,7 +74,7 @@ _connector.NewSecurities += securities =>
 private void ColumnsFilter()
 {
 	// Задаем список видимых колонок
-	string[] сolumns = { "Board", "BestAsk.Price", "BestAsk.Volume" };
+	string[] columns = { "Board", "BestAsk.Price", "BestAsk.Volume" };
 	
 	foreach (var column in SecurityGrid.Columns)
 	{
@@ -89,9 +89,6 @@ private void ColumnsFilter()
 </section>
    
     </introduction>
-     <relatedTopics>
-       <link xlink:href="88a40124-43a6-4be9-b04b-a245000fca70">Универсальная таблица</link>
-    </relatedTopics>
     
   </developerConceptualDocument>
 </topic>

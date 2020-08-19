@@ -39,12 +39,14 @@ namespace StockSharp.Algo.Testing
 			MinVolume = 1;
 			MaxPriceStepCount = 10;
 			RandomArrayLength = 100;
+
+			Interval = TimeSpan.FromMilliseconds(50);
 		}
 
 		/// <summary>
 		/// Market data type.
 		/// </summary>
-		public abstract MarketDataTypes DataType { get; }
+		public abstract DataType DataType { get; }
 
 		/// <summary>
 		/// The length of massive of preliminarily generated random numbers. The default is 100.
@@ -67,7 +69,7 @@ namespace StockSharp.Algo.Testing
 		/// <summary>
 		/// The identifier of the instrument, for which data shall be generated.
 		/// </summary>
-		public SecurityId SecurityId { get; private set; }
+		public SecurityId SecurityId { get; }
 
 		/// <summary>
 		/// Information about the trading instrument.
@@ -94,7 +96,7 @@ namespace StockSharp.Algo.Testing
 		/// </remarks>
 		public int MaxVolume
 		{
-			get { return _maxVolume; }
+			get => _maxVolume;
 			set
 			{
 				if (value < 1)
@@ -114,7 +116,7 @@ namespace StockSharp.Algo.Testing
 		/// </remarks>
 		public int MinVolume
 		{
-			get { return _minVolume; }
+			get => _minVolume;
 			set
 			{
 				if (value < 1)
@@ -134,7 +136,7 @@ namespace StockSharp.Algo.Testing
 		/// </remarks>
 		public int MaxPriceStepCount
 		{
-			get { return _maxPriceStepCount; }
+			get => _maxPriceStepCount;
 			set
 			{
 				if (value < 1)
@@ -193,13 +195,7 @@ namespace StockSharp.Algo.Testing
 
 				return _volumes;
 			}
-			protected set
-			{
-				if (value == null)
-					throw new ArgumentNullException(nameof(value));
-
-				_volumes = value;
-			}
+			protected set => _volumes = value ?? throw new ArgumentNullException(nameof(value));
 		}
 
 		private RandomArray<int> _steps;
@@ -216,13 +212,21 @@ namespace StockSharp.Algo.Testing
 
 				return _steps;
 			}
-			protected set
-			{
-				if (value == null)
-					throw new ArgumentNullException(nameof(value));
+			protected set => _steps = value ?? throw new ArgumentNullException(nameof(value));
+		}
 
-				_steps = value;
-			}
+		/// <summary>
+		/// Copy the message into the <paramref name="destination" />.
+		/// </summary>
+		/// <param name="destination">The object, to which copied information.</param>
+		protected void CopyTo(MarketDataGenerator destination)
+		{
+			destination.Interval = Interval;
+			destination.MinVolume = MinVolume;
+			destination.MaxVolume = MaxVolume;
+			destination.MaxPriceStepCount = MaxPriceStepCount;
+			destination._volumes = _volumes;
+			destination._steps = _steps;
 		}
 	}
 }

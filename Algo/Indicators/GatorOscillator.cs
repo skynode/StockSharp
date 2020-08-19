@@ -53,10 +53,7 @@ namespace StockSharp.Algo.Indicators
 		public GatorOscillator(Alligator alligator, GatorHistogram histogram1, GatorHistogram histogram2)
 			: base(histogram1, histogram2)
 		{
-			if (alligator == null)
-				throw new ArgumentNullException(nameof(alligator));
-
-			_alligator = alligator;
+			_alligator = alligator ?? throw new ArgumentNullException(nameof(alligator));
 			Histogram1 = histogram1;
 			Histogram2 = histogram2;
 		}
@@ -65,7 +62,7 @@ namespace StockSharp.Algo.Indicators
 		/// Top histogram.
 		/// </summary>
 		[TypeConverter(typeof(ExpandableObjectConverter))]
-		[DisplayName("Histogram1")]
+		[DisplayName(LocalizedStrings.Str3564Key)]
 		[DescriptionLoc(LocalizedStrings.Str851Key)]
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public GatorHistogram Histogram1 { get; }
@@ -74,21 +71,15 @@ namespace StockSharp.Algo.Indicators
 		/// Lower histogram.
 		/// </summary>
 		[TypeConverter(typeof(ExpandableObjectConverter))]
-		[DisplayName("Histogram2")]
+		[DisplayName(LocalizedStrings.Str3565Key)]
 		[DescriptionLoc(LocalizedStrings.Str852Key)]
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public GatorHistogram Histogram2 { get; }
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _alligator.IsFormed;
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			_alligator.Process(input);

@@ -60,6 +60,7 @@ namespace StockSharp.Logging
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MemoryStatisticsValue{T}"/>.
 		/// </summary>
+		/// <param name="name">Name.</param>
 		public MemoryStatisticsValue(string name/*, MemoryStatistics parent*/)
 		{
 			if (name.IsEmpty())
@@ -77,16 +78,12 @@ namespace StockSharp.Logging
 		/// </summary>
 		public T[] Objects => _objects.Cache;
 
-		/// <summary>
-		/// Name.
-		/// </summary>
+		/// <inheritdoc />
 		public string Name { get; }
 
 		private int _objectCount;
 
-		/// <summary>
-		/// The number of active objects.
-		/// </summary>
+		/// <inheritdoc />
 		public int ObjectCount => _objectCount;
 
 		/// <summary>
@@ -106,7 +103,7 @@ namespace StockSharp.Logging
 		/// </summary>
 		public bool IsObjectTracking
 		{
-			get { return _isObjectTracking; }
+			get => _isObjectTracking;
 			set
 			{
 				if (!_isObjectTracking && value)

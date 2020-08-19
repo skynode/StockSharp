@@ -20,7 +20,7 @@ namespace StockSharp.Algo.Indicators
 	using StockSharp.Localization;
 
 	/// <summary>
-	/// Chande Momentum Oscillator.
+	/// Chande Momentum Oscillator.
 	/// </summary>
 	[DisplayName("CMO")]
 	[DescriptionLoc(LocalizedStrings.Str759Key)]
@@ -39,9 +39,7 @@ namespace StockSharp.Algo.Indicators
 			Length = 15;
 		}
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			_cmoDn.Length = _cmoUp.Length = Length;
@@ -51,16 +49,10 @@ namespace StockSharp.Algo.Indicators
 			base.Reset();
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _cmoUp.IsFormed;
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var newValue = input.GetValue<decimal>();
@@ -81,7 +73,7 @@ namespace StockSharp.Algo.Indicators
 			var upValue = _cmoUp.Process(input.SetValue(this, delta > 0 ? delta : 0m)).GetValue<decimal>();
 			var downValue = _cmoDn.Process(input.SetValue(this, delta > 0 ? 0m : -delta)).GetValue<decimal>();
 
-			if(input.IsFinal)
+			if (input.IsFinal)
 				_last = newValue;
 
 			var value = (upValue + downValue) == 0 ? 0 : 100m * (upValue - downValue) / (upValue + downValue);

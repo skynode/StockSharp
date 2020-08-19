@@ -24,6 +24,7 @@ namespace StockSharp.Algo
 	using MoreLinq;
 
 	using StockSharp.BusinessEntities;
+	using StockSharp.Messages;
 
 	/// <summary>
 	/// Provider of information about instruments supporting search using <see cref="SecurityTrie"/>.
@@ -33,23 +34,14 @@ namespace StockSharp.Algo
 		private readonly SecurityTrie _trie = new SecurityTrie();
 
 		private readonly ISecurityProvider _provider;
-		private readonly bool _ownProvider;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FilterableSecurityProvider"/>.
 		/// </summary>
 		/// <param name="provider">Security meta info provider.</param>
-		/// <param name="ownProvider"><see langword="true"/> to leave the <paramref name="provider"/> open after the <see cref="FilterableSecurityProvider"/> object is disposed; otherwise, <see langword="false"/>.</param>
-		///// <param name="excludeFilter">Filter for instruments exclusion.</param>
-		public FilterableSecurityProvider(ISecurityProvider provider, bool ownProvider = false/*, Func<Security, bool> excludeFilter = null*/)
+		public FilterableSecurityProvider(ISecurityProvider provider)
 		{
-			if (provider == null)
-				throw new ArgumentNullException(nameof(provider));
-
-			_provider = provider;
-			_ownProvider = ownProvider;
-
-			//ExcludeFilter = excludeFilter;
+			_provider = provider ?? throw new ArgumentNullException(nameof(provider));
 
 			_provider.Added += AddSecurities;
 			_provider.Removed += RemoveSecurities;
@@ -58,51 +50,39 @@ namespace StockSharp.Algo
 			AddSecurities(_provider.LookupAll());
 		}
 
-		/// <summary>
-		/// Gets the number of instruments contained in the <see cref="ISecurityProvider"/>.
-		/// </summary>
+		/// <inheritdoc />
 		public int Count => _trie.Count;
 
-		/// <summary>
-		/// New instruments added.
-		/// </summary>
+		/// <inheritdoc />
 		public event Action<IEnumerable<Security>> Added;
 
-		/// <summary>
-		/// Instruments removed.
-		/// </summary>
+		/// <inheritdoc />
 		public event Action<IEnumerable<Security>> Removed;
 
-		/// <summary>
-		/// The storage was cleared.
-		/// </summary>
+		/// <inheritdoc />
 		public event Action Cleared;
 
-		/// <summary>
-		/// Lookup securities by criteria <paramref name="criteria" />.
-		/// </summary>
-		/// <param name="criteria">The instrument whose fields will be used as a filter.</param>
-		/// <returns>Found instruments.</returns>
-		public IEnumerable<Security> Lookup(Security criteria)
+		/// <inheritdoc />
+		public Security LookupById(SecurityId id) => _trie.GetById(id);
+
+		/// <inheritdoc />
+		public IEnumerable<Security> Lookup(SecurityLookupMessage criteria)
 		{
 			if (criteria == null)
 				throw new ArgumentNullException(nameof(criteria));
 
-			var filter = criteria.Id.IsEmpty()
-				? (criteria.IsLookupAll() ? string.Empty : criteria.Code.ToLowerInvariant())
-				: criteria.Id.ToLowerInvariant();
+			var secId = criteria.SecurityId.ToStringId(nullIfEmpty: true);
+
+			var filter = secId.IsEmpty()
+				? (criteria.IsLookupAll() ? string.Empty : criteria.SecurityId.SecurityCode)
+				: secId;
 
 			var securities = _trie.Retrieve(filter);
 
-			if (!criteria.Id.IsEmpty())
-				securities = securities.Where(s => s.Id.CompareIgnoreCase(criteria.Id));
+			if (!secId.IsEmpty())
+				securities = securities.Where(s => s.Id.CompareIgnoreCase(secId));
 
-			return securities;
-		}
-
-		object ISecurityProvider.GetNativeId(Security security)
-		{
-			return null;
+			return securities.Filter(criteria);
 		}
 
 		private void AddSecurities(IEnumerable<Security> securities)
@@ -131,9 +111,6 @@ namespace StockSharp.Algo
 			_provider.Added -= AddSecurities;
 			_provider.Removed -= RemoveSecurities;
 			_provider.Cleared -= ClearSecurities;
-
-			if (_ownProvider)
-				_provider.Dispose();
 
 			base.DisposeManaged();
 		}

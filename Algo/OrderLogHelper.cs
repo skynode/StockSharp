@@ -26,6 +26,7 @@ namespace StockSharp.Algo
 	using StockSharp.BusinessEntities;
 	using StockSharp.Messages;
 	using StockSharp.Localization;
+	using StockSharp.Algo.Storages;
 
 	/// <summary>
 	/// Reasons for orders cancelling in the orders log.
@@ -59,69 +60,30 @@ namespace StockSharp.Algo
 	public static class OrderLogHelper
 	{
 		/// <summary>
-		/// To check, does the string contain the order registration.
+		/// To check, does the order log contain the order registration.
 		/// </summary>
 		/// <param name="item">Order log item.</param>
-		/// <returns><see langword="true" />, if the string contains the order registration, otherwise, <see langword="false" />.</returns>
-		public static bool IsOrderLogRegistered(this ExecutionMessage item)
-		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-
-			return item.OrderState == OrderStates.Active && item.TradePrice == null;
-		}
-
-		/// <summary>
-		/// To check, does the string contain the order registration.
-		/// </summary>
-		/// <param name="item">Order log item.</param>
-		/// <returns><see langword="true" />, if the string contains the order registration, otherwise, <see langword="false" />.</returns>
+		/// <returns><see langword="true" />, if the order log contains the order registration, otherwise, <see langword="false" />.</returns>
 		public static bool IsRegistered(this OrderLogItem item)
 		{
 			return item.ToMessage().IsOrderLogRegistered();
 		}
 
 		/// <summary>
-		/// To check, does the string contain the cancelled order.
+		/// To check, does the order log contain the cancelled order.
 		/// </summary>
 		/// <param name="item">Order log item.</param>
-		/// <returns><see langword="true" />, if the string contain the cancelled order, otherwise, <see langword="false" />.</returns>
-		public static bool IsOrderLogCanceled(this ExecutionMessage item)
-		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-
-			return item.OrderState == OrderStates.Done && item.TradePrice == null;
-		}
-
-		/// <summary>
-		/// To check, does the string contain the cancelled order.
-		/// </summary>
-		/// <param name="item">Order log item.</param>
-		/// <returns><see langword="true" />, if the string contain the cancelled order, otherwise, <see langword="false" />.</returns>
+		/// <returns><see langword="true" />, if the order log contain the cancelled order, otherwise, <see langword="false" />.</returns>
 		public static bool IsCanceled(this OrderLogItem item)
 		{
 			return item.ToMessage().IsOrderLogCanceled();
 		}
 
 		/// <summary>
-		/// To check, does the string contain the order matching.
+		/// To check, does the order log contain the order matching.
 		/// </summary>
 		/// <param name="item">Order log item.</param>
-		/// <returns><see langword="true" />, if the string contains order matching, otherwise, <see langword="false" />.</returns>
-		public static bool IsOrderLogMatched(this ExecutionMessage item)
-		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-
-			return item.TradeId != null;
-		}
-
-		/// <summary>
-		/// To check, does the string contain the order matching.
-		/// </summary>
-		/// <param name="item">Order log item.</param>
-		/// <returns><see langword="true" />, if the string contains order matching, otherwise, <see langword="false" />.</returns>
+		/// <returns><see langword="true" />, if the order log contains order matching, otherwise, <see langword="false" />.</returns>
 		public static bool IsMatched(this OrderLogItem item)
 		{
 			return item.ToMessage().IsOrderLogMatched();
@@ -175,9 +137,6 @@ namespace StockSharp.Algo
 
 				public DepthEnumerator(IEnumerable<ExecutionMessage> items, IOrderLogMarketDepthBuilder builder, TimeSpan interval, int maxDepth)
 				{
-					if (builder == null)
-						throw new ArgumentNullException(nameof(builder));
-
 					if (items == null)
 						throw new ArgumentNullException(nameof(items));
 
@@ -185,7 +144,7 @@ namespace StockSharp.Algo
 						throw new ArgumentOutOfRangeException(nameof(maxDepth), maxDepth, LocalizedStrings.Str941);
 
 					_itemsEnumerator = items.GetEnumerator();
-					_builder = builder;
+					_builder = builder ?? throw new ArgumentNullException(nameof(builder));
 					_interval = interval;
 					_maxDepth = maxDepth;
 				}
@@ -199,15 +158,16 @@ namespace StockSharp.Algo
 						var item = _itemsEnumerator.Current;
 
 						//if (_builder == null)
-						//	_builder = new OrderLogMarketDepthBuilder(new QuoteChangeMessage { SecurityId = item.SecurityId, IsSorted = true }, _maxDepth);
+						//	_builder = new OrderLogMarketDepthBuilder(new QuoteChangeMessage { SecurityId = item.SecurityId }, _maxDepth);
 
-						if (!_builder.Update(item))
+						var depth = _builder.Update(item);
+						if (depth == null)
 							continue;
 
-						if (Current != null && (_builder.Depth.ServerTime - Current.ServerTime) < _interval)
+						if (Current != null && (depth.ServerTime - Current.ServerTime) < _interval)
 							continue;
 
-						Current = (QuoteChangeMessage)_builder.Depth.Clone();
+						Current = depth.TypedClone();
 
 						if (_maxDepth < int.MaxValue)
 						{
@@ -233,7 +193,7 @@ namespace StockSharp.Algo
 
 				void IDisposable.Dispose()
 				{
-					Reset();
+					Current = null;
 					_itemsEnumerator.Dispose();
 				}
 			}
@@ -260,10 +220,10 @@ namespace StockSharp.Algo
 		/// </summary>
 		/// <param name="items">Orders log lines.</param>
 		/// <param name="builder">Order log to market depth builder.</param>
-		/// <param name="interval">The interval of the order book generation. The default is <see cref="TimeSpan.Zero"/>, which means order books generation at each new string of orders log.</param>
+		/// <param name="interval">The interval of the order book generation. The default is <see cref="TimeSpan.Zero"/>, which means order books generation at each new item of orders log.</param>
 		/// <param name="maxDepth">The maximal depth of order book. The default is <see cref="Int32.MaxValue"/>, which means endless depth.</param>
 		/// <returns>Market depths.</returns>
-		public static IEnumerable<MarketDepth> ToMarketDepths(this IEnumerable<OrderLogItem> items, IOrderLogMarketDepthBuilder builder, TimeSpan interval = default(TimeSpan), int maxDepth = int.MaxValue)
+		public static IEnumerable<MarketDepth> ToOrderBooks(this IEnumerable<OrderLogItem> items, IOrderLogMarketDepthBuilder builder, TimeSpan interval = default, int maxDepth = int.MaxValue)
 		{
 			var first = items.FirstOrDefault();
 
@@ -271,7 +231,8 @@ namespace StockSharp.Algo
 				return Enumerable.Empty<MarketDepth>();
 
 			return items.ToMessages<OrderLogItem, ExecutionMessage>()
-				.ToMarketDepths(builder, interval)
+				.ToOrderBooks(builder, interval)
+				.BuildIfNeed()
 				.ToEntities<QuoteChangeMessage, MarketDepth>(first.Order.Security);
 		}
 
@@ -280,10 +241,10 @@ namespace StockSharp.Algo
 		/// </summary>
 		/// <param name="items">Orders log lines.</param>
 		/// <param name="builder">Order log to market depth builder.</param>
-		/// <param name="interval">The interval of the order book generation. The default is <see cref="TimeSpan.Zero"/>, which means order books generation at each new string of orders log.</param>
+		/// <param name="interval">The interval of the order book generation. The default is <see cref="TimeSpan.Zero"/>, which means order books generation at each new item of orders log.</param>
 		/// <param name="maxDepth">The maximal depth of order book. The default is <see cref="Int32.MaxValue"/>, which means endless depth.</param>
 		/// <returns>Market depths.</returns>
-		public static IEnumerable<QuoteChangeMessage> ToMarketDepths(this IEnumerable<ExecutionMessage> items, IOrderLogMarketDepthBuilder builder, TimeSpan interval = default(TimeSpan), int maxDepth = int.MaxValue)
+		public static IEnumerable<QuoteChangeMessage> ToOrderBooks(this IEnumerable<ExecutionMessage> items, IOrderLogMarketDepthBuilder builder, TimeSpan interval = default, int maxDepth = int.MaxValue)
 		{
 			return new DepthEnumerable(items, builder, interval, maxDepth);
 		}
@@ -326,21 +287,7 @@ namespace StockSharp.Algo
 						{
 							_trades.Remove(tradeId.Value);
 
-							Current = new ExecutionMessage
-							{
-								ExecutionType = ExecutionTypes.Tick,
-								SecurityId = currItem.SecurityId,
-								TradeId = tradeId,
-								TradePrice = currItem.TradePrice,
-								TradeStatus = currItem.TradeStatus,
-								TradeVolume = currItem.TradeVolume,
-								ServerTime = currItem.ServerTime,
-								LocalTime = currItem.LocalTime,
-								OpenInterest = currItem.OpenInterest,
-								OriginSide = prevItem.Item2 == Sides.Buy
-									? (prevItem.Item1 > currItem.OrderId ? Sides.Buy : Sides.Sell)
-									: (prevItem.Item1 > currItem.OrderId ? Sides.Sell : Sides.Buy),
-							};
+							Current = currItem.ToTick();
 
 							return true;
 						}
@@ -360,6 +307,7 @@ namespace StockSharp.Algo
 
 				void IDisposable.Dispose()
 				{
+					Current = null;
 					_itemsEnumerator.Dispose();
 				}
 			}
@@ -398,6 +346,40 @@ namespace StockSharp.Algo
 		}
 
 		/// <summary>
+		/// To tick trade from the order log.
+		/// </summary>
+		/// <param name="item">Order log item.</param>
+		/// <returns>Tick trade.</returns>
+		public static ExecutionMessage ToTick(this ExecutionMessage item)
+		{
+			if (item == null)
+				throw new ArgumentNullException(nameof(item));
+
+			if (item.ExecutionType != ExecutionTypes.OrderLog)
+				throw new ArgumentException(nameof(item));
+
+			return new ExecutionMessage
+			{
+				ExecutionType = ExecutionTypes.Tick,
+				SecurityId = item.SecurityId,
+				TradeId = item.TradeId,
+				TradeStringId = item.TradeStringId,
+				TradePrice = item.TradePrice,
+				TradeStatus = item.TradeStatus,
+				TradeVolume = item.OrderVolume,
+				ServerTime = item.ServerTime,
+				LocalTime = item.LocalTime,
+				IsSystem = item.IsSystem,
+				OpenInterest = item.OpenInterest,
+				OriginSide = item.OriginSide,
+				//OriginSide = prevItem.Item2 == Sides.Buy
+				//	? (prevItem.Item1 > item.OrderId ? Sides.Buy : Sides.Sell)
+				//	: (prevItem.Item1 > item.OrderId ? Sides.Sell : Sides.Buy),
+				BuildFrom = DataType.OrderLog,
+			};
+		}
+
+		/// <summary>
 		/// To build tick trades from the orders log.
 		/// </summary>
 		/// <param name="items">Orders log lines.</param>
@@ -405,6 +387,90 @@ namespace StockSharp.Algo
 		public static IEnumerable<ExecutionMessage> ToTicks(this IEnumerable<ExecutionMessage> items)
 		{
 			return new OrderLogTickEnumerable(items);
+		}
+
+		private sealed class TickLevel1Enumerable : SimpleEnumerable<Level1ChangeMessage>
+		{
+			private sealed class TickLevel1Enumerator : IEnumerator<Level1ChangeMessage>
+			{
+				private readonly IEnumerator<ExecutionMessage> _itemsEnumerator;
+
+				public TickLevel1Enumerator(IEnumerable<ExecutionMessage> items)
+				{
+					if (items is null)
+						throw new ArgumentNullException(nameof(items));
+
+					_itemsEnumerator = items.GetEnumerator();
+				}
+
+				public Level1ChangeMessage Current { get; private set; }
+
+				bool IEnumerator.MoveNext()
+				{
+					while (_itemsEnumerator.MoveNext())
+					{
+						var tick = _itemsEnumerator.Current;
+
+						var l1Msg = new Level1ChangeMessage
+						{
+							SecurityId = tick.SecurityId,
+							ServerTime = tick.ServerTime,
+							LocalTime = tick.LocalTime,
+						}
+						.TryAdd(Level1Fields.LastTradeId, tick.TradeId)
+						.TryAdd(Level1Fields.LastTradePrice, tick.TradePrice)
+						.TryAdd(Level1Fields.LastTradeVolume, tick.TradeVolume)
+						.TryAdd(Level1Fields.LastTradeUpDown, tick.IsUpTick)
+						.TryAdd(Level1Fields.LastTradeOrigin, tick.OriginSide)
+						;
+
+						if (l1Msg.Changes.Count == 0)
+							continue;
+
+						Current = l1Msg;
+						return true;
+					}
+
+					Current = null;
+					return false;
+				}
+
+				void IEnumerator.Reset()
+				{
+					_itemsEnumerator.Reset();
+					Current = null;
+				}
+
+				object IEnumerator.Current => Current;
+
+				void IDisposable.Dispose()
+				{
+					Current = null;
+					_itemsEnumerator.Dispose();
+				}
+			}
+
+			public TickLevel1Enumerable(IEnumerable<ExecutionMessage> items)
+				: base(() => new TickLevel1Enumerator(items))
+			{
+				if (items is null)
+					throw new ArgumentNullException(nameof(items));
+			}
+		}
+
+		/// <summary>
+		/// To build level1 from the orders log.
+		/// </summary>
+		/// <param name="items">Orders log lines.</param>
+		/// <param name="builder">Order log to market depth builder.</param>
+		/// <param name="interval">The interval of the order book generation. The default is <see cref="TimeSpan.Zero"/>, which means order books generation at each new item of orders log.</param>
+		/// <returns>Tick trades.</returns>
+		public static IEnumerable<Level1ChangeMessage> ToLevel1(this IEnumerable<ExecutionMessage> items, IOrderLogMarketDepthBuilder builder, TimeSpan interval = default)
+		{
+			if (builder == null)
+				return new TickLevel1Enumerable(items);
+			else
+				return items.ToOrderBooks(builder, interval, 1).BuildIfNeed().ToLevel1();
 		}
 	}
 }

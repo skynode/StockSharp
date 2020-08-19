@@ -16,6 +16,7 @@ Copyright 2010 by StockSharp, LLC
 namespace StockSharp.Messages
 {
 	using System;
+	using System.ComponentModel.DataAnnotations;
 	using System.Runtime.Serialization;
 
 	using StockSharp.Localization;
@@ -28,24 +29,24 @@ namespace StockSharp.Messages
 	public enum TimeInForce
 	{
 		/// <summary>
-		/// Put in queue.
+		/// Good til cancelled.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.Str405Key)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.GTCKey, Description = LocalizedStrings.GoodTilCancelledKey)]
 		PutInQueue,
 
 		/// <summary>
 		/// Fill Or Kill.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.FOKKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.FOKKey, Description = LocalizedStrings.FillOrKillKey)]
 		MatchOrCancel,
 
 		/// <summary>
 		/// Immediate Or Cancel.
 		/// </summary>
 		[EnumMember]
-		[EnumDisplayNameLoc(LocalizedStrings.IOCKey)]
+		[Display(ResourceType = typeof(LocalizedStrings), Name = LocalizedStrings.IOCKey, Description = LocalizedStrings.ImmediateOrCancelKey)]
 		CancelBalance,
 	}
 }

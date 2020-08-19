@@ -17,15 +17,13 @@ namespace StockSharp.Algo.Export
 {
 	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using System.Linq;
-	using System.Windows.Media;
 
-	using Ecng.Collections;
 	using Ecng.Common;
 	using Ecng.ComponentModel;
 	using Ecng.Interop;
 
-	using StockSharp.BusinessEntities;
 	using StockSharp.Messages;
 	using StockSharp.Localization;
 
@@ -34,189 +32,186 @@ namespace StockSharp.Algo.Export
 	/// </summary>
 	public class ExcelExporter : BaseExporter
 	{
+		private readonly IExcelWorkerProvider _provider;
 		private readonly Action _breaked;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ExcelExporter"/>.
 		/// </summary>
-		/// <param name="security">Security.</param>
-		/// <param name="arg">The data parameter.</param>
-		/// <param name="isCancelled">The processor, returning export interruption sign.</param>
+		/// <param name="provider">Excel provider.</param>
+		/// <param name="dataType">Data type info.</param>
+		/// <param name="isCancelled">The processor, returning process interruption sign.</param>
 		/// <param name="fileName">The path to file.</param>
 		/// <param name="breaked">The processor, which will be called if maximal value of strings is exceeded.</param>
-		public ExcelExporter(Security security, object arg, Func<int, bool> isCancelled, string fileName, Action breaked)
-			: base(security, arg, isCancelled, fileName)
+		public ExcelExporter(IExcelWorkerProvider provider, DataType dataType, Func<int, bool> isCancelled, string fileName, Action breaked)
+			: base(dataType, isCancelled, fileName)
 		{
-			if (breaked == null)
-				throw new ArgumentNullException(nameof(breaked));
-
-			_breaked = breaked;
+			_provider = provider ?? throw new ArgumentNullException(nameof(provider));
+			_breaked = breaked ?? throw new ArgumentNullException(nameof(breaked));
 		}
 
-		/// <summary>
-		/// To export <see cref="ExecutionMessage"/>.
-		/// </summary>
-		/// <param name="messages">Messages.</param>
-		protected override void Export(IEnumerable<ExecutionMessage> messages)
+		/// <inheritdoc />
+		protected override (int, DateTimeOffset?) ExportOrderLog(IEnumerable<ExecutionMessage> messages)
 		{
-			switch ((ExecutionTypes)Arg)
+			return Do(worker =>
 			{
-				case ExecutionTypes.Tick:
+				worker
+					.SetCell(0, 0, LocalizedStrings.Id).SetStyle(0, typeof(string))
+					.SetCell(1, 0, LocalizedStrings.Time).SetStyle(1, "yyyy-MM-dd HH:mm:ss.fff zzz")
+					.SetCell(2, 0, LocalizedStrings.Price).SetStyle(2, typeof(decimal))
+					.SetCell(3, 0, LocalizedStrings.Volume).SetStyle(3, typeof(decimal))
+					.SetCell(4, 0, LocalizedStrings.Str128)
+					.SetCell(5, 0, LocalizedStrings.Str722)
+					.SetCell(6, 0, LocalizedStrings.Type)
+					.SetCell(7, 0, LocalizedStrings.Str342)
+					.SetCell(8, 0, LocalizedStrings.Str723).SetStyle(8, typeof(string))
+					.SetCell(9, 0, LocalizedStrings.Str724).SetStyle(9, typeof(decimal))
+					.SetCell(10, 0, LocalizedStrings.Str725).SetStyle(10, typeof(decimal));
+
+				//worker.SetConditionalFormatting(4, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Buy), null, Colors.Green);
+				//worker.SetConditionalFormatting(4, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Sell), null, Colors.Red);
+
+				var row = 1;
+				var lastTime = default(DateTimeOffset?);
+
+				foreach (var message in messages)
 				{
-					Do(worker =>
+					worker
+						.SetCell(0, row, message.OrderId == null ? message.OrderStringId : message.OrderId.To<string>())
+						.SetCell(1, row, message.ServerTime)
+						.SetCell(2, row, message.OrderPrice)
+						.SetCell(3, row, message.OrderVolume)
+						.SetCell(4, row, message.Side)
+						.SetCell(5, row, message.OrderState)
+						.SetCell(6, row, message.TimeInForce)
+						.SetCell(7, row, message.IsSystem);
+
+					if (message.TradePrice != null)
 					{
 						worker
-							.SetCell(0, 0, LocalizedStrings.Id).SetStyle(0, typeof(string))
-							.SetCell(1, 0, LocalizedStrings.Time).SetStyle(1, "yyyy-MM-dd HH:mm:ss.fff zzz")
-							.SetCell(2, 0, LocalizedStrings.Price).SetStyle(2, typeof(decimal))
-							.SetCell(3, 0, LocalizedStrings.Volume).SetStyle(3, typeof(decimal))
-							.SetCell(4, 0, LocalizedStrings.Str128)
-							.SetCell(5, 0, LocalizedStrings.OI).SetStyle(5, typeof(decimal))
-							.SetCell(6, 0, "UP_DOWN").SetStyle(5, typeof(bool));
+							.SetCell(8, row, message.TradeId == null ? message.TradeStringId : message.TradeId.To<string>())
+							.SetCell(9, row, message.TradePrice)
+							.SetCell(10, row, message.OpenInterest);
+					}
 
-						worker.SetConditionalFormatting(4, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Buy), null, Colors.Green);
-						worker.SetConditionalFormatting(4, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Sell), null, Colors.Red);
+					lastTime = message.ServerTime;
 
-						var index = 1;
-
-						foreach (var message in messages)
-						{
-							worker
-								.SetCell(0, index, message.TradeId == null ? message.TradeStringId : message.TradeId.To<string>())
-								.SetCell(1, index, message.ServerTime)
-								.SetCell(2, index, message.TradePrice)
-								.SetCell(3, index, message.TradeVolume)
-								.SetCell(4, index, message.OriginSide)
-								.SetCell(5, index, message.OpenInterest)
-								.SetCell(6, index, message.IsUpTick);
-
-							index++;
-
-							if (!Check(index))
-								break;
-						}
-					});
-
-					break;
+					if (!Check(++row))
+						break;
 				}
-				case ExecutionTypes.OrderLog:
-				{
-					Do(worker =>
-					{
-						worker
-							.SetCell(0, 0, LocalizedStrings.Id).SetStyle(0, typeof(string))
-							.SetCell(1, 0, LocalizedStrings.Time).SetStyle(1, "yyyy-MM-dd HH:mm:ss.fff zzz")
-							.SetCell(2, 0, LocalizedStrings.Price).SetStyle(2, typeof(decimal))
-							.SetCell(3, 0, LocalizedStrings.Volume).SetStyle(3, typeof(decimal))
-							.SetCell(4, 0, LocalizedStrings.Str128)
-							.SetCell(5, 0, LocalizedStrings.Str722)
-							.SetCell(6, 0, LocalizedStrings.Type)
-							.SetCell(7, 0, LocalizedStrings.Str342)
-							.SetCell(8, 0, LocalizedStrings.Str723).SetStyle(8, typeof(string))
-							.SetCell(9, 0, LocalizedStrings.Str724).SetStyle(9, typeof(decimal))
-							.SetCell(10, 0, LocalizedStrings.Str725).SetStyle(10, typeof(decimal));
 
-						worker.SetConditionalFormatting(4, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Buy), null, Colors.Green);
-						worker.SetConditionalFormatting(4, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Sell), null, Colors.Red);
-
-						var index = 1;
-
-						foreach (var message in messages)
-						{
-							worker
-								.SetCell(0, index, message.OrderId == null ? message.OrderStringId : message.OrderId.To<string>())
-								.SetCell(1, index, message.ServerTime)
-								.SetCell(2, index, message.OrderPrice)
-								.SetCell(3, index, message.OrderVolume)
-								.SetCell(4, index, message.Side)
-								.SetCell(5, index, message.OrderState)
-								.SetCell(6, index, message.TimeInForce)
-								.SetCell(7, index, message.IsSystem);
-
-							if (message.TradePrice != null)
-							{
-								worker
-									.SetCell(8, index, message.TradeId == null ? message.TradeStringId : message.TradeId.To<string>())
-									.SetCell(9, index, message.TradePrice)
-									.SetCell(10, index, message.OpenInterest);
-							}
-
-							index++;
-
-							if (!Check(index))
-								break;
-						}
-					});
-
-					break;
-				}
-				case ExecutionTypes.Transaction:
-				{
-					Do(worker =>
-					{
-						worker
-							.SetCell(0, 0, LocalizedStrings.Time).SetStyle(1, "yyyy-MM-dd HH:mm:ss.fff zzz")
-							.SetCell(1, 0, LocalizedStrings.Portfolio)
-							.SetCell(2, 0, LocalizedStrings.TransactionId)
-							.SetCell(3, 0, LocalizedStrings.OrderId)
-							.SetCell(4, 0, LocalizedStrings.Price).SetStyle(2, typeof(decimal))
-							.SetCell(5, 0, LocalizedStrings.Volume).SetStyle(3, typeof(decimal))
-							.SetCell(6, 0, LocalizedStrings.Str1325).SetStyle(3, typeof(decimal))
-							.SetCell(7, 0, LocalizedStrings.Str128)
-							.SetCell(8, 0, LocalizedStrings.Str132)
-							.SetCell(9, 0, LocalizedStrings.Str134)
-							.SetCell(10, 0, LocalizedStrings.Str506)
-							.SetCell(11, 0, LocalizedStrings.TradePrice).SetStyle(3, typeof(decimal));
-
-						worker.SetConditionalFormatting(7, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Buy), null, Colors.Green);
-						worker.SetConditionalFormatting(7, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Sell), null, Colors.Red);
-
-						worker.SetConditionalFormatting(9, ComparisonOperator.Equal, "\"{0}\"".Put(OrderStates.Active), null, Colors.Blue);
-						worker.SetConditionalFormatting(9, ComparisonOperator.Equal, "\"{0}\"".Put(OrderStates.Done), null, Colors.Green);
-						worker.SetConditionalFormatting(9, ComparisonOperator.Equal, "\"{0}\"".Put(OrderStates.Failed), null, Colors.Red);
-
-						var index = 1;
-
-						foreach (var message in messages)
-						{
-							worker
-								.SetCell(0, index, message.ServerTime)
-								.SetCell(1, index, message.PortfolioName)
-								.SetCell(2, index, message.TransactionId)
-								.SetCell(3, index, message.OrderId == null ? message.OrderStringId : message.OrderId.To<string>())
-								.SetCell(4, index, message.OrderPrice)
-								.SetCell(5, index, message.OrderVolume)
-								.SetCell(6, index, message.Balance)
-								.SetCell(7, index, message.Side)
-								.SetCell(8, index, message.OrderType)
-								.SetCell(9, index, message.OrderState)
-								.SetCell(10, index, message.TradeId == null ? message.TradeStringId : message.TradeId.To<string>())
-								.SetCell(11, index, message.TradePrice)
-								.SetCell(12, index, message.HasOrderInfo)
-								.SetCell(13, index, message.HasTradeInfo);
-
-							index++;
-
-							if (!Check(index))
-								break;
-						}
-					});
-
-					break;
-				}
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+				return (row - 1, lastTime);
+			});
 		}
 
-		/// <summary>
-		/// To export <see cref="QuoteChangeMessage"/>.
-		/// </summary>
-		/// <param name="messages">Messages.</param>
-		protected override void Export(IEnumerable<QuoteChangeMessage> messages)
+		/// <inheritdoc />
+		protected override (int, DateTimeOffset?) ExportTicks(IEnumerable<ExecutionMessage> messages)
 		{
-			Do(worker =>
+			return Do(worker =>
 			{
+				worker
+					.SetCell(0, 0, LocalizedStrings.Id).SetStyle(0, typeof(string))
+					.SetCell(1, 0, LocalizedStrings.Time).SetStyle(1, "yyyy-MM-dd HH:mm:ss.fff zzz")
+					.SetCell(2, 0, LocalizedStrings.Price).SetStyle(2, typeof(decimal))
+					.SetCell(3, 0, LocalizedStrings.Volume).SetStyle(3, typeof(decimal))
+					.SetCell(4, 0, LocalizedStrings.Str128)
+					.SetCell(5, 0, LocalizedStrings.OI).SetStyle(5, typeof(decimal))
+					.SetCell(6, 0, "UP_DOWN").SetStyle(5, typeof(bool))
+					.SetCell(7, 0, LocalizedStrings.Currency);
+
+				//worker.SetConditionalFormatting(4, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Buy), null, Colors.Green);
+				//worker.SetConditionalFormatting(4, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Sell), null, Colors.Red);
+
+				var row = 1;
+				var lastTime = default(DateTimeOffset?);
+
+				foreach (var message in messages)
+				{
+					worker
+						.SetCell(0, row, message.TradeId == null ? message.TradeStringId : message.TradeId.To<string>())
+						.SetCell(1, row, message.ServerTime)
+						.SetCell(2, row, message.TradePrice)
+						.SetCell(3, row, message.TradeVolume)
+						.SetCell(4, row, message.OriginSide)
+						.SetCell(5, row, message.OpenInterest)
+						.SetCell(6, row, message.IsUpTick)
+						.SetCell(7, row, message.Currency);
+
+					lastTime = message.ServerTime;
+
+					if (!Check(++row))
+						break;
+				}
+
+				return (row - 1, lastTime);
+			});
+		}
+
+		/// <inheritdoc />
+		protected override (int, DateTimeOffset?) ExportTransactions(IEnumerable<ExecutionMessage> messages)
+		{
+			return Do(worker =>
+			{
+				worker
+					.SetCell(0, 0, LocalizedStrings.Time).SetStyle(1, "yyyy-MM-dd HH:mm:ss.fff zzz")
+					.SetCell(1, 0, LocalizedStrings.Portfolio)
+					.SetCell(2, 0, LocalizedStrings.TransactionId)
+					.SetCell(3, 0, LocalizedStrings.OrderId)
+					.SetCell(4, 0, LocalizedStrings.Price).SetStyle(2, typeof(decimal))
+					.SetCell(5, 0, LocalizedStrings.Volume).SetStyle(3, typeof(decimal))
+					.SetCell(6, 0, LocalizedStrings.Str1325).SetStyle(3, typeof(decimal))
+					.SetCell(7, 0, LocalizedStrings.Str128)
+					.SetCell(8, 0, LocalizedStrings.Str132)
+					.SetCell(9, 0, LocalizedStrings.Str134)
+					.SetCell(10, 0, LocalizedStrings.Str506)
+					.SetCell(11, 0, LocalizedStrings.TradePrice).SetStyle(3, typeof(decimal));
+
+				//worker.SetConditionalFormatting(7, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Buy), null, Colors.Green);
+				//worker.SetConditionalFormatting(7, ComparisonOperator.Equal, "\"{0}\"".Put(Sides.Sell), null, Colors.Red);
+
+				//worker.SetConditionalFormatting(9, ComparisonOperator.Equal, "\"{0}\"".Put(OrderStates.Active), null, Colors.Blue);
+				//worker.SetConditionalFormatting(9, ComparisonOperator.Equal, "\"{0}\"".Put(OrderStates.Done), null, Colors.Green);
+				//worker.SetConditionalFormatting(9, ComparisonOperator.Equal, "\"{0}\"".Put(OrderStates.Failed), null, Colors.Red);
+
+				var row = 1;
+				var lastTime = default(DateTimeOffset?);
+
+				foreach (var message in messages)
+				{
+					worker
+						.SetCell(0, row, message.ServerTime)
+						.SetCell(1, row, message.PortfolioName)
+						.SetCell(2, row, message.TransactionId)
+						.SetCell(3, row, message.OrderId == null ? message.OrderStringId : message.OrderId.To<string>())
+						.SetCell(4, row, message.OrderPrice)
+						.SetCell(5, row, message.OrderVolume)
+						.SetCell(6, row, message.Balance)
+						.SetCell(7, row, message.Side)
+						.SetCell(8, row, message.OrderType)
+						.SetCell(9, row, message.OrderState)
+						.SetCell(10, row, message.TradeId == null ? message.TradeStringId : message.TradeId.To<string>())
+						.SetCell(11, row, message.TradePrice)
+						.SetCell(12, row, message.HasOrderInfo)
+						.SetCell(13, row, message.HasTradeInfo);
+
+					lastTime = message.ServerTime;
+
+					if (!Check(++row))
+						break;
+				}
+
+				return (row - 1, lastTime);
+			});
+		}
+
+		/// <inheritdoc />
+		protected override (int, DateTimeOffset?) Export(IEnumerable<QuoteChangeMessage> messages)
+		{
+			return Do(worker =>
+			{
+				var count = 0;
+				var lastTime = default(DateTimeOffset?);
+
 				var rowIndex = 0;
 
 				foreach (var message in messages)
@@ -227,30 +222,39 @@ namespace StockSharp.Algo.Export
 
 					var columnIndex = 0;
 
+					var bids = new HashSet<QuoteChange>(message.Bids);
+
 					foreach (var quote in message.Bids.Concat(message.Asks).OrderByDescending(q => q.Price))
 					{
 						worker
-							.SetCell(columnIndex, rowIndex + (quote.Side == Sides.Buy ? 1 : 3), quote.Price)
-							.SetCell(columnIndex, rowIndex + 2, quote.Volume);
+							.SetCell(columnIndex, rowIndex + (bids.Contains(quote) ? 1 : 3), quote.Price)
+							.SetCell(columnIndex, rowIndex + 2, quote.Volume)
+							.SetCell(columnIndex, rowIndex + 4, quote.OrdersCount);
+
+						if (quote.Condition != default)
+							worker.SetCell(columnIndex, rowIndex + 5, quote.Condition.GetDisplayName());
 
 						columnIndex++;
+
+						count++;
 					}
 
-					rowIndex += 4;
+					lastTime = message.ServerTime;
+
+					rowIndex += 5;
 
 					if (!Check(rowIndex))
 						break;
 				}
+
+				return (count, lastTime);
 			});
 		}
 
-		/// <summary>
-		/// To export <see cref="Level1ChangeMessage"/>.
-		/// </summary>
-		/// <param name="messages">Messages.</param>
-		protected override void Export(IEnumerable<Level1ChangeMessage> messages)
+		/// <inheritdoc />
+		protected override (int, DateTimeOffset?) Export(IEnumerable<Level1ChangeMessage> messages)
 		{
-			Do(worker =>
+			return Do(worker =>
 			{
 				var columns = new Dictionary<Level1Fields, int>();
 				//{
@@ -287,6 +291,7 @@ namespace StockSharp.Algo.Export
 				//}
 
 				var row = 1;
+				var lastTime = default(DateTimeOffset?);
 
 				foreach (var message in messages)
 				{
@@ -296,44 +301,119 @@ namespace StockSharp.Algo.Export
 					{
 						var field = pair.Key;
 
-						var columnIndex = columns.TryGetValue2(field);
-
-						if (columnIndex == null)
+						if (!columns.TryGetValue(field, out var columnIndex))
 						{
 							columnIndex = columns.Count;
-							columns.Add(field, columnIndex.Value);
+							columns.Add(field, columnIndex);
 
-							worker.SetCell(columnIndex.Value, 0, field.GetDisplayName());
-							ApplyCellStyle(worker, field, columnIndex.Value);
+							worker.SetCell(columnIndex, 0, field.GetDisplayName());
+							ApplyCellStyle(worker, field, columnIndex);
 						}
 
 						worker.SetCell(columns[field], row, pair.Value);
 					}
 
+					lastTime = message.ServerTime;
+
 					if (!Check(++row))
 						break;
 				}
+
+				return (row - 1, lastTime);
 			});
 		}
 
-		private static void ApplyCellStyle(ExcelWorker worker, Level1Fields field, int column)
+		private static void ApplyCellStyle(IExcelWorker worker, Level1Fields field, int column)
 		{
-			switch (field)
+			var type = field.ToType();
+
+			if (type != null && !type.IsEnum)
+				worker.SetStyle(column, type);
+		}
+
+		/// <inheritdoc />
+		protected override (int, DateTimeOffset?) Export(IEnumerable<PositionChangeMessage> messages)
+		{
+			return Do(worker =>
 			{
-				case Level1Fields.LastTrade:
-				case Level1Fields.BestAsk:
-				case Level1Fields.BestBid:
-					break;
-				case Level1Fields.LastTradeId:
-				case Level1Fields.BidsCount:
-				case Level1Fields.AsksCount:
-				case Level1Fields.TradesCount:
-					worker.SetStyle(column, typeof(long));
-					break;
-				case Level1Fields.LastTradeTime:
-				case Level1Fields.BestAskTime:
-				case Level1Fields.BestBidTime:
-					worker.SetStyle(column, typeof(DateTimeOffset));
+				var columns = new Dictionary<PositionChangeTypes, int>();
+
+				worker
+					.SetCell(0, 0, LocalizedStrings.Time).SetStyle(0, "yyyy-MM-dd HH:mm:ss.fff");
+
+				var row = 1;
+				var lastTime = default(DateTimeOffset?);
+
+				foreach (var message in messages)
+				{
+					worker.SetCell(0, row, message.LocalTime);
+
+					foreach (var pair in message.Changes)
+					{
+						var type = pair.Key;
+
+						if (!columns.TryGetValue(type, out var columnIndex))
+						{
+							columnIndex = columns.Count;
+							columns.Add(type, columnIndex);
+
+							worker.SetCell(columnIndex, 0, type.GetDisplayName());
+							ApplyCellStyle(worker, type, columnIndex);
+						}
+
+						worker.SetCell(columns[type], row, pair.Value);
+					}
+
+					lastTime = message.ServerTime;
+
+					if (!Check(++row))
+						break;
+				}
+
+				return (row - 1, lastTime);
+			});
+		}
+
+		/// <inheritdoc />
+		protected override (int, DateTimeOffset?) Export(IEnumerable<IndicatorValue> values)
+		{
+			return Do(worker =>
+			{
+				var row = 0;
+
+				worker
+					.SetCell(0, row, LocalizedStrings.Time)
+					.SetCell(1, row, LocalizedStrings.Str3099);
+
+				row++;
+
+				var lastTime = default(DateTimeOffset?);
+
+				foreach (var value in values)
+				{
+					worker.SetCell(0, row, value.Time);
+
+					var col = 1;
+					foreach (var indVal in value.ValuesAsDecimal)
+						worker.SetCell(col++, row, indVal);
+
+					lastTime = value.Time;
+				
+					if (!Check(++row))
+						break;
+				}
+
+				return (row - 1, lastTime);
+			});
+		}
+
+		private static void ApplyCellStyle(IExcelWorker worker, PositionChangeTypes type, int column)
+		{
+			switch (type)
+			{
+				case PositionChangeTypes.Currency:
+				case PositionChangeTypes.State:
+					worker.SetStyle(column, typeof(string));
 					break;
 				default:
 					worker.SetStyle(column, typeof(decimal));
@@ -341,93 +421,94 @@ namespace StockSharp.Algo.Export
 			}
 		}
 
-		/// <summary>
-		/// To export <see cref="CandleMessage"/>.
-		/// </summary>
-		/// <param name="messages">Messages.</param>
-		protected override void Export(IEnumerable<CandleMessage> messages)
+		/// <inheritdoc />
+		protected override (int, DateTimeOffset?) Export(IEnumerable<CandleMessage> messages)
 		{
-			Do(worker =>
+			return Do(worker =>
 			{
-				worker
-					.SetCell(0, 0, LocalizedStrings.Str726).SetStyle(0, "yyyy-MM-dd HH:mm:ss.fff")
-					.SetCell(1, 0, LocalizedStrings.Str727).SetStyle(1, "yyyy-MM-dd HH:mm:ss.fff")
-					.SetCell(2, 0, "O").SetStyle(2, typeof(decimal))
-					.SetCell(3, 0, "H").SetStyle(3, typeof(decimal))
-					.SetCell(4, 0, "L").SetStyle(4, typeof(decimal))
-					.SetCell(5, 0, "C").SetStyle(5, typeof(decimal))
-					.SetCell(6, 0, "V").SetStyle(6, typeof(decimal))
-					.SetCell(7, 0, LocalizedStrings.OI).SetStyle(7, typeof(decimal));
+				var row = 0;
 
-				var index = 1;
+				worker
+					.SetCell(0, row, LocalizedStrings.Str726).SetStyle(0, "yyyy-MM-dd HH:mm:ss.fff")
+					.SetCell(1, row, "O").SetStyle(2, typeof(decimal))
+					.SetCell(2, row, "H").SetStyle(3, typeof(decimal))
+					.SetCell(3, row, "L").SetStyle(4, typeof(decimal))
+					.SetCell(4, row, "C").SetStyle(5, typeof(decimal))
+					.SetCell(5, row, "V").SetStyle(6, typeof(decimal))
+					.SetCell(6, row, LocalizedStrings.OI).SetStyle(7, typeof(decimal));
+
+				row++;
+
+				var lastTime = default(DateTimeOffset?);
 
 				foreach (var candle in messages)
 				{
 					worker
-						.SetCell(0, index, candle.OpenTime)
-						.SetCell(1, index, candle.CloseTime)
-						.SetCell(2, index, candle.OpenPrice)
-						.SetCell(3, index, candle.HighPrice)
-						.SetCell(4, index, candle.LowPrice)
-						.SetCell(5, index, candle.ClosePrice)
-						.SetCell(6, index, candle.TotalVolume)
-						.SetCell(7, index, candle.OpenInterest);
+						.SetCell(0, row, candle.OpenTime)
+						.SetCell(1, row, candle.OpenPrice)
+						.SetCell(2, row, candle.HighPrice)
+						.SetCell(3, row, candle.LowPrice)
+						.SetCell(4, row, candle.ClosePrice)
+						.SetCell(5, row, candle.TotalVolume)
+						.SetCell(6, row, candle.OpenInterest);
 
-					index++;
+					lastTime = candle.OpenTime;
 
-					if (!Check(index))
+					if (!Check(++row))
 						break;
 				}
+
+				return (row - 1, lastTime);
 			});
 		}
 
-		/// <summary>
-		/// To export <see cref="NewsMessage"/>.
-		/// </summary>
-		/// <param name="messages">Messages.</param>
-		protected override void Export(IEnumerable<NewsMessage> messages)
+		/// <inheritdoc />
+		protected override (int, DateTimeOffset?) Export(IEnumerable<NewsMessage> messages)
 		{
-			Do(worker =>
+			return Do(worker =>
 			{
-				worker
-					.SetCell(0, 0, LocalizedStrings.Id).SetStyle(0, typeof(string))
-					.SetCell(1, 0, LocalizedStrings.Time).SetStyle(1, "yyyy-MM-dd HH:mm:ss.fff")
-					.SetCell(2, 0, LocalizedStrings.Security).SetStyle(2, typeof(string))
-					.SetCell(3, 0, LocalizedStrings.Board).SetStyle(3, typeof(string))
-					.SetCell(4, 0, LocalizedStrings.Str215).SetStyle(4, typeof(string))
-					.SetCell(5, 0, LocalizedStrings.Str217).SetStyle(5, typeof(string))
-					.SetCell(6, 0, LocalizedStrings.Str213).SetStyle(6, typeof(string))
-					.SetCell(7, 0, LocalizedStrings.Str221).SetStyle(6, typeof(string));
+				var row = 0;
 
-				var index = 1;
+				worker
+					.SetCell(0, row, LocalizedStrings.Id).SetStyle(0, typeof(string))
+					.SetCell(1, row, LocalizedStrings.Time).SetStyle(1, "yyyy-MM-dd HH:mm:ss.fff")
+					.SetCell(2, row, LocalizedStrings.Security).SetStyle(2, typeof(string))
+					.SetCell(3, row, LocalizedStrings.Board).SetStyle(3, typeof(string))
+					.SetCell(4, row, LocalizedStrings.Str215).SetStyle(4, typeof(string))
+					.SetCell(5, row, LocalizedStrings.Str217).SetStyle(5, typeof(string))
+					.SetCell(6, row, LocalizedStrings.Str213).SetStyle(6, typeof(string))
+					.SetCell(7, row, LocalizedStrings.Str221).SetStyle(6, typeof(string));
+
+				row++;
+
+				var lastTime = default(DateTimeOffset?);
 
 				foreach (var n in messages)
 				{
 					worker
-						.SetCell(0, index, n.Id)
-						.SetCell(1, index, n.ServerTime)
-						.SetCell(2, index, n.SecurityId == null ? null : n.SecurityId.Value.SecurityCode)
-						.SetCell(3, index, n.BoardCode)
-						.SetCell(4, index, n.Headline)
-						.SetCell(5, index, n.Story)
-						.SetCell(6, index, n.Source)
-						.SetCell(7, index, n.Url);
+						.SetCell(0, row, n.Id)
+						.SetCell(1, row, n.ServerTime)
+						.SetCell(2, row, n.SecurityId?.SecurityCode)
+						.SetCell(3, row, n.BoardCode)
+						.SetCell(4, row, n.Headline)
+						.SetCell(5, row, n.Story)
+						.SetCell(6, row, n.Source)
+						.SetCell(7, row, n.Url);
 
-					index++;
+					lastTime = n.ServerTime;
 
-					if (!Check(index))
+					if (!Check(++row))
 						break;
 				}
+
+				return (row - 1, lastTime);
 			});
 		}
 
-		/// <summary>
-		/// To export <see cref="SecurityMessage"/>.
-		/// </summary>
-		/// <param name="messages">Messages.</param>
-		protected override void Export(IEnumerable<SecurityMessage> messages)
+		/// <inheritdoc />
+		protected override (int, DateTimeOffset?) Export(IEnumerable<SecurityMessage> messages)
 		{
-			Do(worker =>
+			return Do(worker =>
 			{
 				var colIndex = 0;
 
@@ -438,15 +519,28 @@ namespace StockSharp.Algo.Export
 					.SetCell(colIndex, 0, LocalizedStrings.Str363).SetStyle(colIndex++, typeof(string))
 					.SetCell(colIndex, 0, LocalizedStrings.PriceStep).SetStyle(colIndex++, typeof(decimal))
 					.SetCell(colIndex, 0, LocalizedStrings.VolumeStep).SetStyle(colIndex++, typeof(decimal))
+					.SetCell(colIndex, 0, LocalizedStrings.MinVolume).SetStyle(colIndex++, typeof(decimal))
+					.SetCell(colIndex, 0, LocalizedStrings.MaxVolume).SetStyle(colIndex++, typeof(decimal))
 					.SetCell(colIndex, 0, LocalizedStrings.Str330).SetStyle(colIndex++, typeof(decimal))
 					.SetCell(colIndex, 0, LocalizedStrings.Type).SetStyle(colIndex++, typeof(string))
 					.SetCell(colIndex, 0, LocalizedStrings.Decimals).SetStyle(colIndex++, typeof(decimal))
 					.SetCell(colIndex, 0, LocalizedStrings.Str551).SetStyle(colIndex++, typeof(string))
 					.SetCell(colIndex, 0, LocalizedStrings.Strike).SetStyle(colIndex++, typeof(decimal))
 					.SetCell(colIndex, 0, LocalizedStrings.UnderlyingAsset).SetStyle(colIndex++, typeof(string))
+					.SetCell(colIndex, 0, LocalizedStrings.UnderlyingSecurityType).SetStyle(colIndex++, typeof(string))
+					.SetCell(colIndex, 0, LocalizedStrings.UnderlyingMinVolume).SetStyle(colIndex++, typeof(string))
 					.SetCell(colIndex, 0, LocalizedStrings.ExpiryDate).SetStyle(colIndex++, "yyyy-MM-dd")
 					.SetCell(colIndex, 0, LocalizedStrings.SettlementDate).SetStyle(colIndex++, "yyyy-MM-dd")
+					.SetCell(colIndex, 0, LocalizedStrings.IssueSize).SetStyle(colIndex++, typeof(decimal))
+					.SetCell(colIndex, 0, LocalizedStrings.IssueDate).SetStyle(colIndex++, "yyyy-MM-dd")
 					.SetCell(colIndex, 0, LocalizedStrings.Currency).SetStyle(colIndex++, typeof(string))
+					.SetCell(colIndex, 0, LocalizedStrings.CfiCode).SetStyle(colIndex++, typeof(string))
+					.SetCell(colIndex, 0, LocalizedStrings.Shortable).SetStyle(colIndex++, typeof(bool))
+					.SetCell(colIndex, 0, LocalizedStrings.Basket).SetStyle(colIndex++, typeof(string))
+					.SetCell(colIndex, 0, LocalizedStrings.Expression).SetStyle(colIndex++, typeof(string))
+					.SetCell(colIndex, 0, LocalizedStrings.FaceValue).SetStyle(colIndex++, typeof(decimal))
+					.SetCell(colIndex, 0, LocalizedStrings.Code).SetStyle(colIndex++, typeof(string))
+					.SetCell(colIndex, 0, LocalizedStrings.Board).SetStyle(colIndex++, typeof(string))
 
 					.SetCell(colIndex, 0, "Bloomberg").SetStyle(colIndex++, typeof(string))
 					.SetCell(colIndex, 0, "CUSIP").SetStyle(colIndex++, typeof(string))
@@ -459,6 +553,8 @@ namespace StockSharp.Algo.Export
 
 				var rowIndex = 1;
 
+				var lastTime = default(DateTimeOffset?);
+
 				foreach (var security in messages)
 				{
 					colIndex = 0;
@@ -470,16 +566,29 @@ namespace StockSharp.Algo.Export
 						.SetCell(colIndex++, rowIndex, security.ShortName)
 						.SetCell(colIndex++, rowIndex, security.PriceStep)
 						.SetCell(colIndex++, rowIndex, security.VolumeStep)
+						.SetCell(colIndex++, rowIndex, security.MinVolume)
+						.SetCell(colIndex++, rowIndex, security.MaxVolume)
 						.SetCell(colIndex++, rowIndex, security.Multiplier)
-						.SetCell(colIndex++, rowIndex, security.SecurityType == null ? string.Empty : security.SecurityType.Value.GetDisplayName())
+						.SetCell(colIndex++, rowIndex, security.SecurityType?.GetDisplayName() ?? string.Empty)
 						.SetCell(colIndex++, rowIndex, security.Decimals)
-						.SetCell(colIndex++, rowIndex, security.OptionType == null ? string.Empty : security.OptionType.Value.GetDisplayName())
+						.SetCell(colIndex++, rowIndex, security.OptionType?.GetDisplayName() ?? string.Empty)
 						.SetCell(colIndex++, rowIndex, security.Strike)
 						.SetCell(colIndex++, rowIndex, security.BinaryOptionType)
 						.SetCell(colIndex++, rowIndex, security.UnderlyingSecurityCode)
+						.SetCell(colIndex++, rowIndex, security.UnderlyingSecurityType?.GetDisplayName() ?? string.Empty)
+						.SetCell(colIndex++, rowIndex, security.UnderlyingSecurityMinVolume)
 						.SetCell(colIndex++, rowIndex, security.ExpiryDate)
 						.SetCell(colIndex++, rowIndex, security.SettlementDate)
-						.SetCell(colIndex++, rowIndex, security.Currency == null ? string.Empty : security.Currency.Value.GetDisplayName())
+						.SetCell(colIndex++, rowIndex, security.IssueSize)
+						.SetCell(colIndex++, rowIndex, security.IssueDate)
+						.SetCell(colIndex++, rowIndex, security.Currency?.GetDisplayName() ?? string.Empty)
+						.SetCell(colIndex++, rowIndex, security.CfiCode)
+						.SetCell(colIndex++, rowIndex, security.Shortable)
+						.SetCell(colIndex++, rowIndex, security.BasketCode)
+						.SetCell(colIndex++, rowIndex, security.BasketExpression)
+						.SetCell(colIndex++, rowIndex, security.FaceValue)
+						.SetCell(colIndex++, rowIndex, security.PrimaryId.SecurityCode)
+						.SetCell(colIndex++, rowIndex, security.PrimaryId.BoardCode)
 						.SetCell(colIndex++, rowIndex, security.SecurityId.Bloomberg)
 						.SetCell(colIndex++, rowIndex, security.SecurityId.Cusip)
 						.SetCell(colIndex++, rowIndex, security.SecurityId.IQFeed)
@@ -494,18 +603,24 @@ namespace StockSharp.Algo.Export
 					if (!Check(rowIndex))
 						break;
 				}
+
+				return (rowIndex - 1, lastTime);
 			});
 		}
 
-		private void Do(Action<ExcelWorker> action)
+		private (int, DateTimeOffset?) Do(Func<IExcelWorker, (int, DateTimeOffset?)> action)
 		{
-			if (action == null)
+			if (action is null)
 				throw new ArgumentNullException(nameof(action));
 
-			using (var worker = new ExcelWorker())
+			using (var stream = File.OpenWrite(Path))
+			using (var worker = _provider.CreateNew(stream))
 			{
-				action(worker);
-				worker.Save(Path, false);
+				worker
+					.AddSheet()
+					.RenameSheet(LocalizedStrings.Export);
+
+				return action(worker);
 			}
 		}
 

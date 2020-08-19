@@ -6,6 +6,7 @@
       Компонент позволяет фильтровать список инструментов по их типу. Также этот компонент может использоваться для отображения финансовой информации (полей level1), как показано в разделе
       <link xlink:href="de52af78-ec80-45b4-9820-0052f8add762">SecurityGrid</link>.
       </para>
+       <mediaLink><image placement="left" xlink:href="GUI_SecurityPicker2" /></mediaLink>	
       <para>
       	<codeEntityReference>T:StockSharp.Xaml.SecurityPicker</codeEntityReference> состоит из:
       </para>	
@@ -68,14 +69,14 @@
 	  </list>
 	  
       <para>
-       Ниже показаны внешний вид компонента и фрагмент кода с его использованием, взятый из примера <legacyItalic>Samples/Quik/Sample</legacyItalic> .
+       Ниже показан фрагмент кода с его использованием, взятый из примера <legacyItalic>Samples/Common/SampleConnection</legacyItalic>:
       </para>
  <section>
  
  <sections>
  	<section address="SubSection1">
      	<content>
-              <mediaLink><image placement="left" xlink:href="GUI_SecurityPicker2" /></mediaLink>	
+             
               <code title="XAML" language="XAML">
 	  		<![CDATA[
 <Window x:Class="Sample.SecuritiesWindow"
@@ -92,21 +93,6 @@
 
 		<xaml:SecurityPicker x:Name="SecurityPicker" x:FieldModifier="public" SecuritySelected="SecurityPicker_OnSecuritySelected" ShowCommonStatColumns="True" />
 
-		<StackPanel Grid.Row="1" HorizontalAlignment="Right" Orientation="Horizontal">
-			<Button x:Name="Find" Width="100" Click="FindClick">
-				<TextBlock><Run Text="{x:Static loc:LocalizedStrings.Find}" />...</TextBlock>
-			</Button>
-            <Button x:Name="Level1" Content="Level1..." Width="100" IsEnabled="False" Click="Level1Click" />
-			<Button x:Name="Depth" Width="100" IsEnabled="False" Click="DepthClick">
-				<TextBlock><Run Text="{x:Static loc:LocalizedStrings.MarketDepth}" />...</TextBlock>
-			</Button>
-			<Button x:Name="NewOrder" Width="100" IsEnabled="False" Click="NewOrderClick">
-				<TextBlock><Run Text="{x:Static loc:LocalizedStrings.NewOrder}" />...</TextBlock>
-			</Button>
-			<Button x:Name="NewStopOrder" Width="120" IsEnabled="False" Click="NewStopOrderClick">
-				<TextBlock><Run Text="{x:Static loc:LocalizedStrings.NewStopOrder}" />...</TextBlock>
-			</Button>
-		</StackPanel>
 	</Grid>
 </Window>
 	  	]]>
@@ -115,81 +101,11 @@
               <![CDATA[
 private void ConnectClick(object sender, RoutedEventArgs e)
 {
-	if (!_isConnected)
-	{
-       ......................................
-
-		if (Trader == null)
-		{
-			// создаем подключение
-			Trader = isLua
-				? new QuikTrader
-				{
-					LuaFixServerAddress = Address.Text.To<EndPoint>(),
-					LuaLogin = Login.Text,
-					LuaPassword = Password.Password.To<SecureString>()
-				}
-				: new QuikTrader(Path.Text) { IsDde = true };
-
-			Trader.LogLevel = LogLevels.Debug;
-			
-			_logManager.Sources.Add(Trader);
-
-			// отключение автоматического запроса всех инструментов.
-			Trader.RequestAllSecurities = AllSecurities.IsChecked == true;
-
-			// возводим флаг, что соединение установлено
-			_isConnected = true;
-
-			// переподключение будет работать только во время работы биржи РТС
-			// (чтобы отключить переподключение когда торгов нет штатно, например, ночью)
-			Trader.ReConnectionSettings.WorkingTime = ExchangeBoard.Forts.WorkingTime;
-
-			// подписываемся на событие об успешном восстановлении соединения
-			Trader.Restored += () => this.GuiAsync(() => MessageBox.Show(this, LocalizedStrings.Str2958));
-
-			// подписываемся на событие разрыва соединения
-			Trader.ConnectionError += error => this.GuiAsync(() => MessageBox.Show(this, error.ToString()));
-
-
-			// подписываемся на ошибку подписки маркет-данных
-			Trader.MarketDataSubscriptionFailed += (security, type, error) =>
-				this.GuiAsync(() => MessageBox.Show(this, error.ToString(), LocalizedStrings.Str2956Params.Put(type, security)));
-
-			// добавляем инструменты в коллекцию инструментов SecurityPicker
-			Trader.NewSecurities += securities => _securitiesWindow.SecurityPicker.Securities.AddRange(securities);
-			
-			Trader.NewMyTrades += trades => _myTradesWindow.TradeGrid.Trades.AddRange(trades);
-			Trader.NewTrades += trades => _tradesWindow.TradeGrid.Trades.AddRange(trades);
-			Trader.NewOrders += orders => _ordersWindow.OrderGrid.Orders.AddRange(orders);
-			Trader.NewStopOrders += orders => _stopOrderWindow.OrderGrid.Orders.AddRange(orders);
-			Trader.OrdersRegisterFailed += fails => fails.ForEach(fail => this.GuiAsync(() => MessageBox.Show(this, fail.Error.Message, LocalizedStrings.Str2960)));
-			Trader.OrdersCancelFailed += fails => fails.ForEach(fail => this.GuiAsync(() => MessageBox.Show(this, fail.Error.Message, LocalizedStrings.Str2981)));
-			Trader.StopOrdersRegisterFailed += fails => fails.ForEach(fail => this.GuiAsync(() => MessageBox.Show(this, fail.Error.Message, LocalizedStrings.Str2960)));
-			Trader.StopOrdersCancelFailed += fails => fails.ForEach(fail => this.GuiAsync(() => MessageBox.Show(this, fail.Error.Message, LocalizedStrings.Str2981)));
-			Trader.NewPortfolios += portfolios => _portfoliosWindow.PortfolioGrid.Portfolios.AddRange(portfolios);
-			Trader.NewPositions += positions => _portfoliosWindow.PortfolioGrid.Positions.AddRange(positions);
-
-			// устанавливаем поставщик маркет-данных для SecurityPicker
-			_securitiesWindow.SecurityPicker.MarketDataProvider = Trader;
-
-			ShowSecurities.IsEnabled = ShowTrades.IsEnabled =
-				ShowMyTrades.IsEnabled = ShowOrders.IsEnabled =
-					ShowPortfolios.IsEnabled = ShowStopOrders.IsEnabled = true;
-		}
-
-		Trader.Connect();
-
-		_isConnected = true;
-		ConnectBtn.Content = LocalizedStrings.Disconnect;
-	}
-	else
-	{
-		Trader.Disconnect();
-
-		_isConnected = false;
-		ConnectBtn.Content = LocalizedStrings.Connect;
-	}
+    ......................................
+	_connector.NewSecurity += security => _securitiesWindow.SecurityPicker.Securities.Add(security);
+	// устанавливаем поставщик маркет-данных
+	_securitiesWindow.SecurityPicker.MarketDataProvider = _connector;
+	......................................
 }
 
 private void SecurityPicker_OnSecuritySelected(Security security)
@@ -197,7 +113,6 @@ private void SecurityPicker_OnSecuritySelected(Security security)
 	NewStopOrder.IsEnabled = NewOrder.IsEnabled =
 	Level1.IsEnabled = Depth.IsEnabled = security != null;
 }
-
 ]]>
               </code>
           </content>
@@ -205,12 +120,6 @@ private void SecurityPicker_OnSecuritySelected(Security security)
    </sections>
 </section>
       
-    </introduction>
-    
-         <!--<relatedTopics>
-       <link xlink:href="3dc4f866-ab4e-4c74-a627-13727abdb966">SecurityPickerWindow</link>
-    </relatedTopics>-->
-
-    
+    </introduction> 
   </developerConceptualDocument>
 </topic>

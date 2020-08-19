@@ -42,20 +42,14 @@ namespace StockSharp.Algo.Indicators
 			Length = 10;
 		}
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
 			_slope = 0;
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var newValue = input.GetValue<decimal>();
@@ -86,7 +80,7 @@ namespace StockSharp.Algo.Indicators
 				var sumXy = 0m; //сумма x*y
 				var sumX2 = 0m; //сумма x^2
 
-				for (int i = 0; i < Length; i++)
+				for (var i = 0; i < Length; i++)
 				{
 					sumX += i;
 					sumY += buff.ElementAt(i);
@@ -95,7 +89,7 @@ namespace StockSharp.Algo.Indicators
 				}
 
 				//коэффициент при независимой переменной
-				var divisor = (Length * sumX2 - sumX * sumX);
+				var divisor = Length * sumX2 - sumX * sumX;
 				if (divisor == 0) _slope = 0;
 				else _slope = (Length * sumXy - sumX * sumY) / divisor;
 
@@ -105,7 +99,7 @@ namespace StockSharp.Algo.Indicators
 				//счиаем сумму квадратов ошибок
 				var sumErr2 = 0m; //сумма квадратов ошибок
 
-				for (int i = 0; i < Length; i++)
+				for (var i = 0; i < Length; i++)
 				{
 					var y = buff.ElementAt(i); // значение
 					var yEst = _slope * i + b; // оценка по регрессии

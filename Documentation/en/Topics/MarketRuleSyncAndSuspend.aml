@@ -3,85 +3,39 @@
 	<developerWalkthroughDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
     <introduction>
     	<para>
-				Иногда требуется установить одновременно несколько правил, чтобы каждое из них было активно только тогда, когда завершено формирование всех этих правил.
-				Для этого используется метод <codeEntityReference qualifyHint="true">M:StockSharp.Algo.MarketRuleHelper.SuspendRules(System.Action)</codeEntityReference>.
+				Sometimes you want to set multiple rules in suspension mode (prevent to trigger any of them until code initialization will be finished).
+				To do this, the <codeEntityReference qualifyHint="true">M:StockSharp.Algo.MarketRuleHelper.SuspendRules(System.Action)</codeEntityReference>
+				method is used.
 		</para>
     
     </introduction>
 
-	<!-- <procedure>
-		<title>Синхронизация правил</title>
-		<steps class="ordered">
-			<step>
-				><content>
-					<para>Для синхронизации правил необходимо создать объект синхронизации:</para>
-			
-					<code language="C#">
-					<![CDATA[
-private readonly object _syncToken = new object();
-					]]>
-					</code>					
-				</content> 
-			</step>
-			
-			<step>
-				<content>
-					<para>Затем вызвать 
-					<codeEntityReference qualifyHint="true" autoUpgrade="true">M:StockSharp.Algo.MarketRuleHelper.Sync``1(``0,Ecng.Common.SyncObject)</codeEntityReference> 
-					у нужных правил:</para>
-					
-					<code language="C#">
-					<![CDATA[
-
-order
-	.WhenRegistered()
-	.Do(() => this.AddInfoLog("Заявка успешно зарегестрирована"))
-	.Once()
-	.Sync(_syncToken)
-	.Apply(this);
-	
-order
-	.WhenRegisterFailed()
-	.Do(() => this.AddInfoLog("Заявка не принята биржей"))
-	.Once()
-	.Sync(_syncToken)
-	.Apply(this);
-					]]>
-					</code>							
-				</content>
-			</step>			
-		</steps>
-	</procedure> -->
-	
 
     <section address="Section2">
-		<title>Использование приостановки правил</title>
+		<title>Rules suspension using</title>
 		<content>
 			<procedure>
 				<steps class="bullet">
 				<step>
 						<content>
-							<para>Вне стратегии:</para>
+							<para>Out of the strategy:</para>
 			
 							<code language="C#">
 							<![CDATA[
 MarketRuleHelper.SuspendRules(() =>	
 {
 	order
-		.WhenRegistered()
-		.Do(() => trader.AddInfoLog("Заявка успешно зарегестрирована"))
+		.WhenRegistered(Connector)
+		.Do(() => Connector.AddInfoLog("The order was successfully registered."))
 		.Once()
 		.Apply(this);
 	
 	order
-		.WhenCancelled()
-		.Do(() => trader.AddInfoLog("Заявка успешно отменена"))
+		.WhenCancelled(Connector)
+		.Do(() => Connector.AddInfoLog("The order was successfully cancelled."))
 		.Once()
 		.Apply(this);
 });
-
-// регистрация заявки
-trader.RegisterOrder(order);
 							]]>
 							</code>				
 						</content>
@@ -89,7 +43,7 @@ trader.RegisterOrder(order);
 			
 					<step>
 						<content>
-							<para>Внутри стратегии:</para>
+							<para>Inside the strategy:</para>
 					
 							<code language="C#">
 							<![CDATA[
@@ -97,24 +51,20 @@ class FirstStrategy : Strategy
 {
 	...
 	
-    protected override void OnStarting()
-    {
-		this.SuspendRules(() =>
-		{
-			_series
-				.WhenCandlesFinished()
-				.Do(FinishCandle)
-				.Apply(this);
+       this.SuspendRules(() =>
+       {
+		_connector
+               .WhenCandlesFinished(_series)
+               .Do(FinishCandle)
+               .Apply(this);
 
-			Security
-				.WhenNewTrades()
-				.Do(NewTrade)
-				.Apply(this);
-		});
+           Security
+               .WhenNewTrade(Connector)
+               .Do(NewTrade)
+               .Apply(this);
+       });
+   }
 
-        base.OnStarting();
-    }
-    
     ...
 }
 							]]>

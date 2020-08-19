@@ -20,6 +20,7 @@ namespace StockSharp.Algo.Indicators
 	/// <summary>
 	/// The part of the indicator <see cref="DirectionalIndex"/>.
 	/// </summary>
+	[IndicatorIn(typeof(CandleIndicatorValue))]
 	public abstract class DiPart : LengthIndicator<decimal>
 	{
 		private readonly AverageTrueRange _averageTrueRange;
@@ -38,9 +39,7 @@ namespace StockSharp.Algo.Indicators
 			Length = 5;
 		}
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
@@ -52,23 +51,17 @@ namespace StockSharp.Algo.Indicators
 			_isFormed = false;
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _isFormed;
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			decimal? result = null;
 
 			var candle = input.GetValue<Candle>();
 
-			// задержка в 1 период
+			// 1 period delay
 			_isFormed = _averageTrueRange.IsFormed && _movingAverage.IsFormed;
 
 			_averageTrueRange.Process(input);
@@ -77,11 +70,10 @@ namespace StockSharp.Algo.Indicators
 			{
 				var trValue = _averageTrueRange.GetCurrentValue();
 
-				// не вносить в тернарный оператор! 
 				var maValue = _movingAverage.Process(new DecimalIndicatorValue(this, GetValue(candle, _lastCandle)) { IsFinal = input.IsFinal });
 
 				if (!maValue.IsEmpty)
-					result = (trValue != 0m) ? (100m * maValue.GetValue<decimal>() / trValue) : 0m;
+					result = trValue != 0m ? 100m * maValue.GetValue<decimal>() / trValue : 0m;
 			}
 
 			if (input.IsFinal)

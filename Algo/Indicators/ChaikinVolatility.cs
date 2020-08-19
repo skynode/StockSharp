@@ -30,6 +30,7 @@ namespace StockSharp.Algo.Indicators
 	/// </remarks>
 	[DisplayName("Chaikin's Volatility")]
 	[DescriptionLoc(LocalizedStrings.Str730Key)]
+	[IndicatorIn(typeof(CandleIndicatorValue))]
 	public class ChaikinVolatility : BaseIndicator
 	{
 		/// <summary>
@@ -59,16 +60,10 @@ namespace StockSharp.Algo.Indicators
 		[CategoryLoc(LocalizedStrings.GeneralKey)]
 		public RateOfChange Roc { get; }
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => Roc.IsFormed;
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var candle = input.GetValue<Candle>();
@@ -76,34 +71,29 @@ namespace StockSharp.Algo.Indicators
 
 			if (Ema.IsFormed)
 			{
-				return Roc.Process(emaValue);
+				var val = Roc.Process(emaValue);
+				return new DecimalIndicatorValue(this, val.GetValue<decimal>());
 			}
 
-			return input;				
+			return new DecimalIndicatorValue(this);
 		}
 
-		/// <summary>
-		/// Load settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Load(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Load(SettingsStorage storage)
 		{
-			base.Load(settings);
+			base.Load(storage);
 
-			Ema.LoadNotNull(settings, "Ema");
-			Roc.LoadNotNull(settings, "Roc");
+			Ema.LoadNotNull(storage, nameof(Ema));
+			Roc.LoadNotNull(storage, nameof(Roc));
 		}
 
-		/// <summary>
-		/// Save settings.
-		/// </summary>
-		/// <param name="settings">Settings storage.</param>
-		public override void Save(SettingsStorage settings)
+		/// <inheritdoc />
+		public override void Save(SettingsStorage storage)
 		{
-			base.Save(settings);
+			base.Save(storage);
 
-			settings.SetValue("Ema", Ema.Save());
-			settings.SetValue("Roc", Roc.Save());
+			storage.SetValue(nameof(Ema), Ema.Save());
+			storage.SetValue(nameof(Roc), Roc.Save());
 		}
 	}
 }

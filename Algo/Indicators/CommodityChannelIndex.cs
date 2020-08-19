@@ -25,6 +25,7 @@ namespace StockSharp.Algo.Indicators
 	/// </summary>
 	[DisplayName("CCI")]
 	[DescriptionLoc(LocalizedStrings.Str760Key)]
+	[IndicatorIn(typeof(CandleIndicatorValue))]
 	public class CommodityChannelIndex : LengthIndicator<decimal>
 	{
 		private readonly MeanDeviation _mean = new MeanDeviation();
@@ -37,25 +38,17 @@ namespace StockSharp.Algo.Indicators
 			Length = 15;
 		}
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			_mean.Length = Length;
 			base.Reset();
 		}
 
-		/// <summary>
-		/// Whether the indicator is set.
-		/// </summary>
+		/// <inheritdoc />
 		public override bool IsFormed => _mean.IsFormed;
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var candle = input.GetValue<Candle>();

@@ -21,10 +21,12 @@ namespace StockSharp.Algo.Indicators
 	using StockSharp.Localization;
 
 	/// <summary>
-	/// Cadle volume.
+	/// Candle volume.
 	/// </summary>
 	[DisplayName("Volume")]
 	[DescriptionLoc(LocalizedStrings.Str756Key)]
+	[IndicatorIn(typeof(CandleIndicatorValue))]
+	[IndicatorOut(typeof(CandleIndicatorValue))]
 	public class VolumeIndicator : BaseIndicator
 	{
 		/// <summary>
@@ -34,11 +36,7 @@ namespace StockSharp.Algo.Indicators
 		{
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			if (input.IsFinal)

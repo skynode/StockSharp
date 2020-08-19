@@ -19,20 +19,20 @@
 			<codeEntityReference qualifyHint="true">Overload:StockSharp.Algo.TraderHelper.GetTheoreticalTrades</codeEntityReference>:
 		</para>
 		<code language="C#"><![CDATA[// получить стакан опциона
-var depth = trader.GetMarketDepth(option);
+var depth = _connector.GetMarketDepth(option);
 
-// получить теоритические сделки на покупку 100 контрактов
-var trades = depth.GetTheoreticalTrades(OrderDirections.Buy, 100);
+// получить теоретические сделки на покупку 100 контрактов
+var trades = depth.GetTheoreticalTrades(Sides.Buy, 100);
 
-// расчитать реализованный объем
+// рассчитать реализованный объем
 var matchedVolume = trades.Sum(t => t.Trade.Volume);
 
 // регистрируем заявку по основному опциону
-trader.RegisterOrder(new Order
+_connector.RegisterOrder(new Order
 {
 	Security = option,
 	Volume = matchedVolume,
-	Direction = OrderDirections.Buy,
+	Direction = Sides.Buy,
 	// максимальная цена, чтобы реализовать требуемый объем
 	Price = trades.Max(t => t.Trade.Price),
 });
@@ -49,7 +49,7 @@ if (elapsedVolume > 0)
 	// регистрируем оставшийся объем по синтетическим инструментам
 	foreach (var pair in syntheticBuy)
 	{
-		trader.RegisterOrder(new Order
+		_connector.RegisterOrder(new Order
 		{
 			Security = pair.Key,
 			Volume = elapsedVolume,
@@ -109,12 +109,6 @@ if (elapsedVolume > 0)
       <codeEntityReference>T:MyNamespace.MyClass</codeEntityReference>
       <codeEntityReference>P:MyNamespace.MyClass.MyProp</codeEntityReference>
       <codeEntityReference>M:System.IO.File.OpenText(System.String)</codeEntityReference>
-
-      <externalLink>
-        <linkText>Sandcastle Styles</linkText>
-        <linkAlternateText>Sandcastle Styles on CodePlex</linkAlternateText>
-        <linkUri>http://www.codeplex.com/SandcastleStyles</linkUri>
-      </externalLink>
 
       <externalLink>
         <linkText>Change Log</linkText>

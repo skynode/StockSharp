@@ -1,16 +1,23 @@
 namespace StockSharp.Localization
 {
+	using Ecng.Common;
+
 	partial class LocalizedStrings
 	{
 		/// <summary>
 		/// 
 		/// </summary>
-		public const string Dot = "Dot";
+		public const string Dot = nameof(Dot);
 
 		private static string AppendDot(string value)
 		{
 			return value + ".";
 		}
+
+		/// <summary>
+		///
+		/// </summary>
+		public static string AreaColorDot => AppendDot(AreaColor);
 
 		/// <summary>
 		/// 
@@ -261,5 +268,370 @@ namespace StockSharp.Localization
 		/// 
 		/// </summary>
 		public static string Str1405Dot => AppendDot(Str1405);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string PnLDot => AppendDot(PnL);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str862Dot => AppendDot(Str862);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string SecurityIdDot => AppendDot(SecurityId);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str349Dot => AppendDot(Str349);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string BestPairDot => AppendDot(BestPair);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str293Dot => AppendDot(Str293);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str299Dot => AppendDot(Str299);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str232Dot => AppendDot(Str232);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str321Dot => AppendDot(Str321);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string AveragePriceDot => AppendDot(AveragePrice);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str9Dot => AppendDot(Str9);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str345Dot => AppendDot(Str345);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str2223Dot => AppendDot(Str2223);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str2235Dot => AppendDot(Str2235);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string TimeZoneDot => AppendDot(TimeZone);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str2237Dot => AppendDot(Str2237);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string SecurityDot => AppendDot(Security);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string VersionDot => AppendDot(Version);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string TemplateDot => AppendDot(Template);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string CsvHeaderDot => AppendDot(CsvHeader);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str3526Dot => AppendDot(Str3526);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str135Dot => AppendDot(Str135);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str1864Dot => AppendDot(Str1864);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str2572TrailingDelta => Str2572.Put(TrailingDelta);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str2577TrailingReferencePrice => Str2572.Put(TrailingReferencePrice);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str3423Dot => AppendDot(Str3423);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string FastSettingsDot => AppendDot(FastSettings);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string NewsDot => AppendDot(News);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string NewsSkrinDot => AppendDot(NewsSkrin);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string EnabledDot => AppendDot(Enabled);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string SettingsFileDot => AppendDot(SettingsFile);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string FondMarketDot => AppendDot(FondMarket);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string CurrencyMarketDot => AppendDot(CurrencyMarket);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str436Dot => AppendDot(Str436);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string OrdersDot => AppendDot(Orders);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str985Dot => AppendDot(Str985);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string SecuritiesDot => AppendDot(Securities);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str1324Dot => AppendDot(Str1324);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string CancelOnDisconnectDot => AppendDot(CancelOnDisconnect);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string TurnoverDot => AppendDot(Turnover);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string ResultTypeDot => AppendDot(ResultType);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string IssueSizeDot => AppendDot(IssueSize);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string IssueDateDot => AppendDot(IssueDate);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string UnderlyingSecurityTypeDot => AppendDot(UnderlyingSecurityType);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string PassphraseDot => AppendDot(Passphrase);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string MiddleLineDot => AppendDot(MiddleLine);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string UpperLineDot => AppendDot(UpperLine);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string LowerLineDot => AppendDot(LowerLine);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string PnFBoxSizeDot => AppendDot(PnFBoxSize);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string TrailingStopLossDot => AppendDot(TrailingStopLoss);
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str261Dot => AppendDot(Str261);
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string OrderFlagsDot => AppendDot(OrderFlags);
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str3400Dot => AppendDot(Str3400);
+				
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string CryptoAddressDot => AppendDot(CryptoAddress);
+				
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string PaymentIdDot => AppendDot(PaymentId);
+						
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string IbanDot => AppendDot(Iban);
+						
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string WithdrawDot => AppendDot(Withdraw);
+								
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string WithdrawInfoDot => AppendDot(WithdrawInfo);
+										
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string CurrencyDot => AppendDot(Currency);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string CountryDot => AppendDot(Country);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string CityDot => AppendDot(City);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string PostalCodeDot => AppendDot(PostalCode);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string NameDot => AppendDot(Name);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string ChargeFeeDot => AppendDot(ChargeFee);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string SslCertificateDot => AppendDot(SslCertificate);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string StorageFormatDot => AppendDot(StorageFormat);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string OrderSideDot => AppendDot(OrderSide);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str3506Dot => AppendDot(Str3506);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string DateTimeFormatDot => AppendDot(DateTimeFormat);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string TimeFormatDot => AppendDot(TimeFormat);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str437Dot => AppendDot(Str437);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string TransactionIdDot => AppendDot(TransactionId);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string Str254Dot => AppendDot(Str254);
 	}
 }

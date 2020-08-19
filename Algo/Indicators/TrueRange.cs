@@ -27,6 +27,7 @@ namespace StockSharp.Algo.Indicators
 	/// </summary>
 	[DisplayName("TR")]
 	[DescriptionLoc(LocalizedStrings.Str775Key)]
+	[IndicatorIn(typeof(CandleIndicatorValue))]
 	public class TrueRange : BaseIndicator
 	{
 		private Candle _prevCandle;
@@ -38,9 +39,7 @@ namespace StockSharp.Algo.Indicators
 		{
 		}
 
-		/// <summary>
-		/// To reset the indicator status to initial. The method is called each time when initial settings are changed (for example, the length of period).
-		/// </summary>
+		/// <inheritdoc />
 		public override void Reset()
 		{
 			base.Reset();
@@ -63,11 +62,7 @@ namespace StockSharp.Algo.Indicators
 			};
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var candle = input.GetValue<Candle>();

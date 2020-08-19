@@ -27,12 +27,6 @@ namespace StockSharp.Community
 		Studio,
 
 		///// <summary>
-		///// S#.Server.
-		///// </summary>
-		//[EnumMember]
-		//Server,
-
-		///// <summary>
 		///// S#.StrategyRunner.
 		///// </summary>
 		//[EnumMember]
@@ -49,5 +43,35 @@ namespace StockSharp.Community
 		/// </summary>
 		[EnumMember]
 		Terminal,
+
+		/// <summary>
+		/// S#.Server.
+		/// </summary>
+		[EnumMember]
+		Server,
+
+		/// <summary>
+		/// S#.Shell.
+		/// </summary>
+		[EnumMember]
+		Shell,
+
+		/// <summary>
+		/// S#.MatLab.
+		/// </summary>
+		[EnumMember]
+		MatLab,
+
+		/// <summary>
+		/// S#.Ë×È.
+		/// </summary>
+		[EnumMember]
+		Lci,
+
+		/// <summary>
+		/// S#.Updater.
+		/// </summary>
+		[EnumMember]
+		Installer,
 	}
 }

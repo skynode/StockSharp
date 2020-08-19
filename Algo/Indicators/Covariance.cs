@@ -28,6 +28,7 @@ namespace StockSharp.Algo.Indicators
 	/// </remarks>
 	[DisplayName("COV")]
 	[DescriptionLoc(LocalizedStrings.CovarianceKey, true)]
+	[IndicatorIn(typeof(PairIndicatorValue<decimal>))]
 	public class Covariance : LengthIndicator<Tuple<decimal, decimal>>
 	{
 		/// <summary>
@@ -38,11 +39,7 @@ namespace StockSharp.Algo.Indicators
 			Length = 20;
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var value = input.GetValue<Tuple<decimal, decimal>>();

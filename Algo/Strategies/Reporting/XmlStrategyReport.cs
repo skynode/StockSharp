@@ -51,9 +51,7 @@ namespace StockSharp.Algo.Strategies.Reporting
 		{
 		}
 
-		/// <summary>
-		/// To generate the report.
-		/// </summary>
+		/// <inheritdoc />
 		public override void Generate()
 		{
 			new XElement("strategies",
@@ -63,10 +61,10 @@ namespace StockSharp.Algo.Strategies.Reporting
 						new XElement("security", strategy.Security != null ? strategy.Security.Id : string.Empty),
 						new XElement("portfolio", strategy.Portfolio != null ? strategy.Portfolio.Name : string.Empty),
 						new XElement("parameters",
-							strategy.Parameters.SyncGet(c => c.ToArray()).Select(p =>
+							strategy.Parameters.CachedValues.Select(p =>
 								new XElement("parameter",
 									new XElement("name", p.Name),
-									new XElement("value", p.Value is TimeSpan ? Format((TimeSpan)p.Value) : p.Value)
+									new XElement("value", p.Value is TimeSpan ts ? Format(ts) : p.Value)
 									))),
 						new XElement("totalWorkingTime", Format(strategy.TotalWorkingTime)),
 						new XElement("commission", strategy.Commission),
@@ -78,7 +76,7 @@ namespace StockSharp.Algo.Strategies.Reporting
 							strategy.StatisticManager.Parameters.SyncGet(c => c.ToArray()).Select(p =>
 								new XElement("parameter",
 									new XElement("name", p.Name),
-									new XElement("value", p.Value is TimeSpan ? Format((TimeSpan)p.Value) : p.Value)
+									new XElement("value", p.Value is TimeSpan ts ? Format(ts) : p.Value)
 									))),
 						new XElement("orders",
 							strategy.Orders.OrderBy(o => o.TransactionId).Select(o =>
@@ -88,13 +86,14 @@ namespace StockSharp.Algo.Strategies.Reporting
 									new XElement("direction", o.Direction),
 									new XElement("time", Format(o.Time)),
 									new XElement("price", o.Price),
-									new XElement("averagePrice", o.GetAveragePrice(strategy.Connector)),
 									new XElement("state", o.State),
 									new XElement("balance", o.Balance),
 									new XElement("volume", o.Volume),
 									new XElement("type", o.Type),
 									new XElement("latencyRegistration", Format(o.LatencyRegistration)),
-									new XElement("latencyCancellation", Format(o.LatencyCancellation))
+									new XElement("latencyCancellation", Format(o.LatencyCancellation)),
+									new XElement("latencyEdition", Format(o.LatencyEdition)),
+									new XElement("parameters", o.Condition?.Parameters.Select(p => new XElement(p.Key, p.Value)))
 									))),
 						new XElement("trades",
 							strategy.MyTrades.OrderBy(t => t.Order.TransactionId).Select(t =>
@@ -105,23 +104,8 @@ namespace StockSharp.Algo.Strategies.Reporting
 									new XElement("price", t.Trade.Price),
 									new XElement("volume", t.Trade.Volume),
 									new XElement("order", t.Order.Id),
-									new XElement("PnL", strategy.PnLManager.ProcessMessage(t.ToMessage()).PnL),
+									new XElement("PnL", strategy.PnLManager.ProcessMessage(t.ToMessage())?.PnL),
 									new XElement("slippage", t.Slippage)
-									))),
-						new XElement("stopOrders",
-							strategy.StopOrders.OrderBy(o => o.TransactionId).Select(o =>
-								new XElement("order",
-									new XElement("id", o.Id),
-									new XElement("transactionId", o.TransactionId),
-									new XElement("direction", o.Direction),
-									new XElement("time", Format(o.Time)),
-									new XElement("price", o.Price),
-									new XElement("state", o.State),
-									new XElement("volume", o.Volume),
-									new XElement("latencyRegistration", Format(o.LatencyRegistration)),
-									new XElement("latencyCancellation", Format(o.LatencyCancellation)),
-									new XElement("derivedOrderId", o.DerivedOrder != null ? (object)o.DerivedOrder.Id : string.Empty),
-									new XElement("parameters", o.Condition.Parameters.Select(p => new XElement(p.Key, p.Value)))
 									)))
 					))
 				).Save(FileName);

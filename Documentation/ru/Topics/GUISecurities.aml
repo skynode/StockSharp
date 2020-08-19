@@ -16,7 +16,7 @@
   			
   			<listItem>
   				<para>Компоненты для поиска и выбора инструментов - <codeEntityReference>T:StockSharp.Xaml.SecurityPicker</codeEntityReference>, 
-  				<codeEntityReference>T:StockSharp.Xaml.SecurityPickerWindow</codeEntityReference> и <codeEntityReference>T:StockSharp.Xaml.SecurityEditor</codeEntityReference>.
+  				<codeEntityReference>T:StockSharp.Xaml.SecurityPickerWindow</codeEntityReference> и <codeEntityReference>T:StockSharp.Xaml.PropertyGrid.SecurityEditor</codeEntityReference>.
   				</para>
   			</listItem>
   			
@@ -24,7 +24,7 @@
   			
   			<listItem>
   				<para>Компоненты для создания непрерывных и индексных инструментов - <codeEntityReference>T:StockSharp.Xaml.ContinuousSecurityWindow</codeEntityReference> и 
-  				<codeEntityReference>T:StockSharp.Algo.Expressions.Xaml.IndexSecurityWindow</codeEntityReference>. </para>
+  				<codeEntityReference>T:StockSharp.Xaml.IndexEditor</codeEntityReference>. </para>
   			</listItem>
   			
 		</list>

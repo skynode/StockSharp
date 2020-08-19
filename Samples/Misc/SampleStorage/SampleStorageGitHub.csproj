@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\common_samples.props" />
+  <PropertyGroup>
+    <ProjectGuid>{9E39C9C9-C05C-4D79-ADAA-22C287E02F78}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>SampleStorage</RootNamespace>
+    <AssemblyName>SampleStorage</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>..\..\..\stocksharp.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="..\..\..\stocksharp.ico">
+      <Link>stocksharp.ico</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Algo\Algo.csproj" />
+  </ItemGroup>
+</Project>

@@ -3,14 +3,14 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:loc="clr-namespace:StockSharp.Localization;assembly=StockSharp.Localization"
 		Title="{x:Static loc:LocalizedStrings.XamlStr562}" Height="520" Width="834"
-		xmlns:sx="clr-namespace:StockSharp.Xaml;assembly=StockSharp.Xaml"
-		xmlns:ex="clr-namespace:Ecng.Xaml.Converters;assembly=Ecng.Xaml"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+		xmlns:sx="http://schemas.stocksharp.com/xaml"
+		xmlns:ex="clr-namespace:Ecng.Xaml;assembly=Ecng.Xaml"
+        xmlns:exc="clr-namespace:Ecng.Xaml.Converters;assembly=Ecng.Xaml"
         xmlns:charting="http://schemas.stocksharp.com/xaml"
-        xmlns:xaml="clr-namespace:Ecng.Xaml;assembly=Ecng.Xaml">
+        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors">
 
 	<Window.Resources>
-		<ex:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" FalseVisibilityValue="Hidden" />
+		<exc:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" FalseVisibilityValue="Hidden" />
 	</Window.Resources>
 
 	<Grid>
@@ -43,9 +43,9 @@
 				</Grid.RowDefinitions>
 
 				<Label Grid.Column="0" Grid.Row="0" Content="{x:Static loc:LocalizedStrings.XamlStr593}" />
-                <xaml:FolderBrowserPicker x:Name="HistoryPath" Grid.Column="1" Grid.Row="0" />
+                <ex:FolderBrowserPicker x:Name="HistoryPath" Grid.Column="1" Grid.Row="0" />
 
-                <Grid Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="2">
+                <Grid Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="2">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="130" />
 						<ColumnDefinition Width="*" />
@@ -68,12 +68,13 @@
 						<RowDefinition Height="23" />
 						<RowDefinition Height="23" />
 						<RowDefinition Height="23" />
+						<RowDefinition Height="23" />
 					</Grid.RowDefinitions>
 
 					<TextBox x:Name="SecId" />
 					<StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-						<xctk:DateTimePicker x:Name="From" Width="180" />
-						<xctk:DateTimePicker x:Name="To"  Width="180" />
+						<dxe:DateEdit x:Name="From" Width="180" />
+						<dxe:DateEdit x:Name="To"  Width="180" />
 
 						<CheckBox Content="{x:Static loc:LocalizedStrings.XamlStr117}" VerticalAlignment="Center" Name="DebugLogCheckBox" Click="CheckBoxClick" />
 					</StackPanel>
@@ -87,6 +88,7 @@
 					<ProgressBar x:Name="Level1Progress" Grid.Column="1" Grid.Row="8" />
 					<ProgressBar x:Name="FinamCandlesProgress" Grid.Column="1" Grid.Row="9" />
 					<ProgressBar x:Name="YahooCandlesProgress" Grid.Column="1" Grid.Row="10" />
+					<ProgressBar x:Name="RandomProgress" Grid.Column="1" Grid.Row="11" />
 
 					<CheckBox Content="{x:Static loc:LocalizedStrings.Ticks}" Grid.Row="2" Grid.Column="0" Name="TicksCheckBox" Click="CheckBoxClick" />
 					<CheckBox Content="{x:Static loc:LocalizedStrings.XamlStr757}" Grid.Row="3" Grid.Column="0" Name="TicksAndDepthsCheckBox" Click="CheckBoxClick" />
@@ -97,20 +99,21 @@
 					<CheckBox Content="{x:Static loc:LocalizedStrings.Level1}" Grid.Row="8" Grid.Column="0" Name="Level1CheckBox" Click="CheckBoxClick" />
 					<CheckBox Content="{x:Static loc:LocalizedStrings.FinamCandles}" Grid.Row="9" Grid.Column="0" Name="FinamCandlesCheckBox" Click="CheckBoxClick" />
 					<CheckBox Content="{x:Static loc:LocalizedStrings.YahooCandles}" Grid.Row="10" Grid.Column="0" Name="YahooCandlesCheckBox" Click="CheckBoxClick" />
+					<CheckBox Content="{x:Static loc:LocalizedStrings.Random}" Grid.Row="11" Grid.Column="0" Name="RandomCheckBox" Click="CheckBoxClick" />
 
-                    <StackPanel Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+                    <StackPanel Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
                         <Button x:Name="StartBtn" Content="{x:Static loc:LocalizedStrings.Str2421}" Width="100" Click="StartBtnClick" IsEnabled="False"/>
                         <Button x:Name="PauseBtn" Content="{x:Static loc:LocalizedStrings.Pause}" Width="100" Click="PauseBtnClick" IsEnabled="False"/>
                         <Button x:Name="StopBtn" Content="{x:Static loc:LocalizedStrings.Str242}" Width="100" HorizontalAlignment="Left" Click="StopBtnClick" IsEnabled="False"/>
                     </StackPanel>
 					
-					<CheckBox x:Name="GenDepthsCheckBox" Content="{x:Static loc:LocalizedStrings.XamlStr97}" Grid.Row="12" Grid.Column="0" Click="CheckBoxClick" />
-					<CheckBox x:Name="ShowDepth" Content="{x:Static loc:LocalizedStrings.XamlStr85}" Grid.Row="13" Grid.Column="0" IsChecked="True" />
+					<CheckBox x:Name="GenDepthsCheckBox" Content="{x:Static loc:LocalizedStrings.XamlStr97}" Grid.Row="13" Grid.Column="0" Click="CheckBoxClick" />
+					<CheckBox x:Name="ShowDepth" Content="{x:Static loc:LocalizedStrings.XamlStr85}" Grid.Row="14" Grid.Column="0" IsChecked="True" />
 					
-					<TextBox x:Name="MaxDepth" Grid.Row="14" Grid.Column="0" IsEnabled="{Binding ElementName=GenDepthsCheckBox, Path=IsChecked}" TextAlignment="Right" ToolTip="{x:Static loc:LocalizedStrings.XamlStr291}">1</TextBox>
-					<TextBox x:Name="MaxVolume" Grid.Row="15" Grid.Column="0" IsEnabled="{Binding ElementName=GenDepthsCheckBox, Path=IsChecked}" TextAlignment="Right" ToolTip="{x:Static loc:LocalizedStrings.XamlStr293}">1</TextBox>
+					<TextBox x:Name="MaxDepth" Grid.Row="15" Grid.Column="0" IsEnabled="{Binding ElementName=GenDepthsCheckBox, Path=IsChecked}" TextAlignment="Right" ToolTip="{x:Static loc:LocalizedStrings.XamlStr291}">1</TextBox>
+					<TextBox x:Name="MaxVolume" Grid.Row="16" Grid.Column="0" IsEnabled="{Binding ElementName=GenDepthsCheckBox, Path=IsChecked}" TextAlignment="Right" ToolTip="{x:Static loc:LocalizedStrings.XamlStr293}">1</TextBox>
 
-					<ComboBox x:Name="TimeFrame" Grid.Row="16" Grid.Column="0">
+					<ComboBox x:Name="TimeFrame" Grid.Row="17" Grid.Column="0">
 						<ComboBoxItem>1min</ComboBoxItem>
 						<ComboBoxItem>5min</ComboBoxItem>
 					</ComboBox>
@@ -260,6 +263,22 @@
 							</TabItem>
 							<TabItem Header="{x:Static loc:LocalizedStrings.Str862}">
 								<charting:EquityCurveChart x:Name="YahooCandlesPosition" />
+							</TabItem>
+						</TabControl>
+					</TabItem>
+					<TabItem Header="{x:Static loc:LocalizedStrings.Random}" Visibility="{Binding Converter={StaticResource BoolToVisibilityConverter}, ElementName=RandomCheckBox, Path=IsChecked}">
+						<TabControl>
+							<TabItem Header="{x:Static loc:LocalizedStrings.Candles}">
+								<charting:ChartPanel x:Name="RandomChart" ShowOverview="False" />
+							</TabItem>
+							<TabItem Header="{x:Static loc:LocalizedStrings.Equity}">
+								<charting:EquityCurveChart x:Name="RandomEquity" />
+							</TabItem>
+							<TabItem Header="{x:Static loc:LocalizedStrings.Str436}">
+								<sx:StatisticParameterGrid x:Name="RandomParameterGrid" />
+							</TabItem>
+							<TabItem Header="{x:Static loc:LocalizedStrings.Str862}">
+								<charting:EquityCurveChart x:Name="RandomPosition" />
 							</TabItem>
 						</TabControl>
 					</TabItem>

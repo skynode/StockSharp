@@ -21,6 +21,7 @@ namespace StockSharp.BusinessEntities
 
 	using Ecng.Common;
 	using Ecng.ComponentModel;
+	using Ecng.Serialization;
 
 	using StockSharp.Messages;
 
@@ -29,11 +30,10 @@ namespace StockSharp.BusinessEntities
 		static ExchangeBoard()
 		{
 			// NOTE
-			// описание ММВБ площадок взято из документа http://fs.rts.micex.ru/files/707
 
 			Associated = new ExchangeBoard
 			{
-				Code = "ALL",
+				Code = SecurityId.AssociatedBoardCode,
 				Exchange = Exchange.Test,
 			};
 
@@ -105,13 +105,16 @@ namespace StockSharp.BusinessEntities
 				// http://www.rts.ru/s355
 				new DateTime(2011, 3, 5),
 				
-				// http://rts.micex.ru/a254
+				// http://moex.com/a254
 				new DateTime(2012, 3, 11),
 				new DateTime(2012, 4, 28),
 				new DateTime(2012, 5, 5),
 				new DateTime(2012, 5, 12),
 				new DateTime(2012, 6, 9),
-				new DateTime(2012, 12, 29)
+				new DateTime(2012, 12, 29),
+
+				// http://moex.com/a3367
+				new DateTime(2016, 02, 20)
 			};
 
 			var russianSpecialHolidays = new[]
@@ -290,7 +293,7 @@ namespace StockSharp.BusinessEntities
 				new DateTime(2011, 6, 13),
 				new DateTime(2011, 11, 4),
 
-				// http://rts.micex.ru/a254
+				// http://moex.com/a254
 				new DateTime(2012, 1, 2),
 				new DateTime(2012, 2, 23),
 				new DateTime(2012, 3, 8),
@@ -303,7 +306,7 @@ namespace StockSharp.BusinessEntities
 				new DateTime(2012, 11, 5),
 				new DateTime(2012, 12, 31),
 
-				// http://rts.micex.ru/s690
+				// http://moex.com/a1343
 				new DateTime(2013, 1, 1),
 				new DateTime(2013, 1, 2),
 				new DateTime(2013, 1, 3),
@@ -312,8 +315,46 @@ namespace StockSharp.BusinessEntities
 				new DateTime(2013, 3, 8),
 				new DateTime(2013, 5, 1),
 				new DateTime(2013, 5, 9),
-				new DateTime(2013, 5, 10),
-				new DateTime(2013, 6, 12)
+				new DateTime(2013, 6, 12),
+				new DateTime(2013, 11, 4),
+				new DateTime(2013, 12, 31),
+
+				// http://moex.com/a2973
+				new DateTime(2014, 1, 1),
+				new DateTime(2014, 1, 2),
+				new DateTime(2014, 1, 3),
+				new DateTime(2014, 1, 7),
+				new DateTime(2014, 3, 10),
+				new DateTime(2014, 5, 1),
+				new DateTime(2014, 5, 9),
+				new DateTime(2014, 6, 12),
+				new DateTime(2014, 11, 4),
+				new DateTime(2014, 12, 31),
+				
+				// http://moex.com/a2793
+				new DateTime(2015, 1, 1),
+				new DateTime(2015, 1, 2),
+				new DateTime(2015, 1, 7),
+				new DateTime(2015, 2, 23),
+				new DateTime(2015, 3, 9),
+				new DateTime(2015, 5, 1),
+				new DateTime(2015, 5, 4),
+				new DateTime(2015, 5, 11),
+				new DateTime(2015, 6, 12),
+				new DateTime(2015, 11, 4),
+				new DateTime(2015, 12, 31),
+
+				// http://moex.com/a3367
+				new DateTime(2016, 1, 1),
+				new DateTime(2016, 1, 7),
+				new DateTime(2016, 1, 8),
+				new DateTime(2016, 2, 23),
+				new DateTime(2016, 3, 8),
+				new DateTime(2016, 5, 2),
+				new DateTime(2016, 5, 3),
+				new DateTime(2016, 5, 9),
+				new DateTime(2016, 6, 13),
+				new DateTime(2016, 11, 4),
 			};
 
 			//var moscowTime = TimeZoneInfo.FromSerializedString("Russian Standard Time;180;(UTC+03:00) Moscow, St. Petersburg, Volgograd (RTZ 2);Russia TZ 2 Standard Time;Russia TZ 2 Daylight Time;[01:01:0001;12:31:2010;60;[0;02:00:00;3;5;0;];[0;03:00:00;10;5;0;];][01:01:2011;12:31:2011;60;[0;02:00:00;3;5;0;];[0;00:00:00;1;1;6;];][01:01:2014;12:31:2014;60;[0;00:00:00;1;1;3;];[0;02:00:00;10;5;0;];];");
@@ -329,6 +370,7 @@ namespace StockSharp.BusinessEntities
 				Code = "FORTS",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -342,17 +384,18 @@ namespace StockSharp.BusinessEntities
 							},
 						}
 					},
-					SpecialWorkingDays = new List<DateTime>(russianSpecialWorkingDays),
-					SpecialHolidays = new List<DateTime>(russianSpecialHolidays),
+					SpecialWorkingDays = russianSpecialWorkingDays,
+					SpecialHolidays = russianSpecialHolidays,
 				},
 				ExpiryTime = new TimeSpan(18, 45, 00),
-				IsSupportAtomicReRegister = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
 
 			var micexWorkingTime = new WorkingTime
 			{
+				IsEnabled = true,
 				Periods = new List<WorkingTimePeriod>
 				{
 					new WorkingTimePeriod
@@ -364,16 +407,16 @@ namespace StockSharp.BusinessEntities
 						},
 					}
 				},
-				SpecialWorkingDays = new List<DateTime>(russianSpecialWorkingDays),
-				SpecialHolidays = new List<DateTime>(russianSpecialHolidays),
+				SpecialWorkingDays = russianSpecialWorkingDays,
+				SpecialHolidays = russianSpecialHolidays,
 			};
 
 			Micex = new ExchangeBoard
 			{
 				Code = "MICEX",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -382,8 +425,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "AUCT",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -392,8 +435,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "AUBB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -402,8 +445,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "CASF",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -412,8 +455,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQBR",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -422,8 +465,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQBS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -432,8 +475,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQDP",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -442,8 +485,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQEU",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -452,8 +495,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQUS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -462,8 +505,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQNB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -472,8 +515,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQNE",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -482,8 +525,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQNL",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -492,8 +535,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQNO",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -502,8 +545,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQOB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -512,8 +555,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQOS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -522,8 +565,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQOV",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -532,8 +575,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQLV",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -542,8 +585,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQDB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -552,8 +595,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQDE",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -562,8 +605,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQLI",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -572,8 +615,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQQI",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -582,8 +625,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "SMAL",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -592,8 +635,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "SPOB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -602,8 +645,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQBR",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -612,8 +655,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQDE",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -622,8 +665,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQBS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -632,8 +675,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQEU",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -642,8 +685,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQUS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -652,8 +695,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQNB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -662,8 +705,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQNE",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -672,8 +715,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQNL",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -682,8 +725,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQNO",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -692,8 +735,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQOB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -702,8 +745,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQOS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -712,8 +755,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQOV",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -722,8 +765,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQLV",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -732,8 +775,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQLI",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -742,8 +785,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TQQI",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -752,8 +795,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "EQRP",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -762,8 +805,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSRP",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -772,8 +815,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "RFND",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -782,8 +825,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TADM",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -792,8 +835,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "NADM",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -802,7 +845,7 @@ namespace StockSharp.BusinessEntities
 			//{
 			//	Code = "TRAN",
 			//	WorkingTime = micexWorkingTime.Clone(),
-			//	IsSupportMarketOrders = true,
+			//	//IsSupportMarketOrders = true,
 			//	Exchange = Exchange.Moex,
 			//	TimeZone = moscowTime,
 			//};
@@ -811,8 +854,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSAU",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -821,8 +864,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PAUS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -831,8 +874,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSBB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -841,8 +884,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSEQ",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -851,8 +894,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSES",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -861,8 +904,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSEU",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -871,8 +914,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSDB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -881,8 +924,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSDE",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -891,8 +934,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSUS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -901,8 +944,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSNB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -911,8 +954,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSNE",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -921,8 +964,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSNL",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -931,8 +974,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSNO",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -941,8 +984,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSOB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -951,8 +994,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSOS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -961,8 +1004,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSOV",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -971,8 +1014,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSLV",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -981,8 +1024,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSLI",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -991,8 +1034,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PSQI",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1001,8 +1044,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "RPEU",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1011,8 +1054,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "RPMA",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1021,8 +1064,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "RPMO",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1031,8 +1074,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "RPUA",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1041,8 +1084,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "RPUO",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1051,8 +1094,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "RPUQ",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1061,8 +1104,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "FBCB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1071,8 +1114,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "FBFX",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1081,8 +1124,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "IRK2",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1091,8 +1134,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "RPQI",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1101,8 +1144,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTEQ",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1111,8 +1154,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTES",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1121,8 +1164,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTEU",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1131,8 +1174,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTUS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1141,8 +1184,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTNB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1151,8 +1194,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTNE",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1161,8 +1204,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTNL",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1171,8 +1214,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTNO",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1181,8 +1224,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTOB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1191,8 +1234,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTOS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1201,8 +1244,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTOV",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1211,8 +1254,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTLV",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1221,8 +1264,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTLI",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1231,8 +1274,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "PTQI",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1241,8 +1284,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "SCVC",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1251,8 +1294,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "RPNG",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1261,8 +1304,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "RPFG",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1271,8 +1314,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "CBCR",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1281,8 +1324,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "CRED",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1291,8 +1334,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "DEPZ",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 			};
 
@@ -1300,8 +1343,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "DPVB",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1310,8 +1353,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "DPFK",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1320,8 +1363,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "DPFO",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1330,8 +1373,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "DPPF",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1340,8 +1383,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "CETS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1350,8 +1393,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "AETS",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1360,8 +1403,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "CNGD",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1370,8 +1413,8 @@ namespace StockSharp.BusinessEntities
 			{
 				Code = "TRAN",
 				WorkingTime = micexWorkingTime.Clone(),
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1379,8 +1422,8 @@ namespace StockSharp.BusinessEntities
 			MicexJunior = new ExchangeBoard
 			{
 				Code = "QJSIM",
-				IsSupportMarketOrders = true,
-				IsSupportAtomicReRegister = true,
+				//IsSupportMarketOrders = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Moex,
 				TimeZone = moscowTime,
 			};
@@ -1388,8 +1431,8 @@ namespace StockSharp.BusinessEntities
 			Spb = new ExchangeBoard
 			{
 				Code = "SPB",
-				IsSupportMarketOrders = false,
-				IsSupportAtomicReRegister = false,
+				//IsSupportMarketOrders = false,
+				//IsSupportAtomicReRegister = false,
 				Exchange = Exchange.Spb,
 				TimeZone = moscowTime,
 			};
@@ -1399,6 +1442,7 @@ namespace StockSharp.BusinessEntities
 				Code = "UX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1413,9 +1457,9 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				ExpiryTime = new TimeSpan(18, 45, 00),
-				IsSupportAtomicReRegister = true,
+				//IsSupportAtomicReRegister = true,
 				Exchange = Exchange.Ux,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("FLE Standard Time"),
+				TimeZone = TimeHelper.Fle,
 			};
 
 			UxStock = new ExchangeBoard
@@ -1423,6 +1467,7 @@ namespace StockSharp.BusinessEntities
 				Code = "GTS",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1436,17 +1481,15 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Ux,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("FLE Standard Time"),
+				TimeZone = TimeHelper.Fle,
 			};
-
-			var newYorkTime = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-			var chicagoTime = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
 
 			Amex = new ExchangeBoard
 			{
 				Code = "AMEX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1459,29 +1502,36 @@ namespace StockSharp.BusinessEntities
 						}
 					},
 				},
-				IsSupportMarketOrders = true,
-				TimeZone = newYorkTime,
+				//IsSupportMarketOrders = true,
+				TimeZone = TimeHelper.Est,
 				Exchange = Exchange.Amex
 			};
 
 			Cme = new ExchangeBoard
 			{
 				Code = "CME",
-				TimeZone = chicagoTime,
+				TimeZone = TimeHelper.Cst,
+				Exchange = Exchange.Cme,
+			};
+
+			CmeMini = new ExchangeBoard
+			{
+				Code = "CMEMINI",
+				TimeZone = TimeHelper.Cst,
 				Exchange = Exchange.Cme,
 			};
 
 			Cbot = new ExchangeBoard
 			{
 				Code = "CBOT",
-				TimeZone = chicagoTime,
+				TimeZone = TimeHelper.Cst,
 				Exchange = Exchange.Cbot,
 			};
 
 			Cce = new ExchangeBoard
 			{
 				Code = "CCE",
-				TimeZone = chicagoTime,
+				TimeZone = TimeHelper.Cst,
 				Exchange = Exchange.Cce,
 			};
 
@@ -1490,6 +1540,7 @@ namespace StockSharp.BusinessEntities
 				Code = "NYSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1502,15 +1553,15 @@ namespace StockSharp.BusinessEntities
 						}
 					},
 				},
-				IsSupportMarketOrders = true,
-				TimeZone = newYorkTime,
+				//IsSupportMarketOrders = true,
+				TimeZone = TimeHelper.Est,
 				Exchange = Exchange.Nyse
 			};
 
 			Nymex = new ExchangeBoard
 			{
 				Code = "NYMEX",
-				TimeZone = newYorkTime,
+				TimeZone = TimeHelper.Est,
 				Exchange = Exchange.Nymex,
 			};
 
@@ -1519,6 +1570,7 @@ namespace StockSharp.BusinessEntities
 				Code = "NASDAQ",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1531,16 +1583,16 @@ namespace StockSharp.BusinessEntities
 						}
 					},
 				},
-				IsSupportMarketOrders = true,
+				//IsSupportMarketOrders = true,
 				Exchange = Exchange.Nasdaq,
-				TimeZone = newYorkTime,
+				TimeZone = TimeHelper.Est,
 			};
 
 			Nqlx = new ExchangeBoard
 			{
 				Code = "NQLX",
 				Exchange = Exchange.Nqlx,
-				TimeZone = newYorkTime,
+				TimeZone = TimeHelper.Est,
 			};
 
 			Tsx = new ExchangeBoard
@@ -1548,6 +1600,7 @@ namespace StockSharp.BusinessEntities
 				Code = "TSX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1561,7 +1614,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Tsx,
-				TimeZone = newYorkTime,
+				TimeZone = TimeHelper.Est,
 			};
 
 			Lse = new ExchangeBoard
@@ -1569,6 +1622,7 @@ namespace StockSharp.BusinessEntities
 				Code = "LSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1582,7 +1636,29 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Lse,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"),
+				TimeZone = TimeHelper.Gmt,
+			};
+
+			Lme = new ExchangeBoard
+			{
+				Code = "LME",
+				WorkingTime = new WorkingTime
+				{
+					IsEnabled = true,
+					Periods = new List<WorkingTimePeriod>
+					{
+						new WorkingTimePeriod
+						{
+							Till = DateTime.MaxValue,
+							Times = new List<Range<TimeSpan>>
+							{
+								new Range<TimeSpan>("09:00:00".To<TimeSpan>(), "18:00:00".To<TimeSpan>())
+							},
+						}
+					},
+				},
+				Exchange = Exchange.Lme,
+				TimeZone = TimeHelper.Gmt,
 			};
 
 			Tse = new ExchangeBoard
@@ -1590,6 +1666,7 @@ namespace StockSharp.BusinessEntities
 				Code = "TSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1604,16 +1681,15 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Tse,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"),
+				TimeZone = TimeHelper.Tokyo,
 			};
-
-			var chinaTime = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
 
 			Hkex = new ExchangeBoard
 			{
 				Code = "HKEX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1628,7 +1704,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Hkex,
-				TimeZone = chinaTime,
+				TimeZone = TimeHelper.China,
 			};
 
 			Hkfe = new ExchangeBoard
@@ -1636,6 +1712,7 @@ namespace StockSharp.BusinessEntities
 				Code = "HKFE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1650,7 +1727,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Hkfe,
-				TimeZone = chinaTime,
+				TimeZone = TimeHelper.China,
 			};
 
 			Sse = new ExchangeBoard
@@ -1658,6 +1735,7 @@ namespace StockSharp.BusinessEntities
 				Code = "SSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1672,7 +1750,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Sse,
-				TimeZone = chinaTime,
+				TimeZone = TimeHelper.China,
 			};
 
 			Szse = new ExchangeBoard
@@ -1680,6 +1758,7 @@ namespace StockSharp.BusinessEntities
 				Code = "SZSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1694,7 +1773,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Szse,
-				TimeZone = chinaTime,
+				TimeZone = TimeHelper.China,
 			};
 
 			Tsec = new ExchangeBoard
@@ -1702,6 +1781,7 @@ namespace StockSharp.BusinessEntities
 				Code = "TSEC",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1715,16 +1795,17 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Tsec,
-				TimeZone = chinaTime,
+				TimeZone = TimeHelper.China,
 			};
 
-			var singaporeTime = TimeZoneInfo.FindSystemTimeZoneById("Singapore Standard Time");
+			var singaporeTime = "Singapore Standard Time".To<TimeZoneInfo>();
 
 			Sgx = new ExchangeBoard
 			{
 				Code = "SGX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1746,6 +1827,7 @@ namespace StockSharp.BusinessEntities
 				Code = "PSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1768,6 +1850,7 @@ namespace StockSharp.BusinessEntities
 				Code = "KLSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1785,13 +1868,14 @@ namespace StockSharp.BusinessEntities
 				TimeZone = singaporeTime,
 			};
 
-			var bangkokTime = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+			var bangkokTime = "SE Asia Standard Time".To<TimeZoneInfo>();
 
 			Idx = new ExchangeBoard
 			{
 				Code = "IDX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1813,6 +1897,7 @@ namespace StockSharp.BusinessEntities
 				Code = "SET",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1830,13 +1915,14 @@ namespace StockSharp.BusinessEntities
 				TimeZone = bangkokTime,
 			};
 
-			var indiaTime = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+			var indiaTime = "India Standard Time".To<TimeZoneInfo>();
 
 			Bse = new ExchangeBoard
 			{
 				Code = "BSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1858,6 +1944,7 @@ namespace StockSharp.BusinessEntities
 				Code = "NSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1879,6 +1966,7 @@ namespace StockSharp.BusinessEntities
 				Code = "CSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1892,7 +1980,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Cse,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Sri Lanka Standard Time"),
+				TimeZone = "Sri Lanka Standard Time".To<TimeZoneInfo>(),
 			};
 
 			Krx = new ExchangeBoard
@@ -1900,6 +1988,7 @@ namespace StockSharp.BusinessEntities
 				Code = "KRX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1913,7 +2002,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Krx,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Korea Standard Time"),
+				TimeZone = TimeHelper.Korea,
 			};
 
 			Asx = new ExchangeBoard
@@ -1921,6 +2010,7 @@ namespace StockSharp.BusinessEntities
 				Code = "ASX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1934,7 +2024,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Asx,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("AUS Eastern Standard Time"),
+				TimeZone = "AUS Eastern Standard Time".To<TimeZoneInfo>(),
 			};
 
 			Nzx = new ExchangeBoard
@@ -1942,6 +2032,7 @@ namespace StockSharp.BusinessEntities
 				Code = "NZX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1955,7 +2046,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Nzx,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time"),
+				TimeZone = "New Zealand Standard Time".To<TimeZoneInfo>(),
 			};
 
 			Tase = new ExchangeBoard
@@ -1963,6 +2054,7 @@ namespace StockSharp.BusinessEntities
 				Code = "TASE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1976,7 +2068,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Tase,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Israel Standard Time"),
+				TimeZone = "Israel Standard Time".To<TimeZoneInfo>(),
 			};
 
 			Fwb = new ExchangeBoard
@@ -1984,6 +2076,7 @@ namespace StockSharp.BusinessEntities
 				Code = "FWB",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -1997,7 +2090,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Fwb,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time"),
+				TimeZone = "W. Europe Standard Time".To<TimeZoneInfo>(),
 			};
 
 			Mse = new ExchangeBoard
@@ -2005,6 +2098,7 @@ namespace StockSharp.BusinessEntities
 				Code = "MSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -2018,7 +2112,7 @@ namespace StockSharp.BusinessEntities
 					},
 				},
 				Exchange = Exchange.Mse,
-				TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time"),
+				TimeZone = "Romance Standard Time".To<TimeZoneInfo>(),
 			};
 
 			Swx = new ExchangeBoard
@@ -2026,6 +2120,7 @@ namespace StockSharp.BusinessEntities
 				Code = "SWX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -2047,6 +2142,7 @@ namespace StockSharp.BusinessEntities
 				Code = "JSE",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -2068,6 +2164,7 @@ namespace StockSharp.BusinessEntities
 				Code = "LMAX",
 				WorkingTime = new WorkingTime
 				{
+					IsEnabled = true,
 					Periods = new List<WorkingTimePeriod>
 					{
 						new WorkingTimePeriod
@@ -2160,7 +2257,7 @@ namespace StockSharp.BusinessEntities
 		{
 			try
 			{
-				return TimeZoneInfo.FindSystemTimeZoneById(id);
+				return id.To<TimeZoneInfo>();
 			}
 			catch (TimeZoneNotFoundException)
 			{
@@ -2169,779 +2266,1386 @@ namespace StockSharp.BusinessEntities
 		}
 
 		/// <summary>
-		/// ALL board with no schedule limits.
+		/// Information about board <see cref="Associated"/>.
 		/// </summary>
-		public static ExchangeBoard Associated { get; private set; }
+		public static ExchangeBoard Associated { get; }
 
 		/// <summary>
-		/// Test board with no schedule limits.
+		/// Information about board <see cref="Test"/>.
 		/// </summary>
-		public static ExchangeBoard Test { get; private set; }
+		public static ExchangeBoard Test { get; }
 
 		/// <summary>
-		/// Information about FORTS board of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="Forts"/>.
 		/// </summary>
 		public static ExchangeBoard Forts { get; }
 
 		/// <summary>
-		/// Information about indecies of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="Micex"/>.
 		/// </summary>
-		public static ExchangeBoard Micex { get; private set; }
+		public static ExchangeBoard Micex { get; }
 
 		/// <summary>
-		/// Information about AUCT of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexAuct"/>.
 		/// </summary>
-		public static ExchangeBoard MicexAuct { get; private set; }
+		public static ExchangeBoard MicexAuct { get; }
 
 		/// <summary>
-		/// Information about AUBB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexAubb"/>.
 		/// </summary>
-		public static ExchangeBoard MicexAubb { get; private set; }
+		public static ExchangeBoard MicexAubb { get; }
 
 		/// <summary>
-		/// Information about CASF of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexCasf"/>.
 		/// </summary>
-		public static ExchangeBoard MicexCasf { get; private set; }
+		public static ExchangeBoard MicexCasf { get; }
 
 		/// <summary>
-		/// Information about EQBR of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqbr"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqbr { get; private set; }
+		public static ExchangeBoard MicexEqbr { get; }
 
 		/// <summary>
-		/// Information about EQBS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqbs"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqbs { get; private set; }
+		public static ExchangeBoard MicexEqbs { get; }
 
 		/// <summary>
-		/// Information about EQDP of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqdp"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqdp { get; private set; }
+		public static ExchangeBoard MicexEqdp { get; }
 
 		/// <summary>
-		/// Information about EQEU of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqeu"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqeu { get; private set; }
+		public static ExchangeBoard MicexEqeu { get; }
 
 		/// <summary>
-		/// Information about EQUS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqus"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqus { get; private set; }
+		public static ExchangeBoard MicexEqus { get; }
 
 		/// <summary>
-		/// Information about EQNB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqnb"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqnb { get; private set; }
+		public static ExchangeBoard MicexEqnb { get; }
 
 		/// <summary>
-		/// Information about EQNE of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqne"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqne { get; private set; }
+		public static ExchangeBoard MicexEqne { get; }
 
 		/// <summary>
-		/// Information about EQNL of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqnl"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqnl { get; private set; }
+		public static ExchangeBoard MicexEqnl { get; }
 
 		/// <summary>
-		/// Information about EQNO of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqno"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqno { get; private set; }
+		public static ExchangeBoard MicexEqno { get; }
 
 		/// <summary>
-		/// Information about EQOB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqob"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqob { get; private set; }
+		public static ExchangeBoard MicexEqob { get; }
 
 		/// <summary>
-		/// Information about EQOS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqos"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqos { get; private set; }
+		public static ExchangeBoard MicexEqos { get; }
 
 		/// <summary>
-		/// Information about EQOV of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqov"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqov { get; private set; }
+		public static ExchangeBoard MicexEqov { get; }
 
 		/// <summary>
-		/// Information about EQLV of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqlv"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqlv { get; private set; }
+		public static ExchangeBoard MicexEqlv { get; }
 
 		/// <summary>
-		/// Information about EQDB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqdb"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqdb { get; private set; }
+		public static ExchangeBoard MicexEqdb { get; }
 
 		/// <summary>
-		/// Information about EQDE of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqde"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqde { get; private set; }
+		public static ExchangeBoard MicexEqde { get; }
 
 		/// <summary>
-		/// Information about EQLI of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqli"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqli { get; private set; }
+		public static ExchangeBoard MicexEqli { get; }
 
 		/// <summary>
-		/// Information about EQQI of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqqi"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqqi { get; private set; }
+		public static ExchangeBoard MicexEqqi { get; }
 
 		/// <summary>
-		/// Information about SMAL of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexSmal"/>.
 		/// </summary>
-		public static ExchangeBoard MicexSmal { get; private set; }
+		public static ExchangeBoard MicexSmal { get; }
 
 		/// <summary>
-		/// Information about SPOB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexSpob"/>.
 		/// </summary>
-		public static ExchangeBoard MicexSpob { get; private set; }
+		public static ExchangeBoard MicexSpob { get; }
 
 		/// <summary>
-		/// Information about TQBR of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqbr"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqbr { get; private set; }
+		public static ExchangeBoard MicexTqbr { get; }
 
 		/// <summary>
-		/// Information about TQDE of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqde"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqde { get; private set; }
+		public static ExchangeBoard MicexTqde { get; }
 
 		/// <summary>
-		/// Information about TQBS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqbs"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqbs { get; private set; }
+		public static ExchangeBoard MicexTqbs { get; }
 
 		/// <summary>
-		/// Information about TQEU of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqeu"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqeu { get; private set; }
+		public static ExchangeBoard MicexTqeu { get; }
 
 		/// <summary>
-		/// Information about TQUS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqus"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqus { get; private set; }
+		public static ExchangeBoard MicexTqus { get; }
 
 		/// <summary>
-		/// Information about TQNB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqnb"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqnb { get; private set; }
+		public static ExchangeBoard MicexTqnb { get; }
 
 		/// <summary>
-		/// Information about TQNE of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqne"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqne { get; private set; }
+		public static ExchangeBoard MicexTqne { get; }
 
 		/// <summary>
-		/// Information about TQNL of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqnl"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqnl { get; private set; }
+		public static ExchangeBoard MicexTqnl { get; }
 
 		/// <summary>
-		/// Information about TQNO of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqno"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqno { get; private set; }
+		public static ExchangeBoard MicexTqno { get; }
 
 		/// <summary>
-		/// Information about TQOB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqob"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqob { get; private set; }
+		public static ExchangeBoard MicexTqob { get; }
 
 		/// <summary>
-		/// Information about TQOS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqos"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqos { get; private set; }
+		public static ExchangeBoard MicexTqos { get; }
 
 		/// <summary>
-		/// Information about TQOV of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqov"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqov { get; private set; }
+		public static ExchangeBoard MicexTqov { get; }
 
 		/// <summary>
-		/// Information about TQLV of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqlv"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqlv { get; private set; }
+		public static ExchangeBoard MicexTqlv { get; }
 
 		/// <summary>
-		/// Information about TQLI of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqli"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqli { get; private set; }
+		public static ExchangeBoard MicexTqli { get; }
 
 		/// <summary>
-		/// Information about TQQI of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTqqi"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTqqi { get; private set; }
+		public static ExchangeBoard MicexTqqi { get; }
 
 		/// <summary>
-		/// Information about EQRP of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexEqrp"/>.
 		/// </summary>
-		public static ExchangeBoard MicexEqrp { get; private set; }
+		public static ExchangeBoard MicexEqrp { get; }
 
 		/// <summary>
-		/// Information about PSRP of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsrp"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsrp { get; private set; }
+		public static ExchangeBoard MicexPsrp { get; }
 
 		/// <summary>
-		/// Information about RFND of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexRfnd"/>.
 		/// </summary>
-		public static ExchangeBoard MicexRfnd { get; private set; }
+		public static ExchangeBoard MicexRfnd { get; }
 
 		/// <summary>
-		/// Information about TADM of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTadm"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTadm { get; private set; }
+		public static ExchangeBoard MicexTadm { get; }
 
 		/// <summary>
-		/// Information about NADM of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexNadm"/>.
 		/// </summary>
-		public static ExchangeBoard MicexNadm { get; private set; }
+		public static ExchangeBoard MicexNadm { get; }
 
-		///// <summary>
-		///// Информация о площадке TRAN биржи <see cref="BusinessEntities.Exchange.Moex"/>.
-		///// </summary>
-		//public static ExchangeBoard MicexTran { get; private set; }
-
 		/// <summary>
-		/// Information about PSAU of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsau"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsau { get; private set; }
+		public static ExchangeBoard MicexPsau { get; }
 
 		/// <summary>
-		/// Information about PAUS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPaus"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPaus { get; private set; }
+		public static ExchangeBoard MicexPaus { get; }
 
 		/// <summary>
-		/// Information about PSBB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsbb"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsbb { get; private set; }
+		public static ExchangeBoard MicexPsbb { get; }
 
 		/// <summary>
-		/// Information about PSEQ of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPseq"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPseq { get; private set; }
+		public static ExchangeBoard MicexPseq { get; }
 
 		/// <summary>
-		/// Information about PSES of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPses"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPses { get; private set; }
+		public static ExchangeBoard MicexPses { get; }
 
 		/// <summary>
-		/// Information about PSEU of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPseu"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPseu { get; private set; }
+		public static ExchangeBoard MicexPseu { get; }
 
 		/// <summary>
-		/// Information about PSDB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsdb"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsdb { get; private set; }
+		public static ExchangeBoard MicexPsdb { get; }
 
 		/// <summary>
-		/// Information about PSDE of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsde"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsde { get; private set; }
+		public static ExchangeBoard MicexPsde { get; }
 
 		/// <summary>
-		/// Information about PSUS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsus"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsus { get; private set; }
+		public static ExchangeBoard MicexPsus { get; }
 
 		/// <summary>
-		/// Information about PSNB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsnb"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsnb { get; private set; }
+		public static ExchangeBoard MicexPsnb { get; }
 
 		/// <summary>
-		/// Information about PSNE of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsne"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsne { get; private set; }
+		public static ExchangeBoard MicexPsne { get; }
 
 		/// <summary>
-		/// Information about PSNL of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsnl"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsnl { get; private set; }
+		public static ExchangeBoard MicexPsnl { get; }
 
 		/// <summary>
-		/// Information about PSNO of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsno"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsno { get; private set; }
+		public static ExchangeBoard MicexPsno { get; }
 
 		/// <summary>
-		/// Information about PSOB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsob"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsob { get; private set; }
+		public static ExchangeBoard MicexPsob { get; }
 
 		/// <summary>
-		/// Information about PSOS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsos"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsos { get; private set; }
+		public static ExchangeBoard MicexPsos { get; }
 
 		/// <summary>
-		/// Information about PSOV of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsov"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsov { get; private set; }
+		public static ExchangeBoard MicexPsov { get; }
 
 		/// <summary>
-		/// Information about PSLV of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPslv"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPslv { get; private set; }
+		public static ExchangeBoard MicexPslv { get; }
 
 		/// <summary>
-		/// Information about PSLI of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsli"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsli { get; private set; }
+		public static ExchangeBoard MicexPsli { get; }
 
 		/// <summary>
-		/// Information about PSQI of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPsqi"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPsqi { get; private set; }
+		public static ExchangeBoard MicexPsqi { get; }
 
 		/// <summary>
-		/// Information about RPEU of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexRpeu"/>.
 		/// </summary>
-		public static ExchangeBoard MicexRpeu { get; private set; }
+		public static ExchangeBoard MicexRpeu { get; }
 
 		/// <summary>
-		/// Information about RPMA of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexRpma"/>.
 		/// </summary>
-		public static ExchangeBoard MicexRpma { get; private set; }
+		public static ExchangeBoard MicexRpma { get; }
 
 		/// <summary>
-		/// Information about RPMO of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexRpmo"/>.
 		/// </summary>
-		public static ExchangeBoard MicexRpmo { get; private set; }
+		public static ExchangeBoard MicexRpmo { get; }
 
 		/// <summary>
-		/// Information about RPUA of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexRpua"/>.
 		/// </summary>
-		public static ExchangeBoard MicexRpua { get; private set; }
+		public static ExchangeBoard MicexRpua { get; }
 
 		/// <summary>
-		/// Information about RPUO of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexRpuo"/>.
 		/// </summary>
-		public static ExchangeBoard MicexRpuo { get; private set; }
+		public static ExchangeBoard MicexRpuo { get; }
 
 		/// <summary>
-		/// Information about RPUQ of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexRpuq"/>.
 		/// </summary>
-		public static ExchangeBoard MicexRpuq { get; private set; }
+		public static ExchangeBoard MicexRpuq { get; }
 
 		/// <summary>
-		/// Information about FBCB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexFbcb"/>.
 		/// </summary>
-		public static ExchangeBoard MicexFbcb { get; private set; }
+		public static ExchangeBoard MicexFbcb { get; }
 
 		/// <summary>
-		/// Information about FBFX of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexFbfx"/>.
 		/// </summary>
-		public static ExchangeBoard MicexFbfx { get; private set; }
+		public static ExchangeBoard MicexFbfx { get; }
 
 		/// <summary>
-		/// Information about IRK2 of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexIrk2"/>.
 		/// </summary>
-		public static ExchangeBoard MicexIrk2 { get; private set; }
+		public static ExchangeBoard MicexIrk2 { get; }
 
 		/// <summary>
-		/// Information about RPQI of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexRpqi"/>.
 		/// </summary>
-		public static ExchangeBoard MicexRpqi { get; private set; }
+		public static ExchangeBoard MicexRpqi { get; }
 
 		/// <summary>
-		/// Information about PTEQ of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPteq"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPteq { get; private set; }
+		public static ExchangeBoard MicexPteq { get; }
 
 		/// <summary>
-		/// Information about PTES of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtes"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtes { get; private set; }
+		public static ExchangeBoard MicexPtes { get; }
 
 		/// <summary>
-		/// Information about PTEU of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPteu"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPteu { get; private set; }
+		public static ExchangeBoard MicexPteu { get; }
 
 		/// <summary>
-		/// Information about PTUS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtus"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtus { get; private set; }
+		public static ExchangeBoard MicexPtus { get; }
 
 		/// <summary>
-		/// Information about PTNB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtnb"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtnb { get; private set; }
+		public static ExchangeBoard MicexPtnb { get; }
 
 		/// <summary>
-		/// Information about PTNE of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtne"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtne { get; private set; }
+		public static ExchangeBoard MicexPtne { get; }
 
 		/// <summary>
-		/// Information about PTNL of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtnl"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtnl { get; private set; }
+		public static ExchangeBoard MicexPtnl { get; }
 
 		/// <summary>
-		/// Information about PTNO of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtno"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtno { get; private set; }
+		public static ExchangeBoard MicexPtno { get; }
 
 		/// <summary>
-		/// Information about PTOB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtob"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtob { get; private set; }
+		public static ExchangeBoard MicexPtob { get; }
 
 		/// <summary>
-		/// Information about PTOS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtos"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtos { get; private set; }
+		public static ExchangeBoard MicexPtos { get; }
 
 		/// <summary>
-		/// Information about PTOV of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtov"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtov { get; private set; }
+		public static ExchangeBoard MicexPtov { get; }
 
 		/// <summary>
-		/// Information about PTLV of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtlv"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtlv { get; private set; }
+		public static ExchangeBoard MicexPtlv { get; }
 
 		/// <summary>
-		/// Information about PTLI of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtli"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtli { get; private set; }
+		public static ExchangeBoard MicexPtli { get; }
 
 		/// <summary>
-		/// Information about PTQI of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexPtqi"/>.
 		/// </summary>
-		public static ExchangeBoard MicexPtqi { get; private set; }
+		public static ExchangeBoard MicexPtqi { get; }
 
 		/// <summary>
-		/// Information about SCVC of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexScvc"/>.
 		/// </summary>
-		public static ExchangeBoard MicexScvc { get; private set; }
+		public static ExchangeBoard MicexScvc { get; }
 
 		/// <summary>
-		/// Information about RPNG of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexRpng"/>.
 		/// </summary>
-		public static ExchangeBoard MicexRpng { get; private set; }
+		public static ExchangeBoard MicexRpng { get; }
 
 		/// <summary>
-		/// Information about RPFG of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexRpfg"/>.
 		/// </summary>
-		public static ExchangeBoard MicexRpfg { get; private set; }
+		public static ExchangeBoard MicexRpfg { get; }
 
 		/// <summary>
-		/// Information about CDCR of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexCbcr"/>.
 		/// </summary>
-		public static ExchangeBoard MicexCbcr { get; private set; }
+		public static ExchangeBoard MicexCbcr { get; }
 
 		/// <summary>
-		/// Information about CRED of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexCred"/>.
 		/// </summary>
-		public static ExchangeBoard MicexCred { get; private set; }
+		public static ExchangeBoard MicexCred { get; }
 
 		/// <summary>
-		/// Information about DEPZ of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexDepz"/>.
 		/// </summary>
-		public static ExchangeBoard MicexDepz { get; private set; }
+		public static ExchangeBoard MicexDepz { get; }
 
 		/// <summary>
-		/// Information about DPVB of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexDpvb"/>.
 		/// </summary>
-		public static ExchangeBoard MicexDpvb { get; private set; }
+		public static ExchangeBoard MicexDpvb { get; }
 
 		/// <summary>
-		/// Information about DPFK of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexDpfk"/>.
 		/// </summary>
-		public static ExchangeBoard MicexDpfk { get; private set; }
+		public static ExchangeBoard MicexDpfk { get; }
 
 		/// <summary>
-		/// Information about DPFO of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexDpfo"/>.
 		/// </summary>
-		public static ExchangeBoard MicexDpfo { get; private set; }
+		public static ExchangeBoard MicexDpfo { get; }
 
 		/// <summary>
-		/// Information about DPPF of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexDppf"/>.
 		/// </summary>
-		public static ExchangeBoard MicexDppf { get; private set; }
+		public static ExchangeBoard MicexDppf { get; }
 
 		/// <summary>
-		/// Information about CETS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexCets"/>.
 		/// </summary>
-		public static ExchangeBoard MicexCets { get; private set; }
+		public static ExchangeBoard MicexCets { get; }
 
 		/// <summary>
-		/// Information about AETS of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexAets"/>.
 		/// </summary>
-		public static ExchangeBoard MicexAets { get; private set; }
+		public static ExchangeBoard MicexAets { get; }
 
 		/// <summary>
-		/// Information about CNGD of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexCngd"/>.
 		/// </summary>
-		public static ExchangeBoard MicexCngd { get; private set; }
+		public static ExchangeBoard MicexCngd { get; }
 
 		/// <summary>
-		/// Information about TRAN of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexTran"/>.
 		/// </summary>
-		public static ExchangeBoard MicexTran { get; private set; }
+		public static ExchangeBoard MicexTran { get; }
 
 		/// <summary>
-		/// Information about QJSIM of <see cref="BusinessEntities.Exchange.Moex"/> exchange.
+		/// Information about board <see cref="MicexJunior"/>.
 		/// </summary>
-		public static ExchangeBoard MicexJunior { get; private set; }
+		public static ExchangeBoard MicexJunior { get; }
 
 		/// <summary>
-		/// Information about SPB of <see cref="BusinessEntities.Exchange.Spb"/> exchange.
+		/// Information about board <see cref="Spb"/>.
 		/// </summary>
-		public static ExchangeBoard Spb { get; private set; }
+		public static ExchangeBoard Spb { get; }
 
 		/// <summary>
-		/// Information about derivatives market of <see cref="BusinessEntities.Exchange.Ux"/> exchange.
+		/// Information about board <see cref="Ux"/>.
 		/// </summary>
 		public static ExchangeBoard Ux { get; }
 
 		/// <summary>
-		/// Information about stock market of <see cref="BusinessEntities.Exchange.Ux"/> exchange.
+		/// Information about board <see cref="UxStock"/>.
 		/// </summary>
-		public static ExchangeBoard UxStock { get; private set; }
+		public static ExchangeBoard UxStock { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Cme"/> exchange.
+		/// Information about board <see cref="Cme"/>.
 		/// </summary>
-		public static ExchangeBoard Cme { get; private set; }
+		public static ExchangeBoard Cme { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Cce"/> exchange.
+		/// Information about board <see cref="Cme"/>.
 		/// </summary>
-		public static ExchangeBoard Cce { get; private set; }
+		public static ExchangeBoard CmeMini { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Cbot"/> exchange.
+		/// Information about board <see cref="Cce"/>.
 		/// </summary>
-		public static ExchangeBoard Cbot { get; private set; }
+		public static ExchangeBoard Cce { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Nymex"/> exchange.
+		/// Information about board <see cref="Cbot"/>.
 		/// </summary>
-		public static ExchangeBoard Nymex { get; private set; }
+		public static ExchangeBoard Cbot { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Amex"/> exchange.
+		/// Information about board <see cref="Nymex"/>.
 		/// </summary>
-		public static ExchangeBoard Amex { get; private set; }
+		public static ExchangeBoard Nymex { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Nyse"/> exchange.
+		/// Information about board <see cref="Amex"/>.
 		/// </summary>
-		public static ExchangeBoard Nyse { get; private set; }
+		public static ExchangeBoard Amex { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Nasdaq"/> exchange.
+		/// Information about board <see cref="Nyse"/>.
 		/// </summary>
-		public static ExchangeBoard Nasdaq { get; private set; }
+		public static ExchangeBoard Nyse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Nqlx"/> exchange.
+		/// Information about board <see cref="Nasdaq"/>.
 		/// </summary>
-		public static ExchangeBoard Nqlx { get; private set; }
+		public static ExchangeBoard Nasdaq { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Lse"/> exchange.
+		/// Information about board <see cref="Nqlx"/>.
 		/// </summary>
-		public static ExchangeBoard Lse { get; private set; }
+		public static ExchangeBoard Nqlx { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Tse"/> exchange.
+		/// Information about board <see cref="Lse"/>.
 		/// </summary>
-		public static ExchangeBoard Tse { get; private set; }
+		public static ExchangeBoard Lse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Hkex"/> exchange.
+		/// Information about board <see cref="Lme"/>.
 		/// </summary>
-		public static ExchangeBoard Hkex { get; private set; }
+		public static ExchangeBoard Lme { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Hkfe"/> exchange.
+		/// Information about board <see cref="Tse"/>.
 		/// </summary>
-		public static ExchangeBoard Hkfe { get; private set; }
+		public static ExchangeBoard Tse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Sse"/> exchange.
+		/// Information about board <see cref="Hkex"/>.
 		/// </summary>
-		public static ExchangeBoard Sse { get; private set; }
+		public static ExchangeBoard Hkex { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Szse"/> exchange.
+		/// Information about board <see cref="Hkfe"/>.
 		/// </summary>
-		public static ExchangeBoard Szse { get; private set; }
+		public static ExchangeBoard Hkfe { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Tsx"/> exchange.
+		/// Information about board <see cref="Sse"/>.
 		/// </summary>
-		public static ExchangeBoard Tsx { get; private set; }
+		public static ExchangeBoard Sse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Fwb"/> exchange.
+		/// Information about board <see cref="Szse"/>.
 		/// </summary>
-		public static ExchangeBoard Fwb { get; private set; }
+		public static ExchangeBoard Szse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Asx"/> exchange.
+		/// Information about board <see cref="Tsx"/>.
 		/// </summary>
-		public static ExchangeBoard Asx { get; private set; }
+		public static ExchangeBoard Tsx { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Nzx"/> exchange.
+		/// Information about board <see cref="Fwb"/>.
 		/// </summary>
-		public static ExchangeBoard Nzx { get; private set; }
+		public static ExchangeBoard Fwb { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Bse"/> exchange.
+		/// Information about board <see cref="Asx"/>.
 		/// </summary>
-		public static ExchangeBoard Bse { get; private set; }
+		public static ExchangeBoard Asx { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Nse"/> exchange.
+		/// Information about board <see cref="Nzx"/>.
 		/// </summary>
-		public static ExchangeBoard Nse { get; private set; }
+		public static ExchangeBoard Nzx { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Swx"/> exchange.
+		/// Information about board <see cref="Bse"/>.
 		/// </summary>
-		public static ExchangeBoard Swx { get; private set; }
+		public static ExchangeBoard Bse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Krx"/> exchange.
+		/// Information about board <see cref="Nse"/>.
 		/// </summary>
-		public static ExchangeBoard Krx { get; private set; }
+		public static ExchangeBoard Nse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Mse"/> exchange.
+		/// Information about board <see cref="Swx"/>.
 		/// </summary>
-		public static ExchangeBoard Mse { get; private set; }
+		public static ExchangeBoard Swx { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Jse"/> exchange.
+		/// Information about board <see cref="Krx"/>.
 		/// </summary>
-		public static ExchangeBoard Jse { get; private set; }
+		public static ExchangeBoard Krx { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Sgx"/> exchange.
+		/// Information about board <see cref="Mse"/>.
 		/// </summary>
-		public static ExchangeBoard Sgx { get; private set; }
+		public static ExchangeBoard Mse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Tsec"/> exchange.
+		/// Information about board <see cref="Jse"/>.
 		/// </summary>
-		public static ExchangeBoard Tsec { get; private set; }
+		public static ExchangeBoard Jse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Pse"/> exchange.
+		/// Information about board <see cref="Sgx"/>.
 		/// </summary>
-		public static ExchangeBoard Pse { get; private set; }
+		public static ExchangeBoard Sgx { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Klse"/> exchange.
+		/// Information about board <see cref="Tsec"/>.
 		/// </summary>
-		public static ExchangeBoard Klse { get; private set; }
+		public static ExchangeBoard Tsec { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Idx"/> exchange.
+		/// Information about board <see cref="Pse"/>.
 		/// </summary>
-		public static ExchangeBoard Idx { get; private set; }
+		public static ExchangeBoard Pse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Set"/> exchange.
+		/// Information about board <see cref="Klse"/>.
 		/// </summary>
-		public static ExchangeBoard Set { get; private set; }
+		public static ExchangeBoard Klse { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Cse"/> exchange.
+		/// Information about board <see cref="Idx"/>.
 		/// </summary>
-		public static ExchangeBoard Cse { get; private set; }
+		public static ExchangeBoard Idx { get; }
 
 		/// <summary>
-		/// Information about board of <see cref="BusinessEntities.Exchange.Tase"/> exchange.
+		/// Information about board <see cref="Set"/>.
 		/// </summary>
-		public static ExchangeBoard Tase { get; private set; }
+		public static ExchangeBoard Set { get; }
 
 		/// <summary>
-		/// Information about brokerage board <see cref="BusinessEntities.Exchange.Lmax"/>.
+		/// Information about board <see cref="Cse"/>.
 		/// </summary>
-		public static ExchangeBoard Lmax { get; private set; }
+		public static ExchangeBoard Cse { get; }
 
 		/// <summary>
-		/// Information about brokerage board <see cref="BusinessEntities.Exchange.DukasCopy"/>.
+		/// Information about board <see cref="Tase"/>.
 		/// </summary>
-		public static ExchangeBoard DukasCopy { get; private set; }
+		public static ExchangeBoard Tase { get; }
 
 		/// <summary>
-		/// Information about brokerage board <see cref="BusinessEntities.Exchange.GainCapital"/>.
+		/// Information about board <see cref="Lmax"/>.
 		/// </summary>
-		public static ExchangeBoard GainCapital { get; private set; }
+		public static ExchangeBoard Lmax { get; }
 
 		/// <summary>
-		/// Information about brokerage board <see cref="BusinessEntities.Exchange.MBTrading"/>.
+		/// Information about board <see cref="DukasCopy"/>.
 		/// </summary>
-		public static ExchangeBoard MBTrading { get; private set; }
+		public static ExchangeBoard DukasCopy { get; }
 
 		/// <summary>
-		/// Information about brokerage board <see cref="BusinessEntities.Exchange.TrueFX"/>.
+		/// Information about board <see cref="GainCapital"/>.
 		/// </summary>
-		public static ExchangeBoard TrueFX { get; private set; }
+		public static ExchangeBoard GainCapital { get; }
 
 		/// <summary>
-		/// Information about board <see cref="BusinessEntities.Exchange.Integral"/>.
+		/// Information about board <see cref="MBTrading"/>.
 		/// </summary>
-		public static ExchangeBoard Integral { get; private set; }
+		public static ExchangeBoard MBTrading { get; }
 
 		/// <summary>
-		/// Information about board <see cref="BusinessEntities.Exchange.Cfh"/>.
+		/// Information about board <see cref="TrueFX"/>.
 		/// </summary>
-		public static ExchangeBoard Cfh { get; private set; }
+		public static ExchangeBoard TrueFX { get; }
 
 		/// <summary>
-		/// Information about board <see cref="BusinessEntities.Exchange.Ond"/>.
+		/// Information about board <see cref="Integral"/>.
 		/// </summary>
-		public static ExchangeBoard Ond { get; private set; }
+		public static ExchangeBoard Integral { get; }
 
 		/// <summary>
-		/// Information about board <see cref="BusinessEntities.Exchange.Nasdaq"/>.
+		/// Information about board <see cref="Cfh"/>.
 		/// </summary>
-		public static ExchangeBoard Smart { get; private set; }
+		public static ExchangeBoard Cfh { get; }
 
 		/// <summary>
-		/// Information about board <see cref="BusinessEntities.Exchange.Btce"/>.
+		/// Information about board <see cref="Ond"/>.
 		/// </summary>
-		public static ExchangeBoard Btce { get; private set; }
+		public static ExchangeBoard Ond { get; }
 
 		/// <summary>
-		/// Information about board <see cref="BusinessEntities.Exchange.BitStamp"/>.
+		/// Information about board <see cref="Nasdaq"/>.
 		/// </summary>
-		public static ExchangeBoard BitStamp { get; private set; }
+		public static ExchangeBoard Smart { get; }
 
 		/// <summary>
-		/// Information about board <see cref="BusinessEntities.Exchange.BtcChina"/>.
+		/// Information about board <see cref="Btce"/>.
 		/// </summary>
-		public static ExchangeBoard BtcChina { get; private set; }
+		public static ExchangeBoard Btce { get; }
 
 		/// <summary>
-		/// Information about board <see cref="BusinessEntities.Exchange.Icbit"/>.
+		/// Information about board <see cref="BitStamp"/>.
 		/// </summary>
-		public static ExchangeBoard Icbit { get; private set; }
+		public static ExchangeBoard BitStamp { get; }
 
 		/// <summary>
-		/// Information about virtual board Finam.
+		/// Information about board <see cref="BtcChina"/>.
 		/// </summary>
-		public static ExchangeBoard Finam { get; private set; }
+		public static ExchangeBoard BtcChina { get; }
 
 		/// <summary>
-		/// Information about virtual board Mfd.
+		/// Information about board <see cref="Icbit"/>.
 		/// </summary>
-		public static ExchangeBoard Mfd { get; private set; }
+		public static ExchangeBoard Icbit { get; }
 
+		/// <summary>
+		/// Information about board <see cref="Finam"/>.
+		/// </summary>
+		public static ExchangeBoard Finam { get; }
+
+		/// <summary>
+		/// Information about board <see cref="Mfd"/>.
+		/// </summary>
+		public static ExchangeBoard Mfd { get; }
+
+		/// <summary>
+		/// Information about board <see cref="Arca"/>.
+		/// </summary>
+		public static ExchangeBoard Arca { get; } = new ExchangeBoard
+		{
+			Code = "ARCA",
+			Exchange = Exchange.Nyse,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Bats"/>.
+		/// </summary>
+		public static ExchangeBoard Bats { get; } = new ExchangeBoard
+		{
+			Code = "BATS",
+			Exchange = Exchange.Cbot,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Currenex"/>.
+		/// </summary>
+		public static ExchangeBoard Currenex { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Currenex.Name,
+			Exchange = Exchange.Currenex,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Fxcm"/>.
+		/// </summary>
+		public static ExchangeBoard Fxcm { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Fxcm.Name,
+			Exchange = Exchange.Fxcm,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Poloniex"/>.
+		/// </summary>
+		public static ExchangeBoard Poloniex { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Poloniex.Name,
+			Exchange = Exchange.Poloniex,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Kraken"/>.
+		/// </summary>
+		public static ExchangeBoard Kraken { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Kraken.Name,
+			Exchange = Exchange.Kraken,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Bittrex"/>.
+		/// </summary>
+		public static ExchangeBoard Bittrex { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Bittrex.Name,
+			Exchange = Exchange.Bittrex,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Bitfinex"/>.
+		/// </summary>
+		public static ExchangeBoard Bitfinex { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Bitfinex.Name,
+			Exchange = Exchange.Bitfinex,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Coinbase"/>.
+		/// </summary>
+		public static ExchangeBoard Coinbase { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Coinbase.Name,
+			Exchange = Exchange.Coinbase,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Gdax"/>.
+		/// </summary>
+		public static ExchangeBoard Gdax { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Gdax.Name,
+			Exchange = Exchange.Gdax,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Bithumb"/>.
+		/// </summary>
+		public static ExchangeBoard Bithumb { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Bithumb.Name,
+			Exchange = Exchange.Bithumb,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="HitBtc"/>.
+		/// </summary>
+		public static ExchangeBoard HitBtc { get; } = new ExchangeBoard
+		{
+			Code = Exchange.HitBtc.Name,
+			Exchange = Exchange.HitBtc,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="OkCoin"/>.
+		/// </summary>
+		public static ExchangeBoard OkCoin { get; } = new ExchangeBoard
+		{
+			Code = Exchange.OkCoin.Name,
+			Exchange = Exchange.OkCoin,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Coincheck"/>.
+		/// </summary>
+		public static ExchangeBoard Coincheck { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Coincheck.Name,
+			Exchange = Exchange.Coincheck,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Binance"/>.
+		/// </summary>
+		public static ExchangeBoard Binance { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Binance.Name,
+			Exchange = Exchange.Binance,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="BinanceCoin"/>.
+		/// </summary>
+		public static ExchangeBoard BinanceCoin { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Binance.Name + "CN",
+			Exchange = Exchange.Binance,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Bitexbook"/>.
+		/// </summary>
+		public static ExchangeBoard Bitexbook { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Bitexbook.Name,
+			Exchange = Exchange.Bitexbook,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Bitmex"/>.
+		/// </summary>
+		public static ExchangeBoard Bitmex { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Bitmex.Name,
+			Exchange = Exchange.Bitmex,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Cex"/>.
+		/// </summary>
+		public static ExchangeBoard Cex { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Cex.Name,
+			Exchange = Exchange.Cex,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Cryptopia"/>.
+		/// </summary>
+		public static ExchangeBoard Cryptopia { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Cryptopia.Name,
+			Exchange = Exchange.Cryptopia,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Okex"/>.
+		/// </summary>
+		public static ExchangeBoard Okex { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Okex.Name,
+			Exchange = Exchange.Okex,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Yobit"/>.
+		/// </summary>
+		public static ExchangeBoard Yobit { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Yobit.Name,
+			Exchange = Exchange.Yobit,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="CoinExchange"/>.
+		/// </summary>
+		public static ExchangeBoard CoinExchange { get; } = new ExchangeBoard
+		{
+			Code = Exchange.CoinExchange.Name,
+			Exchange = Exchange.CoinExchange,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="LiveCoin"/>.
+		/// </summary>
+		public static ExchangeBoard LiveCoin { get; } = new ExchangeBoard
+		{
+			Code = Exchange.LiveCoin.Name,
+			Exchange = Exchange.LiveCoin,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Exmo"/>.
+		/// </summary>
+		public static ExchangeBoard Exmo { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Exmo.Name,
+			Exchange = Exchange.Exmo,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Deribit"/>.
+		/// </summary>
+		public static ExchangeBoard Deribit { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Deribit.Name,
+			Exchange = Exchange.Deribit,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Kucoin"/>.
+		/// </summary>
+		public static ExchangeBoard Kucoin { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Kucoin.Name,
+			Exchange = Exchange.Kucoin,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Liqui"/>.
+		/// </summary>
+		public static ExchangeBoard Liqui { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Liqui.Name,
+			Exchange = Exchange.Liqui,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Huobi"/>.
+		/// </summary>
+		public static ExchangeBoard Huobi { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Huobi.Name,
+			Exchange = Exchange.Huobi,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Globex"/>.
+		/// </summary>
+		public static ExchangeBoard Globex { get; } = new ExchangeBoard
+		{
+			Code = "Globex",
+			Exchange = Exchange.Cme,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="IEX"/>.
+		/// </summary>
+		public static ExchangeBoard IEX { get; } = new ExchangeBoard
+		{
+			Code = Exchange.IEX.Name,
+			Exchange = Exchange.IEX,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="AlphaVantage"/>.
+		/// </summary>
+		public static ExchangeBoard AlphaVantage { get; } = new ExchangeBoard
+		{
+			Code = Exchange.AlphaVantage.Name,
+			Exchange = Exchange.AlphaVantage,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Bitbank"/>.
+		/// </summary>
+		public static ExchangeBoard Bitbank { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Bitbank.Name,
+			Exchange = Exchange.Bitbank,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Zaif"/>.
+		/// </summary>
+		public static ExchangeBoard Zaif { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Zaif.Name,
+			Exchange = Exchange.Zaif,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Quoinex"/>.
+		/// </summary>
+		public static ExchangeBoard Quoinex { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Quoinex.Name,
+			Exchange = Exchange.Quoinex,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Wiki"/>.
+		/// </summary>
+		public static ExchangeBoard Wiki { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Wiki.Name,
+			Exchange = Exchange.Wiki,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Idax"/>.
+		/// </summary>
+		public static ExchangeBoard Idax { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Idax.Name,
+			Exchange = Exchange.Idax,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Digifinex"/>.
+		/// </summary>
+		public static ExchangeBoard Digifinex { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Digifinex.Name,
+			Exchange = Exchange.Digifinex,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="TradeOgre"/>.
+		/// </summary>
+		public static ExchangeBoard TradeOgre { get; } = new ExchangeBoard
+		{
+			Code = Exchange.TradeOgre.Name,
+			Exchange = Exchange.TradeOgre,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="CoinCap"/>.
+		/// </summary>
+		public static ExchangeBoard CoinCap { get; } = new ExchangeBoard
+		{
+			Code = Exchange.CoinCap.Name,
+			Exchange = Exchange.CoinCap,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Coinigy"/>.
+		/// </summary>
+		public static ExchangeBoard Coinigy { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Coinigy.Name,
+			Exchange = Exchange.Coinigy,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="LBank"/>.
+		/// </summary>
+		public static ExchangeBoard LBank { get; } = new ExchangeBoard
+		{
+			Code = Exchange.LBank.Name,
+			Exchange = Exchange.LBank,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="BitMax"/>.
+		/// </summary>
+		public static ExchangeBoard BitMax { get; } = new ExchangeBoard
+		{
+			Code = Exchange.BitMax.Name,
+			Exchange = Exchange.BitMax,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="BW"/>.
+		/// </summary>
+		public static ExchangeBoard BW { get; } = new ExchangeBoard
+		{
+			Code = Exchange.BW.Name,
+			Exchange = Exchange.BW,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Bibox"/>.
+		/// </summary>
+		public static ExchangeBoard Bibox { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Bibox.Name,
+			Exchange = Exchange.Bibox,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="CoinBene"/>.
+		/// </summary>
+		public static ExchangeBoard CoinBene { get; } = new ExchangeBoard
+		{
+			Code = Exchange.CoinBene.Name,
+			Exchange = Exchange.CoinBene,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="BitZ"/>.
+		/// </summary>
+		public static ExchangeBoard BitZ { get; } = new ExchangeBoard
+		{
+			Code = Exchange.BitZ.Name,
+			Exchange = Exchange.BitZ,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="ZB"/>.
+		/// </summary>
+		public static ExchangeBoard ZB { get; } = new ExchangeBoard
+		{
+			Code = Exchange.ZB.Name,
+			Exchange = Exchange.ZB,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Tradier"/>.
+		/// </summary>
+		public static ExchangeBoard Tradier { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Tradier.Name,
+			Exchange = Exchange.Tradier,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="SwSq"/>.
+		/// </summary>
+		public static ExchangeBoard SwSq { get; } = new ExchangeBoard
+		{
+			Code = Exchange.SwSq.Name,
+			Exchange = Exchange.SwSq,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="StockSharp"/>.
+		/// </summary>
+		public static ExchangeBoard StockSharp { get; } = new ExchangeBoard
+		{
+			Code = Exchange.StockSharp.Name,
+			Exchange = Exchange.StockSharp,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Upbit"/>.
+		/// </summary>
+		public static ExchangeBoard Upbit { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Upbit.Name,
+			Exchange = Exchange.Upbit,
+		};
+		
+		/// <summary>
+		/// Information about board <see cref="CoinEx"/>.
+		/// </summary>
+		public static ExchangeBoard CoinEx { get; } = new ExchangeBoard
+		{
+			Code = Exchange.CoinEx.Name,
+			Exchange = Exchange.CoinEx,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="FatBtc"/>.
+		/// </summary>
+		public static ExchangeBoard FatBtc { get; } = new ExchangeBoard
+		{
+			Code = Exchange.FatBtc.Name,
+			Exchange = Exchange.FatBtc,
+		};
+		
+		/// <summary>
+		/// Information about board <see cref="Latoken"/>.
+		/// </summary>
+		public static ExchangeBoard Latoken { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Latoken.Name,
+			Exchange = Exchange.Latoken,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Gopax"/>.
+		/// </summary>
+		public static ExchangeBoard Gopax { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Gopax.Name,
+			Exchange = Exchange.Gopax,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="CoinHub"/>.
+		/// </summary>
+		public static ExchangeBoard CoinHub { get; } = new ExchangeBoard
+		{
+			Code = Exchange.CoinHub.Name,
+			Exchange = Exchange.CoinHub,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Hotbit"/>.
+		/// </summary>
+		public static ExchangeBoard Hotbit { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Hotbit.Name,
+			Exchange = Exchange.Hotbit,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Bitalong"/>.
+		/// </summary>
+		public static ExchangeBoard Bitalong { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Bitalong.Name,
+			Exchange = Exchange.Bitalong,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="PrizmBit"/>.
+		/// </summary>
+		public static ExchangeBoard PrizmBit { get; } = new ExchangeBoard
+		{
+			Code = Exchange.PrizmBit.Name,
+			Exchange = Exchange.PrizmBit,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="DigitexFutures"/>.
+		/// </summary>
+		public static ExchangeBoard DigitexFutures { get; } = new ExchangeBoard
+		{
+			Code = Exchange.DigitexFutures.Name,
+			Exchange = Exchange.DigitexFutures,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="Bovespa"/>.
+		/// </summary>
+		public static ExchangeBoard Bovespa { get; } = new ExchangeBoard
+		{
+			Code = Exchange.Bovespa.Name,
+			Exchange = Exchange.Bovespa,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="IQFeed"/>.
+		/// </summary>
+		public static ExchangeBoard IQFeed { get; } = new ExchangeBoard
+		{
+			Code = Exchange.IQFeed.Name,
+			Exchange = Exchange.IQFeed,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="IBKR"/>.
+		/// </summary>
+		public static ExchangeBoard IBKR { get; } = new ExchangeBoard
+		{
+			Code = Exchange.IBKR.Name,
+			Exchange = Exchange.IBKR,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="STSH"/>.
+		/// </summary>
+		public static ExchangeBoard STSH { get; } = new ExchangeBoard
+		{
+			Code = Exchange.STSH.Name,
+			Exchange = Exchange.STSH,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="STRLG"/>.
+		/// </summary>
+		public static ExchangeBoard STRLG { get; } = new ExchangeBoard
+		{
+			Code = Exchange.STRLG.Name,
+			Exchange = Exchange.STRLG,
+		};
+
+		/// <summary>
+		/// Information about board <see cref="QNDL"/>.
+		/// </summary>
+		public static ExchangeBoard QNDL { get; } = new ExchangeBoard
+		{
+			Code = Exchange.QNDL.Name,
+			Exchange = Exchange.QNDL,
+		};
 	}
 }

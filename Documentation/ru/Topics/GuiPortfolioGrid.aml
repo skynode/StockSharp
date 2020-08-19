@@ -4,10 +4,8 @@
     <introduction>
       
       <para><codeEntityReference>T:StockSharp.Xaml.PortfolioGrid</codeEntityReference> - компонент, отображающий состояние портфелей и позиций.
-      Компонент создан на основе "<link xlink:href="88a40124-43a6-4be9-b04b-a245000fca70">универсальной таблицы</link>" 
-      и наследует ее функциональность.
       </para>
-
+      <mediaLink><image placement="left" xlink:href="GUI_PortfolioGrid" /></mediaLink>
 	<para>
 		<legacyBold>Основные свойства</legacyBold>
 	</para>
@@ -17,7 +15,7 @@
   			<para><codeEntityReference>P:StockSharp.Xaml.PortfolioGrid.Portfolios</codeEntityReference> - список портфелей.</para>
   		</listItem>
   		<listItem>
-  			<para><codeEntityReference>P:StockSharp.Xaml.PortfolioGrid.Positions</codeEntityReference> - спосок позиций.</para>
+  			<para><codeEntityReference>P:StockSharp.Xaml.PortfolioGrid.Positions</codeEntityReference> - список позиций.</para>
   		</listItem>
   		<listItem>
   			<para><codeEntityReference>P:StockSharp.Xaml.PortfolioGrid.SelectedPosition</codeEntityReference> - выбранная позиция.</para>
@@ -29,10 +27,10 @@
 	</list>
       
      	  <para>
-	  Ниже показаны внеший вид компонета, а также фрагменты кода с его использованием. Пример кода взят из <legacyItalic>Samples/QuikSample</legacyItalic>.
+	  Ниже показан внеший вид компонента, а также фрагменты кода с его использованием. Пример кода взят из <legacyItalic>Samples/Common/SampleConnection</legacyItalic>.
       </para>
       
-      <mediaLink><image placement="left" xlink:href="GUI_PortfolioGrid" /></mediaLink>
+
       
        <code title="XAML" language="XAML">
 	  				<![CDATA[
@@ -47,58 +45,18 @@
 	  				]]>
               </code>
               <code title="C#" language="C#">
-              		<![CDATA[
+					  <![CDATA[				  
+private readonly Connector _connector = new Connector();
+
 private void ConnectClick(object sender, RoutedEventArgs e)
 {
-	if (!_isConnected)
-	{
-		if (Trader == null)
-		{
-			// создаем подключение
-			Trader = isLua
-				? new QuikTrader
-				{
-					LuaFixServerAddress = Address.Text.To<EndPoint>(),
-					LuaLogin = Login.Text,
-					LuaPassword = Password.Password.To<SecureString>()
-				}
-				: new QuikTrader(Path.Text) { IsDde = true };
-				
-			.........................................................	
-
-
-			Trader.NewPortfolios += portfolios => _portfoliosWindow.PortfolioGrid.Portfolios.AddRange(portfolios);
-			Trader.NewPositions += positions => _portfoliosWindow.PortfolioGrid.Positions.AddRange(positions);
-
-			// устанавливаем поставщик маркет-данных
-			_securitiesWindow.SecurityPicker.MarketDataProvider = Trader;
-
-			ShowSecurities.IsEnabled = ShowTrades.IsEnabled =
-				ShowMyTrades.IsEnabled = ShowOrders.IsEnabled =
-					ShowPortfolios.IsEnabled = ShowStopOrders.IsEnabled = true;
-		}
-
-		Trader.Connect();
-
-		_isConnected = true;
-		ConnectBtn.Content = LocalizedStrings.Disconnect;
-	}
-	else
-	{
-		Trader.Disconnect();
-
-		_isConnected = false;
-		ConnectBtn.Content = LocalizedStrings.Connect;
-	}
+	.........................................................				
+	_connector.NewPortfolio += portfolio => _portfoliosWindow.PortfolioGrid.Portfolios.Add(portfolio);
+	_connector.NewPosition += position => _portfoliosWindow.PortfolioGrid.Positions.Add(position);
+	.........................................................
 }
 	  				]]>
              </code>
-      
-      
-      
-      
-      
-      
     </introduction>
   </developerConceptualDocument>
 </topic>

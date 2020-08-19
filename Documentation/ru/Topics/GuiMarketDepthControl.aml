@@ -2,9 +2,9 @@
 <topic id="3a23bf32-fcbd-409b-99b3-2ff1b953c85a" revisionNumber="1">
   <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
     <introduction>
+          <mediaLink><image placement="left" xlink:href="GUI_MarketDepthControl" /></mediaLink>
       <para>
       	<codeEntityReference>T:StockSharp.Xaml.MarketDepthControl</codeEntityReference> - графический компонент для отображения стакана.
-      	В основе данного компонента лежит <link xlink:href="88a40124-43a6-4be9-b04b-a245000fca70">универсальная таблица</link>.
       	Компонент позволяет отображать котировки и собственные заявки.
       </para>
       
@@ -24,10 +24,7 @@
   				<para><codeEntityReference>M:StockSharp.Xaml.MarketDepthControl.UpdateFormat(StockSharp.BusinessEntities.Security)</codeEntityReference> - обновить формат отображения цен и объёмов при помощи инструмента.</para>
   			</listItem>
   			<listItem>
-  				<para><codeEntityReference>M:StockSharp.Xaml.MarketDepthControl.ProcessNewOrder(StockSharp.BusinessEntities.Order)</codeEntityReference> - обработать новую заявку.</para>
-  			</listItem>
-  			<listItem>
-  				<para><codeEntityReference>M:StockSharp.Xaml.MarketDepthControl.ProcessChangedOrder(StockSharp.BusinessEntities.Order)</codeEntityReference> - обработать изменение состояния заявки.</para>
+  				<para><codeEntityReference>M:StockSharp.Xaml.MarketDepthControl.ProcessOrder(StockSharp.BusinessEntities.Order,System.Decimal,StockSharp.Messages.OrderStates)</codeEntityReference> - обработать заявку.</para>
   			</listItem>
   			<listItem>
   				<para><codeEntityReference>M:StockSharp.Xaml.MarketDepthControl.UpdateDepth(StockSharp.BusinessEntities.MarketDepth)</codeEntityReference> - обновить стакан.</para>
@@ -38,10 +35,10 @@
 		</list>
 		
 	  <para>
-	  Ниже показаны внеший вид компонета, а также фрагменты кода с его использованием. Пример кода взят из <legacyItalic>Samples/BarChart/SampleBarChart</legacyItalic>.
+Ниже показаны фрагменты кода с его использованием. Пример кода взят из <legacyItalic>Samples/Common/SampleConnection</legacyItalic>.
       </para>
       
-      <mediaLink><image placement="left" xlink:href="GUI_MarketDepthControl" /></mediaLink>
+
       
        <code title="XAML" language="XAML">
 	  				<![CDATA[
@@ -56,7 +53,7 @@
               </code>
               <code title="C#" language="C#">
               		<![CDATA[
-private void TraderOnMarketDepthsChanged(IEnumerable<MarketDepth> depths)
+private void ConnectorOnMarketDepthsChanged(IEnumerable<MarketDepth> depths)
 {
 	foreach (var depth in depths)
 	{

@@ -37,24 +37,21 @@ namespace StockSharp.Algo.Indicators
 		/// Initializes a new instance of the <see cref="MovingAverageConvergenceDivergenceHistogram"/>.
 		/// </summary>
 		/// <param name="macd">Convergence/divergence of moving averages.</param>
-		/// <param name="signalMa">Signalling Voving Average.</param>
+		/// <param name="signalMa">Signaling Moving Average.</param>
 		public MovingAverageConvergenceDivergenceHistogram(MovingAverageConvergenceDivergence macd, ExponentialMovingAverage signalMa)
 			: base(macd, signalMa)
 		{
 		}
 
-		/// <summary>
-		/// To handle the input value.
-		/// </summary>
-		/// <param name="input">The input value.</param>
-		/// <returns>The resulting value.</returns>
+		/// <inheritdoc />
 		protected override IIndicatorValue OnProcess(IIndicatorValue input)
 		{
 			var macdValue = Macd.Process(input);
-			var signalValue = Macd.IsFormed ? SignalMa.Process(macdValue) : new DecimalIndicatorValue(this, 0);
+			var signalValue = Macd.IsFormed ? SignalMa.Process(macdValue) : new DecimalIndicatorValue(SignalMa, 0);
 
 			var value = new ComplexIndicatorValue(this);
-			value.InnerValues.Add(Macd, input.SetValue(this, macdValue.GetValue<decimal>() - signalValue.GetValue<decimal>()));
+			//value.InnerValues.Add(Macd, input.SetValue(this, macdValue.GetValue<decimal>() - signalValue.GetValue<decimal>()));
+			value.InnerValues.Add(Macd, macdValue);
 			value.InnerValues.Add(SignalMa, signalValue);
 			return value;
 		}

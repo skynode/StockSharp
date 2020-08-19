@@ -17,11 +17,11 @@ namespace StockSharp.Algo
 {
 	using System;
     
-	using StockSharp.Logging;
-
 	using Ecng.Collections;
 	using Ecng.Common;
+
 	using StockSharp.Localization;
+	using StockSharp.Logging;
 
 	/// <summary>
 	/// The interface of the rule, activating action at occurrence of market condition.
@@ -150,17 +150,15 @@ namespace StockSharp.Algo
 		/// <returns><see langword="true" />, if rule is not required any more. Otherwise, <see langword="false" />.</returns>
 		protected virtual bool CanFinish()
 		{
-			return ReferenceEquals(_container, null) || _container.ProcessState != ProcessStates.Started;
+			return _container is null || _container.ProcessState != ProcessStates.Started;
 		}
 
 		private string _name;
 
-		/// <summary>
-		/// The name of the rule.
-		/// </summary>
+		/// <inheritdoc />
 		public string Name
 		{
-			get { return _name; }
+			get => _name;
 			set
 			{
 				if (value.IsEmpty())
@@ -170,61 +168,45 @@ namespace StockSharp.Algo
 			}
 		}
 
-		/// <summary>
-		/// The level, at which logging of this rule is performed. The default is <see cref="LogLevels.Inherit"/>.
-		/// </summary>
+		/// <inheritdoc />
 		public virtual LogLevels LogLevel { get; set; } = LogLevels.Inherit;
 
 		private bool _isSuspended;
 
-		/// <summary>
-		/// Is the rule suspended.
-		/// </summary>
+		/// <inheritdoc />
 		public virtual bool IsSuspended
 		{
-			get { return _isSuspended; }
+			get => _isSuspended;
 			set
 			{
 				_isSuspended = value;
 
-				if (_container != null)
-					_container.AddRuleLog(LogLevels.Info, this, value ? LocalizedStrings.Str1089 : LocalizedStrings.Str1090);
+				_container?.AddRuleLog(LogLevels.Info, this, value ? LocalizedStrings.Str1089 : LocalizedStrings.Str1090);
 			}
 		}
 
 		private readonly TToken _token;
 
-		/// <summary>
-		/// Token-rules, it is associated with (for example, for rule <see cref="MarketRuleHelper.WhenRegistered"/> the order will be a token). If rule is not associated with anything, <see langword="null" /> will be returned.
-		/// </summary>
+		/// <inheritdoc />
 		public virtual object Token => _token;
 
 		private readonly SynchronizedSet<IMarketRule> _exclusiveRules = new SynchronizedSet<IMarketRule>();
 
-		/// <summary>
-		/// Rules, opposite to given rule. They are deleted automatically at activation of this rule.
-		/// </summary>
+		/// <inheritdoc />
 		public virtual ISynchronizedCollection<IMarketRule> ExclusiveRules => _exclusiveRules;
 
 		private IMarketRuleContainer _container;
 
-		/// <summary>
-		/// The rules container.
-		/// </summary>
+		/// <inheritdoc />
 		public virtual IMarketRuleContainer Container
 		{
-			get { return _container; }
+			get => _container;
 			set
 			{
-				if (value == null)
-					throw new ArgumentNullException(nameof(value));
-
 				if (Container != null)
-					throw new ArgumentException(LocalizedStrings.Str1091Params.Put(Name, Container));
+					throw new ArgumentException(LocalizedStrings.Str1091Params.Put(this, Container));
 
-				_container = value;
-
-				//_container.AddRuleLog(LogLevels.Info, this, "Добавлено.");
+				_container = value ?? throw new ArgumentNullException(nameof(value));
 			}
 		}
 
@@ -235,10 +217,7 @@ namespace StockSharp.Algo
 		/// <returns>Rule.</returns>
 		public MarketRule<TToken, TArg> Until(Func<bool> canFinish)
 		{
-			if (canFinish == null)
-				throw new ArgumentNullException(nameof(canFinish));
-
-			_canFinish = canFinish;
+			_canFinish = canFinish ?? throw new ArgumentNullException(nameof(canFinish));
 			return this;
 		}
 
@@ -249,13 +228,10 @@ namespace StockSharp.Algo
 		/// <returns>Rule.</returns>
 		public MarketRule<TToken, TArg> Do(Action<TArg> action)
 		{
-			if (action == null)
-				throw new ArgumentNullException(nameof(action));
-
 			//return Do((r, a) => action(a));
 
 			_process = ProcessRuleVoid;
-			_actionVoid = action;
+			_actionVoid = action ?? throw new ArgumentNullException(nameof(action));
 
 			return this;
 		}
@@ -368,7 +344,7 @@ namespace StockSharp.Algo
 		/// </summary>
 		protected void Activate()
 		{
-			Activate(default(TArg));
+			Activate(default);
 		}
 
 		/// <summary>
@@ -388,9 +364,7 @@ namespace StockSharp.Algo
 		{
 			var result = _action(_arg);
 
-			var ah = _activatedHandler;
-			if (ah != null)
-				ah(result);
+			_activatedHandler?.Invoke(result);
 
 			return _canFinish();
 		}
@@ -401,14 +375,8 @@ namespace StockSharp.Algo
 			return _canFinish();
 		}
 
-		/// <summary>
-		/// Returns a string that represents the current object.
-		/// </summary>
-		/// <returns>A string that represents the current object.</returns>
-		public override string ToString()
-		{
-			return "{0} (0x{1:X})".Put(Name, GetHashCode());
-		}
+		/// <inheritdoc />
+		public override string ToString() => $"{Name} (0x{GetHashCode():X})";
 
 		/// <summary>
 		/// Release resources.
@@ -428,14 +396,10 @@ namespace StockSharp.Algo
 			return !IsActive && IsReady && _canFinish();
 		}
 
-		/// <summary>
-		/// Is the rule formed.
-		/// </summary>
-		public bool IsReady => !IsDisposed && !ReferenceEquals(_container, null);
+		/// <inheritdoc />
+		public bool IsReady => !IsDisposed && !(_container is null);
 
-		/// <summary>
-		/// Is the rule currently activated.
-		/// </summary>
+		/// <inheritdoc />
 		public bool IsActive { get; set; }
 
 		IMarketRule IMarketRule.Until(Func<bool> canFinish)
