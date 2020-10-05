@@ -154,7 +154,7 @@
 			if (!state.IsActive())
 			{
 				_subscriptionsByKey.RemoveByValue(info);
-				this.AddInfoLog(LocalizedStrings.OnlineSubscriptionRemoved, info.Subscription.TransactionId);
+				this.AddInfoLog(LocalizedStrings.SubscriptionRemoved, info.Subscription.TransactionId);
 			}
 		}
 
@@ -348,7 +348,7 @@
 						_strategyPosSubscriptions.Add(posMsg.TransactionId);
 						sendInMsg = message;
 					}
-					else if (message.To == null)
+					else if (!message.IsHistoryOnly())
 					{
 						var dataType = message.DataType;
 						var secId = default(SecurityId);
@@ -477,6 +477,15 @@
 						};
 					}
 				}
+
+				if (sendOutMsgs != null)
+				{
+					foreach (var sendOutMsg in sendOutMsgs)
+					{
+						this.AddInfoLog("Out: {0}", sendOutMsg);
+						RaiseNewOutMessage(sendOutMsg);
+					}
+				}
 			}
 
 			var retVal = true;
@@ -485,15 +494,6 @@
 			{
 				this.AddInfoLog("In: {0}", sendInMsg);
 				retVal = base.OnSendInMessage((Message)sendInMsg);
-			}
-
-			if (sendOutMsgs != null)
-			{
-				foreach (var sendOutMsg in sendOutMsgs)
-				{
-					this.AddInfoLog("Out: {0}", sendOutMsg);
-					RaiseNewOutMessage(sendOutMsg);	
-				}
 			}
 
 			return retVal;

@@ -234,6 +234,13 @@ namespace StockSharp.Messages
 			set => InnerAdapter.Parent = value;
 		}
 
+		/// <inheritdoc />
+		public event Action<ILogSource> ParentRemoved
+		{
+			add { }
+			remove { }
+		}
+
 		LogLevels ILogSource.LogLevel
 		{
 			get => InnerAdapter.LogLevel;
@@ -355,6 +362,8 @@ namespace StockSharp.Messages
 
 		bool IMessageAdapter.UseChannels => InnerAdapter.UseChannels;
 
+		TimeSpan IMessageAdapter.IterationInterval => InnerAdapter.IterationInterval;
+
 		string IMessageAdapter.FeatureName => InnerAdapter.FeatureName;
 
 		/// <inheritdoc />
@@ -376,6 +385,9 @@ namespace StockSharp.Messages
 		/// <inheritdoc />
 		public virtual TimeSpan GetHistoryStepSize(DataType dataType, out TimeSpan iterationInterval)
 			=> InnerAdapter.GetHistoryStepSize(dataType, out iterationInterval);
+
+		/// <inheritdoc />
+		public virtual int? GetMaxCount(DataType dataType) => InnerAdapter.GetMaxCount(dataType);
 
 		/// <inheritdoc />
 		public virtual bool IsAllDownloadingSupported(DataType dataType)

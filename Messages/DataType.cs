@@ -1,7 +1,7 @@
 namespace StockSharp.Messages
 {
 	using System;
-	using System.Linq;
+	using System.Runtime.Serialization;
 	using System.Collections.Generic;
 
 	using Ecng.Common;
@@ -13,6 +13,8 @@ namespace StockSharp.Messages
 	/// <summary>
 	/// Data type info.
 	/// </summary>
+	[System.Runtime.Serialization.DataContract]
+	[Serializable]
 	public class DataType : Equatable<DataType>, IPersistable
 	{
 		/// <summary>
@@ -22,11 +24,22 @@ namespace StockSharp.Messages
 		/// <param name="arg">The additional argument, associated with data. For example, candle argument.</param>
 		/// <returns>Data type info.</returns>
 		public static DataType Create(Type messageType, object arg)
+			=> Create(messageType, arg, false);
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DataType"/>.
+		/// </summary>
+		/// <param name="messageType">Message type.</param>
+		/// <param name="arg">The additional argument, associated with data. For example, candle argument.</param>
+		/// <param name="isSecurityRequired">Is the data type required security info.</param>
+		/// <returns>Data type info.</returns>
+		public static DataType Create(Type messageType, object arg, bool isSecurityRequired)
 		{
 			return new DataType
 			{
 				MessageType = messageType,
-				Arg = arg
+				Arg = arg,
+				_isSecurityRequired = isSecurityRequired,
 			};
 		}
 
@@ -192,6 +205,7 @@ namespace StockSharp.Messages
 		/// <summary>
 		/// Message type.
 		/// </summary>
+		[DataMember]
 		public Type MessageType
 		{
 			get => _messageType;
@@ -210,6 +224,7 @@ namespace StockSharp.Messages
 		/// <summary>
 		/// The additional argument, associated with data. For example, candle argument.
 		/// </summary>
+		[DataMember]
 		public object Arg
 		{
 			get => _arg;
@@ -256,7 +271,8 @@ namespace StockSharp.Messages
 			return new DataType
 			{
 				MessageType = MessageType,
-				Arg = Arg
+				Arg = Arg,
+				_isSecurityRequired = _isSecurityRequired,
 			};
 		}
 
@@ -331,15 +347,17 @@ namespace StockSharp.Messages
 			this == SecurityMapping	||
 			this == TimeFrames;
 
+		private bool _isSecurityRequired;
+
 		/// <summary>
 		/// Is the data type required security info.
 		/// </summary>
 		public bool IsSecurityRequired =>
+			_isSecurityRequired			||
 			IsCandles					||
 			this == MarketDepth			||
 			this == FilteredMarketDepth ||
 			this == Level1				||
-			this == Securities			||
 			this == Ticks				||
 			this == OrderLog;
 
@@ -363,6 +381,9 @@ namespace StockSharp.Messages
 
 			if (storage.ContainsKey(nameof(Arg)))
 				Arg = storage.GetValue<object>(nameof(Arg));
+
+			if (storage.ContainsKey(nameof(IsSecurityRequired)))
+				_isSecurityRequired = storage.GetValue<bool>(nameof(IsSecurityRequired));
 		}
 
 		/// <summary>
@@ -375,6 +396,9 @@ namespace StockSharp.Messages
 
 			if (Arg != null)
 				storage.SetValue(nameof(Arg), Arg);
+
+			if (_isSecurityRequired)
+				storage.SetValue(nameof(IsSecurityRequired), true);
 		}
 	}
 }

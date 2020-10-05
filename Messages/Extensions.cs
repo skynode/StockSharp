@@ -1113,12 +1113,13 @@ namespace StockSharp.Messages
 		public static CachedSynchronizedSet<Level1Fields> LastTradeFields { get; } = new CachedSynchronizedSet<Level1Fields>(new[]
 		{
 			Level1Fields.LastTradeId,
+			Level1Fields.LastTradeStringId,
 			Level1Fields.LastTradeTime,
 			Level1Fields.LastTradeOrigin,
 			Level1Fields.LastTradePrice,
 			Level1Fields.LastTradeUpDown,
 			Level1Fields.LastTradeVolume,
-			Level1Fields.IsSystem
+			Level1Fields.IsSystem,
 		});
 
 		/// <summary>
@@ -2111,7 +2112,7 @@ namespace StockSharp.Messages
 			if (dataType == null)
 				throw new ArgumentNullException(nameof(dataType));
 
-			iterationInterval = TimeSpan.FromSeconds(2);
+			iterationInterval = adapter.IterationInterval;
 
 			if (dataType.IsCandles)
 			{
@@ -2141,6 +2142,22 @@ namespace StockSharp.Messages
 
 			// by default adapter do not provide historical data except candles
 			return TimeSpan.Zero;
+		}
+
+		/// <summary>
+		/// Get maximum possible items count per single subscription request.
+		/// </summary>
+		/// <param name="dataType">Data type info.</param>
+		/// <returns>Max items count.</returns>
+		public static int? GetDefaultMaxCount(this DataType dataType)
+		{
+			if (dataType == DataType.Ticks ||
+				dataType == DataType.Level1 ||
+				dataType == DataType.OrderLog ||
+				dataType == DataType.MarketDepth)
+				return 1000;
+
+			return null;
 		}
 
 		/// <summary>
@@ -2310,6 +2327,25 @@ namespace StockSharp.Messages
 				LocalTime = level1.LocalTime,
 				BuildFrom = level1.BuildFrom ?? DataType.Level1,
 			};
+		}
+
+		/// <summary>
+		/// To check, are there <see cref="DataType.CandleTimeFrame"/> in the level1 data.
+		/// </summary>
+		/// <param name="level1">Level1 data.</param>
+		/// <returns>The test result.</returns>
+		public static bool IsContainsCandle(this Level1ChangeMessage level1)
+		{
+			if (level1 is null)
+				throw new ArgumentNullException(nameof(level1));
+
+			var changes = level1.Changes;
+
+			return
+				changes.ContainsKey(Level1Fields.OpenPrice) ||
+				changes.ContainsKey(Level1Fields.HighPrice) ||
+				changes.ContainsKey(Level1Fields.LowPrice) ||
+				changes.ContainsKey(Level1Fields.ClosePrice);
 		}
 
 		private class OrderBookEnumerable : SimpleEnumerable<QuoteChangeMessage>//, IEnumerableEx<QuoteChangeMessage>
@@ -2570,6 +2606,9 @@ namespace StockSharp.Messages
 				case Level1Fields.LastTradeOrigin:
 					return typeof(Sides);
 
+				case Level1Fields.LastTradeStringId:
+					return typeof(string);
+
 				default:
 					return field.IsObsolete() ? null : typeof(decimal);
 			}
@@ -2649,13 +2688,14 @@ namespace StockSharp.Messages
 			var level1 = new Level1ChangeMessage
 			{
 				SecurityId = message.SecurityId,
-				ServerTime = message.OpenTime,
+				ServerTime = message.CloseTime == default ? message.OpenTime : message.CloseTime,
 			}
 			.Add(Level1Fields.OpenPrice, message.OpenPrice)
 			.Add(Level1Fields.HighPrice, message.HighPrice)
 			.Add(Level1Fields.LowPrice, message.LowPrice)
 			.Add(Level1Fields.ClosePrice, message.ClosePrice)
-			.Add(Level1Fields.Volume, message.TotalVolume)
+			.TryAdd(Level1Fields.Volume, message.TotalVolume)
+			.TryAdd(Level1Fields.TradesCount, message.TotalTicks)
 			.TryAdd(Level1Fields.OpenInterest, message.OpenInterest, true);
 
 			return level1;
@@ -2676,6 +2716,7 @@ namespace StockSharp.Messages
 			.TryAdd(Level1Fields.LastTradeId, message.TradeId)
 			.TryAdd(Level1Fields.LastTradePrice, message.TradePrice)
 			.TryAdd(Level1Fields.LastTradeVolume, message.TradeVolume)
+			.TryAdd(Level1Fields.LastTradeUpDown, message.IsUpTick)
 			.TryAdd(Level1Fields.OpenInterest, message.OpenInterest, true)
 			.TryAdd(Level1Fields.LastTradeOrigin, message.OriginSide);
 
@@ -3189,8 +3230,11 @@ namespace StockSharp.Messages
 
 			var result = securities.Where(s => s.IsMatch(criteria, secTypes));
 
+			if (criteria.Skip != null)
+				result = result.Skip((int)criteria.Skip.Value);
+
 			if (criteria.Count != null)
-				result = result.Take(criteria.Count.Value);
+				result = result.Take((int)criteria.Count.Value);
 
 			return result.ToArray();
 		}
@@ -4055,6 +4099,22 @@ namespace StockSharp.Messages
 				PostOnly = regMsg.PostOnly,
 				Leverage = regMsg.Leverage,
 			};
+		}
+
+		/// <summary>
+		/// Determines the specified message contains historical request only.
+		/// </summary>
+		/// <param name="message">Subscription.</param>
+		/// <returns>Check result.</returns>
+		public static bool IsHistoryOnly(this ISubscriptionMessage message)
+		{
+			if (message is null)
+				throw new ArgumentNullException(nameof(message));
+
+			if (!message.IsSubscribe)
+				throw new ArgumentException(nameof(message));
+
+			return message.To != null || message.Count != null;
 		}
 	}
 }

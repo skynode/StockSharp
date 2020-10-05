@@ -857,7 +857,7 @@ namespace StockSharp.Algo
 							}
 
 							if (Adapter.IsMessageSupported(type) && !_subscriptionManager.Subscriptions.Any(s => s.SubscriptionMessage.DataType == dataType && s.SubscriptionMessage.To == null))
-								_subscriptionManager.Subscribe(new Subscription(dataType, (SecurityMessage)null));
+								_subscriptionManager.Subscribe(dataType.ToSubscription());
 						}
 
 						foreach (var type in _lookupMessagesOnConnect.Cache)
@@ -971,10 +971,13 @@ namespace StockSharp.Algo
 
 		private void ProcessLevel1ChangeMessage(Level1ChangeMessage message)
 		{
-			if (RaiseReceived(message, message, RaiseLevel1Received) == false)
-				return;
-
 			var security = EnsureGetSecurity(message);
+
+			if (RaiseReceived(message, message, RaiseLevel1Received, out var anyCanOnline) == false)
+			{
+				if (anyCanOnline != true || _entityCache.HasLevel1Info(security))
+					return;
+			}
 
 			if (UpdateSecurityByLevel1)
 			{
@@ -1187,6 +1190,9 @@ namespace StockSharp.Algo
 					}
 					else
 					{
+						if (subscription.State == SubscriptionStates.Active && subscription.SubscriptionMessage.To is null && !_entityCache.HasMarketDepth(security, message))
+							_entityCache.UpdateMarketDepth(security, message);
+
 						if (hasReceivedEvt)
 							depth = message.ToMarketDepth(EntityFactory.CreateMarketDepth(security));
 					}
@@ -1212,7 +1218,7 @@ namespace StockSharp.Algo
 			var fromLevel1 = message.BuildFrom == DataType.Level1;
 			var time = message.ServerTime;
 
-			if (!fromLevel1 && (bestBid != null || bestAsk != null))
+			if (!fromLevel1 && !Adapter.Level1Extend && (bestBid != null || bestAsk != null))
 			{
 				var info = _entityCache.GetSecurityValues(security, time);
 
@@ -1383,6 +1389,12 @@ namespace StockSharp.Algo
 			{
 				info.SetValue(time, Level1Fields.LastTradeId, message.TradeId.Value);
 				changes.Add(new KeyValuePair<Level1Fields, object>(Level1Fields.LastTradeId, message.TradeId.Value));
+			}
+
+			if (!message.TradeStringId.IsEmpty())
+			{
+				info.SetValue(time, Level1Fields.LastTradeStringId, message.TradeStringId);
+				changes.Add(new KeyValuePair<Level1Fields, object>(Level1Fields.LastTradeStringId, message.TradeStringId));
 			}
 
 			if (message.TradeVolume != null)

@@ -209,6 +209,24 @@ namespace StockSharp.BusinessEntities
 		/// </summary>
 		public Messages.DataType BuildFrom { get; set; }
 
+		/// <summary>
+		/// Yield.
+		/// </summary>
+		[DataMember]
+		public decimal? Yield { get; set; }
+
+		/// <summary>
+		/// Order id (buy).
+		/// </summary>
+		[DataMember]
+		public long? OrderBuyId { get; set; }
+
+		/// <summary>
+		/// Order id (sell).
+		/// </summary>
+		[DataMember]
+		public long? OrderSellId { get; set; }
+
 		[field: NonSerialized]
 		private IDictionary<string, object> _extensionInfo;
 
@@ -251,6 +269,9 @@ namespace StockSharp.BusinessEntities
 				Currency = Currency,
 				SeqNum = SeqNum,
 				BuildFrom = BuildFrom,
+				Yield = Yield,
+				OrderBuyId = OrderBuyId,
+				OrderSellId = OrderSellId,
 			};
 		}
 

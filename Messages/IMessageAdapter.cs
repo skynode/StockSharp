@@ -227,6 +227,13 @@ namespace StockSharp.Messages
 		TimeSpan GetHistoryStepSize(DataType dataType, out TimeSpan iterationInterval);
 
 		/// <summary>
+		/// Get maximum possible items count per single subscription request.
+		/// </summary>
+		/// <param name="dataType">Data type info.</param>
+		/// <returns>Max items count.</returns>
+		int? GetMaxCount(DataType dataType);
+
+		/// <summary>
 		/// Is for the specified <paramref name="dataType"/> all securities downloading enabled.
 		/// </summary>
 		/// <param name="dataType">Data type info.</param>
@@ -241,7 +248,7 @@ namespace StockSharp.Messages
 		bool IsSecurityRequired(DataType dataType);
 
 		/// <summary>
-		/// Use <see cref="IMessageChannel"/> for in and out messages.
+		/// Use channels for in and out messages.
 		/// </summary>
 		bool UseChannels { get; }
 
@@ -249,6 +256,11 @@ namespace StockSharp.Messages
 		/// Feature name.
 		/// </summary>
 		string FeatureName { get; }
+
+		/// <summary>
+		/// Interval between iterations.
+		/// </summary>
+		TimeSpan IterationInterval { get; }
 	}
 
 	/// <summary>

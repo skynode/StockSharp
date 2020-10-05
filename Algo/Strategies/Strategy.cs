@@ -293,6 +293,10 @@ namespace StockSharp.Algo.Strategies
 			_maxRegisterCount = this.Param(nameof(MaxRegisterCount), int.MaxValue);
 			_registerInterval = this.Param<TimeSpan>(nameof(RegisterInterval));
 			_workingTime = this.Param(nameof(WorkingTime), new WorkingTime());
+
+			_maxErrorCount.CanOptimize =
+			_maxOrderRegisterErrorCount.CanOptimize =
+			_maxRegisterCount.CanOptimize = false;
 			
 			InitMaxOrdersKeepTime();
 
@@ -412,15 +416,15 @@ namespace StockSharp.Algo.Strategies
 						}, (SecurityMessage)null);
 
 						Subscribe(_pfSubscription, true);
-
-						_orderSubscription = new Subscription(new OrderStatusMessage
-						{
-							IsSubscribe = true,
-							StrategyId = EnsureGetId(),
-						}, (SecurityMessage)null);
-
-						Subscribe(_orderSubscription, true);
 					}
+
+					_orderSubscription = new Subscription(new OrderStatusMessage
+					{
+						IsSubscribe = true,
+						StrategyId = EnsureGetId(),
+					}, (SecurityMessage)null);
+
+					Subscribe(_orderSubscription, true);
 				}
 
 				foreach (var strategy in ChildStrategies)
@@ -559,6 +563,11 @@ namespace StockSharp.Algo.Strategies
 		/// <see cref="PnL"/> change event.
 		/// </summary>
 		public event Action PnLChanged;
+
+		/// <summary>
+		/// <see cref="PnL"/> change event.
+		/// </summary>
+		public event Action<Subscription> PnLReceived;
 
 		/// <summary>
 		/// Total commission.
@@ -1866,7 +1875,7 @@ namespace StockSharp.Algo.Strategies
 		}
 
 		/// <inheritdoc />
-		public override DateTimeOffset CurrentTime => Connector?.CurrentTime ?? TimeHelper.NowWithOffset;
+		public override DateTimeOffset CurrentTime => Connector?.CurrentTime ?? base.CurrentTime;
 
 		/// <inheritdoc />
 		protected override void RaiseLog(LogMessage message)
@@ -2482,6 +2491,9 @@ namespace StockSharp.Algo.Strategies
 		{
 			this.Notify(nameof(PnL));
 			PnLChanged?.Invoke();
+
+			if (_pfSubscription != null)
+				PnLReceived?.Invoke(_pfSubscription);
 
 			StatisticManager.AddPnL(_lastPnlRefreshTime, PnL);
 
