@@ -1537,6 +1537,33 @@ namespace StockSharp.Messages
 		}
 
 		/// <summary>
+		/// Remove adapter by the specified type.
+		/// </summary>
+		/// <typeparam name="TAdapter">The adapter type.</typeparam>
+		/// <param name="adapter">Adapter.</param>
+		/// <returns>Removed adapter or <see langword="null"/>.</returns>
+		public static TAdapter TryRemoveWrapper<TAdapter>(this IMessageAdapter adapter)
+			where TAdapter : IMessageAdapterWrapper
+		{
+			if (adapter is null)
+				throw new ArgumentNullException(nameof(adapter));
+
+			if (adapter is IMessageAdapterWrapper wrapper)
+			{
+				if (wrapper.InnerAdapter is TAdapter found)
+				{
+					wrapper.InnerAdapter = found.InnerAdapter;
+					found.InnerAdapter = null;
+					return found; 
+				}
+				else
+					return wrapper.InnerAdapter.TryRemoveWrapper<TAdapter>();
+			}
+			else
+				return default;
+		}
+
+		/// <summary>
 		/// Find adapter by the specified type.
 		/// </summary>
 		/// <typeparam name="TAdapter">The adapter type.</typeparam>
@@ -3004,6 +3031,9 @@ namespace StockSharp.Messages
 			if (!criteria.StrategyId.IsEmpty() && !position.StrategyId.CompareIgnoreCase(criteria.StrategyId))
 				return false;
 
+			if (criteria.Side != null && position.Side != criteria.Side)
+				return false;
+
 			return true;
 		}
 
@@ -4116,5 +4146,14 @@ namespace StockSharp.Messages
 
 			return message.To != null || message.Count != null;
 		}
+
+		/// <summary>
+		/// Filter boards by code criteria.
+		/// </summary>
+		/// <param name="boards">All boards.</param>
+		/// <param name="criteria">Criteria.</param>
+		/// <returns>Found boards.</returns>
+		public static IEnumerable<BoardMessage> Filter(this IEnumerable<BoardMessage> boards, BoardLookupMessage criteria)
+			=> boards.Where(b => b.IsMatch(criteria));
 	}
 }

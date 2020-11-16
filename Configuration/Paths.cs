@@ -4,9 +4,12 @@
 	using System.IO;
 	using System.Linq;
 	using System.Reflection;
+	using System.Globalization;
+	using System.Threading;
 
 	using Ecng.Common;
 	using Ecng.Configuration;
+	using Ecng.Serialization;
 
 	using StockSharp.Localization;
 
@@ -33,6 +36,7 @@
 			StorageDir = Path.Combine(AppDataPath, "Storage");
 			SnapshotsDir = Path.Combine(AppDataPath, "Snapshots");
 			InstallerDir = Path.Combine(CompanyPath, "Installer");
+			InstallerInstallationsConfigPath = Path.Combine(InstallerDir, "installer_apps_installed.xml");
 
 			HistoryDataPath = GetHistoryDataPath(Assembly.GetExecutingAssembly().Location);
 		}
@@ -80,9 +84,14 @@
 		public static readonly string AppName;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public static string AppName2 => AppName.Remove("S#.", true);
+
+		/// <summary>
+		/// App title with version.
+		/// </summary>
+		public static string AppNameWithVersion => $"{AppName} v{InstalledVersion}";
 
 		/// <summary>
 		/// The path to directory with all applications.
@@ -135,84 +144,139 @@
 		public static readonly string InstallerDir;
 
 		/// <summary>
+		/// The path to the installer directory.
+		/// </summary>
+		public static readonly string InstallerInstallationsConfigPath;
+
+		/// <summary>
 		/// Get website url.
 		/// </summary>
 		/// <returns>Localized url.</returns>
-		public static string GetWebSiteUrl()
-		{
-			return $"https://stocksharp.{LocalizedStrings.Domain}";
-		}
+		public static string GetWebSiteUrl() => $"https://stocksharp.{LocalizedStrings.Domain}";
 
 		/// <summary>
 		/// Get user url.
 		/// </summary>
 		/// <param name="userId">User id.</param>
 		/// <returns>Localized url.</returns>
-		public static string GetUserUrl(long userId)
-		{
-			return $"{GetWebSiteUrl()}/users/{userId}/";
-		}
+		public static string GetUserUrl(long userId) => $"{GetWebSiteUrl()}/users/{userId}/";
 
 		/// <summary>
 		/// Get strategy url.
 		/// </summary>
 		/// <param name="robotId">The strategy identifier.</param>
 		/// <returns>Localized url.</returns>
-		public static string GetRobotLink(long robotId)
-		{
-			return $"{GetWebSiteUrl()}/robot/{robotId}/";
-		}
+		public static string GetRobotLink(long robotId) => $"{GetWebSiteUrl()}/robot/{robotId}/";
 
 		/// <summary>
 		/// Get file url.
 		/// </summary>
 		/// <param name="fileId">File ID.</param>
 		/// <returns>Localized url.</returns>
-		public static string GetFileLink(object fileId)
-		{
-			return $"{GetWebSiteUrl()}/file/{fileId}/";
-		}
+		public static string GetFileLink(object fileId) => $"{GetWebSiteUrl()}/file/{fileId}/";
 
 		/// <summary>
 		/// To create localized url.
 		/// </summary>
 		/// <param name="docUrl">Help topic.</param>
 		/// <returns>Localized url.</returns>
-		public static string GetDocUrl(string docUrl)
-		{
-			return $"https://doc.stocksharp.{LocalizedStrings.Domain}/html/{docUrl}";
-		}
+		public static string GetDocUrl(string docUrl) => $"https://doc.stocksharp.{LocalizedStrings.Domain}/html/{docUrl}";
 
 		/// <summary>
 		/// Get open account url.
 		/// </summary>
 		/// <returns>Localized url.</returns>
-		public static string GetOpenAccountUrl()
-		{
-			return $"{GetWebSiteUrl()}/broker/openaccount/";
-		}
+		public static string GetOpenAccountUrl() => $"{GetWebSiteUrl()}/broker/openaccount/";
 
 		/// <summary>
 		/// Get sign up url.
 		/// </summary>
 		/// <returns>Localized url.</returns>
-		public static string GetSignUpUrl()
-		{
-			return $"{GetWebSiteUrl()}/register/";
-		}
+		public static string GetSignUpUrl() => $"{GetWebSiteUrl()}/register/";
 
 		/// <summary>
 		/// Get forgot password url.
 		/// </summary>
 		/// <returns>Localized url.</returns>
-		public static string GetForgotUrl()
+		public static string GetForgotUrl() => $"{GetWebSiteUrl()}/forgot/";
+
+		/// <summary>
+		/// Installed version of the product.
+		/// </summary>
+		public static string InstalledVersion
 		{
-			return $"{GetWebSiteUrl()}/forgot/";
+			get
+			{
+				string version;
+
+				try
+				{
+					version = GetInstalledVersion(Directory.GetCurrentDirectory());
+				}
+				catch
+				{
+
+					version = Assembly.GetEntryAssembly().GetName().Version.To<string>();
+				}
+
+				return version;
+			}
+		}
+
+		/// <summary>
+		/// Get currently installed version of the product.
+		/// </summary>
+		/// <param name="productInstallPath">File system path to product installation.</param>
+		/// <returns>Installed version of the product.</returns>
+		public static string GetInstalledVersion(string productInstallPath)
+		{
+			if(productInstallPath.IsEmpty())
+				throw new ArgumentException(nameof(productInstallPath));
+
+			if (!File.Exists(InstallerInstallationsConfigPath))
+				return null;
+
+			SettingsStorage storage = null;
+			CultureInfo.InvariantCulture.DoInCulture(() => storage = new XmlSerializer<SettingsStorage>().Deserialize(InstallerInstallationsConfigPath));
+
+			var installations = storage?.GetValue<SettingsStorage[]>("Installations");
+			if (!(installations?.Length > 0))
+				return null;
+
+			var installation = installations.FirstOrDefault(ss => productInstallPath.ComparePaths(ss.TryGet<string>("InstallDirectory")));
+			if(installation == null)
+				return null;
+
+			var identityStr = installation
+				.TryGet<SettingsStorage>("Version")
+			   ?.TryGet<SettingsStorage>("Metadata")
+			   ?.TryGet<string>("Identity");
+
+			if(identityStr.IsEmpty())
+				return null;
+
+			// ReSharper disable once PossibleNullReferenceException
+			var parts = identityStr.Split('|');
+
+			return parts.Length != 2 ? null : parts[1];
 		}
 
 		/// <summary>
 		/// Sample history data.
 		/// </summary>
 		public static readonly string HistoryDataPath;
+
+		private static Mutex _mutex;
+
+		/// <summary>
+		/// Check if an instance of the application already started.
+		/// </summary>
+		/// <returns>Check result.</returns>
+		public static bool StartIsRunning() => ThreadingHelper.TryGetUniqueMutex(AppDataPath.GetHashCode().To<string>(), out _mutex);
+
+		/// <summary>
+		/// Release all resources allocated by <see cref="StartIsRunning"/>.
+		/// </summary>
+		public static void StopIsRunning() => _mutex?.ReleaseMutex();
 	}
 }
